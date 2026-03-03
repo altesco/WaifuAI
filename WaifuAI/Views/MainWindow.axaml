@@ -1,0 +1,464 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:WaifuAI.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:wv="clr-namespace:WebViewControl;assembly=WebViewControl.Avalonia"
+        xmlns:i="using:Avalonia.Xaml.Interactivity"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="WaifuAI.Views.MainWindow"
+        x:DataType="vm:MainVM"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="WaifuAI"
+        Loaded="Control_OnLoaded">
+    <Window.Resources>
+        <ControlTheme x:Key="RadioButtonWithIcon" TargetType="RadioButton">
+            <Setter Property="Width" Value="28"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="CornerRadius" Value="5"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <ContentPresenter
+                            Name="PART_Content"
+                            Foreground="{TemplateBinding Foreground}"
+                            CornerRadius="{TemplateBinding CornerRadius}"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            Height="{TemplateBinding Height}"
+                            Width="{TemplateBinding Width}"
+                            Padding="{TemplateBinding Padding}"
+                            Content="{TemplateBinding Content}"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style Selector="^:pointerover /template/ ContentPresenter#PART_Content">
+                <Setter Property="Background" Value="{DynamicResource ButtonBackgroundPointerOver}"/> 
+            </Style>
+            <Style Selector="^:checked /template/ ContentPresenter#PART_Content">
+                <Setter Property="Background" Value="{DynamicResource ButtonBackgroundPointerOver}"/>
+                <Setter Property="Foreground" Value="{DynamicResource AccentButtonBackground}"/>
+            </Style>    
+            <Style Selector="^:pressed">
+                <Setter Property="RenderTransform" Value="scale(0.97)"/> 
+            </Style>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.05"/>
+                </Transitions>
+            </Setter>
+        </ControlTheme>
+    </Window.Resources>
+    <Grid RowDefinitions="40,*">
+        <Grid.Styles>
+            <Style Selector="Button">
+                <Setter Property="Width" Value="28"/>
+                <Setter Property="Height" Value="28"/>
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Padding" Value="0"/>
+                <Setter Property="CornerRadius" Value="5"/>
+                <Setter Property="Cursor" Value="Hand"/>
+            </Style>
+            <Style Selector="ToggleButton">
+                <Setter Property="Width" Value="28"/>
+                <Setter Property="Height" Value="28"/>
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Padding" Value="0"/>
+                <Setter Property="CornerRadius" Value="5"/>
+                <Setter Property="Cursor" Value="Hand"/>
+            </Style>
+        </Grid.Styles>
+        <Border
+            BorderThickness="0,0,0,1"
+            BorderBrush="#bbbfcb"
+            Background="{DynamicResource SystemChromeMediumColor}">
+            <Grid>
+                <StackPanel Orientation="Horizontal">
+                    <Border Width="40">
+                        <LucideIcon Kind="PawPrint" Size="20" StrokeWidth="2"/>
+                    </Border>
+                    <TextBlock Text="WaifuAI" VerticalAlignment="Center" FontWeight="DemiBold"/>
+                </StackPanel>
+                <StackPanel 
+                    Spacing="2"
+                    Orientation="Horizontal" Margin="6,4"
+                    HorizontalAlignment="Right">
+                    <Button>
+                        <LucideIcon Kind="Search" Size="20"/>
+                    </Button>
+                    <Button>
+                        <LucideIcon Kind="Settings" Size="20"/>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+        <Grid Grid.Row="1" x:Name="MainGrid">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="40"/>
+                <ColumnDefinition Width="350" MinWidth="256"/>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="350" MinWidth="256"/>
+                <ColumnDefinition Width="40"/>
+            </Grid.ColumnDefinitions>
+            <Border
+                BorderThickness="0,0,1,0"
+                BorderBrush="#bbbfcb"
+                Background="{DynamicResource SystemChromeLowColor}">
+                <StackPanel HorizontalAlignment="Center" Margin="5" Spacing="4">
+                    <ToggleButton 
+                        x:Name="ChatButton"
+                        IsChecked="True"
+                        IsCheckedChanged="LeftToggleButton_OnIsCheckedChanged">
+                        <LucideIcon Kind="MessageSquareText" Size="20"/>
+                    </ToggleButton>
+                    <ToggleButton 
+                        x:Name="PersonalityButton" 
+                        IsCheckedChanged="LeftToggleButton_OnIsCheckedChanged">
+                        <LucideIcon Kind="BookText" Size="20"/>
+                    </ToggleButton>
+                </StackPanel>
+            </Border>
+            <Border 
+                Grid.Column="1" 
+                BorderThickness="0,0,1,0"
+                BorderBrush="#bbbfcb"
+                Background="{DynamicResource SystemChromeLowColor}">
+                <Panel>
+                    <Grid IsVisible="{Binding #ChatButton.IsChecked}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <ListBox 
+                            x:Name="MessageList"
+                            ItemsSource="{Binding Messages}"
+                            Background="{DynamicResource SystemChromeLowColor}"
+                            Padding="6">
+                            <ListBox.Styles>
+                                <Style Selector="ListBox /template/ ItemsPresenter">
+                                    <Setter Property="MaxWidth" Value="720"/>
+                                </Style>
+                            </ListBox.Styles>
+                            <ListBox.ItemContainerTheme>
+                                <ControlTheme TargetType="ListBoxItem">
+                                    <Setter Property="Padding" Value="6"/>
+                                    <Setter Property="Background" Value="Transparent"/>
+                                </ControlTheme>
+                            </ListBox.ItemContainerTheme>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Border 
+                                        Background="LightSkyBlue"
+                                        Tag="{Binding Role}"
+                                        Padding="12,6,12,6"
+                                        MinHeight="32"
+                                        MaxWidth="360">
+                                        <Border.Styles>
+                                            <Style Selector="Border">
+                                                <Setter Property="HorizontalAlignment" Value="Right"/>
+                                                <Setter Property="CornerRadius" Value="16,0,16,16"/>
+                                            </Style>
+                                            <Style Selector="Border[Tag=assistant]">
+                                                <Setter Property="HorizontalAlignment" Value="Left"/>
+                                                <Setter Property="CornerRadius" Value="0,16,16,16"/>
+                                            </Style>
+                                            <Style Selector="Border[Tag=temp]">
+                                                <Setter Property="HorizontalAlignment" Value="Left"/>
+                                                <Setter Property="CornerRadius" Value="0,16,16,16"/>
+                                                <Setter Property="Width" Value="64"/>
+                                            </Style>
+                                        </Border.Styles>
+                                        <StackPanel Spacing="2">
+                                            <TextBlock 
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"
+                                                TextWrapping="Wrap"
+                                                Text="{Binding Content}"/>
+                                            <TextBlock 
+                                                Text="{Binding Time}"
+                                                HorizontalAlignment="Right"
+                                                FontSize="12"
+                                                Opacity="0.5"
+                                                IsVisible="{Binding Role, 
+                                                Converter={x:Static ObjectConverters.NotEqual}, 
+                                                ConverterParameter=temp}"/>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                        <Border
+                            Grid.Row="1"
+                            BorderBrush="#bbbfcb"
+                            Background="{DynamicResource SystemChromeMediumColor}"
+                            MaxWidth="720"
+                            Tag="{Binding $self.Bounds.Width}">
+                            <Border.Styles>
+                                <Style Selector="Border">
+                                    <Setter Property="BorderThickness" Value="0,1,0,0"/>
+                                </Style>
+                                <Style Selector="Border[Tag=720]">
+                                    <Setter Property="Margin" Value="6,0,6,6"/>
+                                    <Setter Property="CornerRadius" Value="7"/>
+                                    <Setter Property="BorderThickness" Value="1,1,1,1"/>
+                                </Style>
+                            </Border.Styles>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition />
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock 
+                                    Text="Сообщение..."
+                                    VerticalAlignment="Center"
+                                    Margin="12,0,0,0"
+                                    Opacity="0.5"
+                                    IsVisible="{Binding #TextBox.Text, 
+                                    Converter={x:Static StringConverters.IsNullOrEmpty}}"/>
+                                <TextBox 
+                                    x:Name="TextBox"
+                                    Grid.Column="0"
+                                    Margin="2,-1,0,0"
+                                    TextWrapping="Wrap"
+                                    BorderThickness="0"
+                                    MinHeight="40"
+                                    MaxHeight="300"
+                                    ScrollViewer.VerticalScrollBarVisibility="Hidden"
+                                    Background="Transparent"
+                                    VerticalContentAlignment="Center"
+                                    Text="{Binding Question, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                    <TextBox.Resources>
+                                        <Thickness x:Key="TextControlBorderThemeThicknessFocused">0</Thickness>
+                                        <SolidColorBrush x:Key="TextControlBackgroundFocused">Transparent</SolidColorBrush>
+                                        <SolidColorBrush x:Key="TextControlBackgroundPointerOver">Transparent</SolidColorBrush>
+                                    </TextBox.Resources>
+                                    <TextBox.Styles>
+                                        <Style Selector="TextBox:focus /template/ Border#PART_Border">
+                                            <Setter Property="BorderThickness" Value="0"/>
+                                            <Setter Property="Background" Value="Transparent"/>
+                                        </Style>
+                                        <Style Selector="TextBox:pointerover /template/ Border#PART_Border">
+                                            <Setter Property="BorderThickness" Value="0"/>
+                                            <Setter Property="Background" Value="Transparent"/>
+                                        </Style>
+                                    </TextBox.Styles>
+                                </TextBox>
+                                <StackPanel 
+                                    Grid.Column="1" 
+                                    Orientation="Horizontal" 
+                                    Margin="3"
+                                    VerticalAlignment="Bottom"
+                                    HorizontalAlignment="Right">
+                                    <Button 
+                                        Margin="3"
+                                        Command="{Binding QueryCommand}"
+                                        CommandParameter="{Binding #MyWebView}"
+                                        IsDefault="True"
+                                        IsEnabled="{Binding Question, 
+                                        Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                                        <LucideIcon Kind="SendHorizontal" Size="20"/>
+                                    </Button>
+                                    <Button Margin="3">
+                                        <LucideIcon Kind="Mic" Size="20"/>
+                                    </Button>
+                                </StackPanel>
+                            </Grid>
+                        </Border>   
+                    </Grid>    
+                </Panel>
+            </Border>
+            <GridSplitter
+                Width="4"
+                Background="Transparent"
+                Grid.Column="1"
+                HorizontalAlignment="Right"
+                DragCompleted="LeftThumb_OnDragCompleted"/>
+            <wv:WebView x:Name="MyWebView" Address="{Binding WebAddress}" Grid.Column="2"/>
+            <Border 
+                Grid.Column="3" 
+                BorderThickness="1,0,0,0"
+                BorderBrush="#bbbfcb"
+                Background="{DynamicResource SystemChromeLowColor}"
+                IsVisible="{Binding #ModelButton.IsChecked}"
+                Focusable="True"
+                DataContext="{x:Static vm:SettingsVM.Instance}"
+                x:DataType="vm:SettingsVM">
+                <Border.Styles>
+                    <Style Selector="TextBox">
+                        <Setter Property="CornerRadius" Value="5"/>
+                        <Setter Property="FontFamily" Value="{StaticResource CascadiaCode}"/>
+                    </Style>
+                    <Style Selector="Grid[Tag=False]">
+                        <Setter Property="IsEnabled" Value="False"/>
+                        <Setter Property="Opacity" Value="0.5"/>
+                    </Style>
+                </Border.Styles>
+                <ScrollViewer >
+                    <StackPanel Spacing="4">
+                        <TextBlock 
+                            Text="Источник модели" 
+                            FontSize="18" 
+                            FontWeight="Bold" 
+                            Margin="10,8,0,0"
+                            TextTrimming="CharacterEllipsis"/>
+                        
+                        <RadioButton 
+                            x:Name="ServerButton" 
+                            GroupName="ModelSource" 
+                            IsChecked="{Binding IsServerQuery}"
+                            Margin="10,0,10,0">
+                            <TextBlock 
+                                Text="Сервер" 
+                                VerticalAlignment="Center"
+                                FontWeight="DemiBold" 
+                                FontSize="16"
+                                TextTrimming="CharacterEllipsis"/>
+                        </RadioButton>
+                        
+                        <Grid ColumnDefinitions="Auto,*,Auto" Tag="{Binding #ServerButton.IsChecked}" Margin="10,0,10,0">
+                            <LucideIcon Kind="Hash" Size="20" StrokeWidth="1.5"/>
+                            <TextBlock 
+                                Grid.Column="1"
+                                Margin="6,0,0,0"
+                                Text="Порт" 
+                                VerticalAlignment="Center"
+                                TextTrimming="CharacterEllipsis"/>
+                            <TextBox 
+                                Grid.Column="2"
+                                Width="70"
+                                Text="{Binding Port}"
+                                HorizontalContentAlignment="Center">
+                                <Interaction.Behaviors>
+                                    <EventTriggerBehavior EventName="LostFocus">
+                                        <InvokeCommandAction Command="{Binding SaveCommand}"/>
+                                    </EventTriggerBehavior>
+                                </Interaction.Behaviors>
+                            </TextBox>
+                        </Grid>
+                        
+                        <Grid ColumnDefinitions="Auto,*,Auto" Tag="{Binding #ServerButton.IsChecked}" Margin="10,0,10,0">
+                            <LucideIcon Kind="Network" Size="20" StrokeWidth="1.5"/>
+                            <TextBlock 
+                                Grid.Column="1"
+                                Margin="6,0,0,0"
+                                Text="IP-адрес" 
+                                VerticalAlignment="Center" 
+                                TextTrimming="CharacterEllipsis"/>
+                            <TextBox 
+                                Grid.Column="2" 
+                                Width="150"
+                                Text="{Binding IpAddress}"
+                                HorizontalContentAlignment="Center">
+                                <Interaction.Behaviors>
+                                    <EventTriggerBehavior EventName="LostFocus">
+                                        <InvokeCommandAction Command="{Binding SaveCommand}"/>
+                                    </EventTriggerBehavior>
+                                </Interaction.Behaviors>
+                            </TextBox>
+                        </Grid>
+                        
+                        <RadioButton 
+                            x:Name="ProviderButton" 
+                            GroupName="ModelSource" 
+                            IsChecked="{Binding !IsServerQuery}" 
+                            Margin="10,0,10,0">
+                            <TextBlock 
+                                Text="Облачный провайдер" 
+                                VerticalAlignment="Center"
+                                FontWeight="DemiBold" 
+                                FontSize="16"/>
+                        </RadioButton>
+                        
+                        <Grid ColumnDefinitions="Auto,*,Auto" Tag="{Binding #ProviderButton.IsChecked}" Margin="10,0,10,0">
+                            <LucideIcon Kind="KeyRound" Size="20" StrokeWidth="1.5" />
+                            <TextBlock 
+                                Grid.Column="1" 
+                                Margin="6,0,0,0"
+                                Text="API Ключ" 
+                                VerticalAlignment="Center"
+                                TextTrimming="CharacterEllipsis"/>
+                            <TextBox 
+                                Grid.Column="2" 
+                                Width="200"
+                                Text="{Binding ApiKey}">
+                                <Interaction.Behaviors>
+                                    <EventTriggerBehavior EventName="LostFocus">
+                                        <InvokeCommandAction Command="{Binding SaveCommand}"/>
+                                    </EventTriggerBehavior>
+                                </Interaction.Behaviors>
+                            </TextBox>
+                        </Grid>
+                        
+                        <Grid ColumnDefinitions="Auto,*,Auto" Tag="{Binding #ProviderButton.IsChecked}" Margin="10,0,10,0">
+                            <LucideIcon Kind="Link" Size="20" StrokeWidth="1.5"/>
+                            <TextBlock 
+                                Grid.Column="1" 
+                                Margin="6,0,6,0"
+                                Text="API URL" 
+                                VerticalAlignment="Center"
+                                TextTrimming="CharacterEllipsis"/>
+                            <TextBox 
+                                Grid.Column="2" 
+                                Width="200"
+                                Text="{Binding ApiUrl}">
+                                <Interaction.Behaviors>
+                                    <EventTriggerBehavior EventName="LostFocus">
+                                        <InvokeCommandAction Command="{Binding SaveCommand}"/>
+                                    </EventTriggerBehavior>
+                                </Interaction.Behaviors>
+                            </TextBox>
+                        </Grid>
+                        
+                        <Grid ColumnDefinitions="Auto,*,Auto" Tag="{Binding #ProviderButton.IsChecked}" Margin="10,0,10,0">
+                            <LucideIcon Kind="Bot" Size="20" StrokeWidth="1.5"/>
+                            <TextBlock 
+                                Grid.Column="1" 
+                                Margin="6,0,6,0"
+                                Text="Модель" 
+                                VerticalAlignment="Center" 
+                                TextTrimming="CharacterEllipsis"/>
+                            <TextBox 
+                                Grid.Column="2" 
+                                Width="200"
+                                Text="{Binding Model}">
+                                <Interaction.Behaviors>
+                                    <EventTriggerBehavior EventName="LostFocus">
+                                        <InvokeCommandAction Command="{Binding SaveCommand}"/>
+                                    </EventTriggerBehavior>
+                                </Interaction.Behaviors>
+                            </TextBox>
+                        </Grid>
+                    </StackPanel>
+                </ScrollViewer>    
+            </Border>
+            <GridSplitter
+                Width="4"
+                Background="Transparent"
+                Grid.Column="3"
+                HorizontalAlignment="Left"
+                DragCompleted="RightThumb_OnDragCompleted"/>
+            <Border
+                Grid.Column="4"
+                BorderThickness="1,0,0,0"
+                BorderBrush="#bbbfcb"
+                Background="{DynamicResource SystemChromeLowColor}">
+                <StackPanel HorizontalAlignment="Center" Margin="5" Spacing="4">
+                    <ToggleButton 
+                        x:Name="ParametersButton" >
+                        <LucideIcon Kind="Settings2" Size="20"/>
+                    </ToggleButton>
+                    <ToggleButton 
+                        x:Name="ModelButton" 
+                        IsChecked="True"
+                        IsCheckedChanged="RightToggleButton_OnIsCheckedChanged">
+                        <LucideIcon Kind="Brain" Size="20"/>
+                    </ToggleButton>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>

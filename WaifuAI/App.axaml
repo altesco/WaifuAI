@@ -1,0 +1,42 @@
+<Application 
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:themes="clr-namespace:Material.Styles.Themes;assembly=Material.Styles"
+    x:Class="WaifuAI.App"
+    xmlns:local="using:WaifuAI"
+    RequestedThemeVariant="Default">
+    <Application.Resources>
+        <StaticResource x:Key="ToggleButtonForegroundChecked" ResourceKey="AccentButtonBackground"/>
+        <StaticResource x:Key="ToggleButtonBackgroundChecked" ResourceKey="ButtonBackgroundPointerOver"/>
+        <StaticResource x:Key="ToggleButtonBackgroundPointerOver" ResourceKey="ButtonBackgroundPointerOver"/>
+        <StaticResource x:Key="ToggleButtonBackgroundCheckedPointerOver" ResourceKey="ButtonBackgroundPointerOver"/>
+        <StaticResource x:Key="ToggleButtonForegroundCheckedPointerOver" ResourceKey="AccentButtonBackground"/>
+        <StaticResource x:Key="ToggleButtonBackgroundPressed" ResourceKey="ButtonBackgroundPointerOver"/>
+        <StaticResource x:Key="ToggleButtonBackgroundCheckedPressed" ResourceKey="ButtonBackgroundPointerOver"/>
+        <StaticResource x:Key="ToggleButtonForegroundCheckedPressed" ResourceKey="AccentButtonBackground"/>
+        <StaticResource x:Key="ButtonBackgroundPressed" ResourceKey="ButtonBackgroundPointerOver"/>
+        <SolidColorBrush x:Key="ButtonBackgroundDisabled" Color="Transparent"/>
+        <FontFamily x:Key="CascadiaCode">avares://WaifuAI/Assets/Fonts/#Cascadia Code</FontFamily>
+        <FontFamily x:Key="JetBrainsMono">avares://WaifuAI/Assets/Fonts/#JetBrains Mono</FontFamily>
+    </Application.Resources>
+    <Application.DataTemplates>
+        <local:ViewLocator/>
+    </Application.DataTemplates>
+    <Application.Styles>
+        <FluentTheme>
+            <FluentTheme.Palettes>
+                <ColorPaletteResources 
+                    x:Key="Light" 
+                    RegionColor="#eef1f5"
+                    ChromeLow="#e5e8ee"
+                    ChromeMedium="#dbdfe7"
+                    BaseHigh="#4d5069"
+                    BaseMediumHigh="#abafbd"
+                    BaseMedium="#bbbfcb"
+                    BaseLow="#D4D6DC"
+                    BaseMediumLow="#7F4D5069"/>
+                <ColorPaletteResources x:Key="Dark" />
+            </FluentTheme.Palettes>
+        </FluentTheme>
+    </Application.Styles>
+</Application>

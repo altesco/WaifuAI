@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AvaloniaProject">
+    <option name="projectPerEditor">
+      <map>
+        <entry key="WaifuAI/App.axaml" value="WaifuAI/WaifuAI.csproj" />
+        <entry key="WaifuAI/Views/MainWindow.axaml" value="WaifuAI/WaifuAI.csproj" />
+        <entry key="Yuki/App.axaml" value="Yuki/Yuki.csproj" />
+        <entry key="Yuki/Views/MainWindow.axaml" value="Yuki/Yuki.csproj" />
+      </map>
+    </option>
+  </component>
+</project>
