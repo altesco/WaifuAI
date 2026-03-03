@@ -1,0 +1,146 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\Alexandr\\source\\repos\\Yuki\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{75511114-EC27-E188-2FDC-A305067552DA}|Yuki\\Yuki.csproj|c:\\users\\alexandr\\source\\repos\\yuki\\yuki\\services\\queryservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{75511114-EC27-E188-2FDC-A305067552DA}|Yuki\\Yuki.csproj|solutionrelative:yuki\\services\\queryservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{75511114-EC27-E188-2FDC-A305067552DA}|Yuki\\Yuki.csproj|c:\\users\\alexandr\\source\\repos\\yuki\\yuki\\viewmodels\\mainvm.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{75511114-EC27-E188-2FDC-A305067552DA}|Yuki\\Yuki.csproj|solutionrelative:yuki\\viewmodels\\mainvm.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{75511114-EC27-E188-2FDC-A305067552DA}|Yuki\\Yuki.csproj|c:\\users\\alexandr\\source\\repos\\yuki\\yuki\\views\\mainwindow.axaml||{6D5344A2-2FCD-49DE-A09D-6A14FD1B1224}",
+      "RelativeMoniker": "D:0:0:{75511114-EC27-E188-2FDC-A305067552DA}|Yuki\\Yuki.csproj|solutionrelative:yuki\\views\\mainwindow.axaml||{6D5344A2-2FCD-49DE-A09D-6A14FD1B1224}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{75511114-EC27-E188-2FDC-A305067552DA}|Yuki\\Yuki.csproj|c:\\users\\alexandr\\source\\repos\\yuki\\yuki\\services\\unityservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{75511114-EC27-E188-2FDC-A305067552DA}|Yuki\\Yuki.csproj|solutionrelative:yuki\\services\\unityservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{75511114-EC27-E188-2FDC-A305067552DA}|Yuki\\Yuki.csproj|c:\\users\\alexandr\\source\\repos\\yuki\\yuki\\models\\querymodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{75511114-EC27-E188-2FDC-A305067552DA}|Yuki\\Yuki.csproj|solutionrelative:yuki\\models\\querymodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{75511114-EC27-E188-2FDC-A305067552DA}|Yuki\\Yuki.csproj|c:\\users\\alexandr\\source\\repos\\yuki\\yuki\\models\\responcemodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{75511114-EC27-E188-2FDC-A305067552DA}|Yuki\\Yuki.csproj|solutionrelative:yuki\\models\\responcemodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 7,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c64b9c2-e352-428e-a56d-0ace190b99a6}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{c6f34f0d-7ae5-4f3a-be61-fe0c21ae9eb8}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "UnityService.cs",
+              "DocumentMoniker": "C:\\Users\\Alexandr\\source\\repos\\Yuki\\Yuki\\Services\\UnityService.cs",
+              "RelativeDocumentMoniker": "Yuki\\Services\\UnityService.cs",
+              "ToolTip": "C:\\Users\\Alexandr\\source\\repos\\Yuki\\Yuki\\Services\\UnityService.cs",
+              "RelativeToolTip": "Yuki\\Services\\UnityService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-06T19:04:57.243Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "MainWindow.axaml",
+              "DocumentMoniker": "C:\\Users\\Alexandr\\source\\repos\\Yuki\\Yuki\\Views\\MainWindow.axaml",
+              "RelativeDocumentMoniker": "Yuki\\Views\\MainWindow.axaml",
+              "ToolTip": "C:\\Users\\Alexandr\\source\\repos\\Yuki\\Yuki\\Views\\MainWindow.axaml",
+              "RelativeToolTip": "Yuki\\Views\\MainWindow.axaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-02-06T13:00:47.908Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "MainVM.cs",
+              "DocumentMoniker": "C:\\Users\\Alexandr\\source\\repos\\Yuki\\Yuki\\ViewModels\\MainVM.cs",
+              "RelativeDocumentMoniker": "Yuki\\ViewModels\\MainVM.cs",
+              "ToolTip": "C:\\Users\\Alexandr\\source\\repos\\Yuki\\Yuki\\ViewModels\\MainVM.cs",
+              "RelativeToolTip": "Yuki\\ViewModels\\MainVM.cs",
+              "ViewState": "AgIAAFEAAAAAAAAAAAAAwHgAAAAsAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-05T19:16:27.398Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "ResponceModel.cs",
+              "DocumentMoniker": "C:\\Users\\Alexandr\\source\\repos\\Yuki\\Yuki\\Models\\ResponceModel.cs",
+              "RelativeDocumentMoniker": "Yuki\\Models\\ResponceModel.cs",
+              "ToolTip": "C:\\Users\\Alexandr\\source\\repos\\Yuki\\Yuki\\Models\\ResponceModel.cs",
+              "RelativeToolTip": "Yuki\\Models\\ResponceModel.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-06T12:25:26.558Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "QueryService.cs",
+              "DocumentMoniker": "C:\\Users\\Alexandr\\source\\repos\\Yuki\\Yuki\\Services\\QueryService.cs",
+              "RelativeDocumentMoniker": "Yuki\\Services\\QueryService.cs",
+              "ToolTip": "C:\\Users\\Alexandr\\source\\repos\\Yuki\\Yuki\\Services\\QueryService.cs",
+              "RelativeToolTip": "Yuki\\Services\\QueryService.cs",
+              "ViewState": "AgIAAGoAAAAAAAAAAAA5wHsAAAA8AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-05T18:42:39.955Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "QueryModel.cs",
+              "DocumentMoniker": "C:\\Users\\Alexandr\\source\\repos\\Yuki\\Yuki\\Models\\QueryModel.cs",
+              "RelativeDocumentMoniker": "Yuki\\Models\\QueryModel.cs",
+              "ToolTip": "C:\\Users\\Alexandr\\source\\repos\\Yuki\\Yuki\\Models\\QueryModel.cs",
+              "RelativeToolTip": "Yuki\\Models\\QueryModel.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACAAAABMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-05T18:35:33.408Z",
+              "EditorCaption": ""
+            }
+          ]
+        },
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": -1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:1:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
