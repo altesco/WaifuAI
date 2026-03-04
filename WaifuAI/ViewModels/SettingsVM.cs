@@ -43,6 +43,7 @@ public partial class SettingsVM : ObservableObject
         ApiKey = SettingsModel.ApiKey;
         ApiUrl = SettingsModel.ApiUrl;
         Model = SettingsModel.Model;
+        IsServerQuery = SettingsModel.IsServerQuery;
     }
 
     [RelayCommand]
@@ -55,6 +56,7 @@ public partial class SettingsVM : ObservableObject
         SettingsModel.ApiKey = ApiKey;
         SettingsModel.ApiUrl = ApiUrl;
         SettingsModel.Model = Model;
+        SettingsModel.IsServerQuery = IsServerQuery;
         var options = new JsonSerializerOptions { WriteIndented = true };
         var json = JsonSerializer.Serialize(SettingsModel, options);
         File.WriteAllText(FilePath, json);

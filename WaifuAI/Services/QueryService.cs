@@ -25,6 +25,7 @@ namespace WaifuAI.Services
                 HttpResponseMessage answer = await _httpClient.PostAsync(
                     $"http://{SettingsVM.Instance.IpAddress}:{SettingsVM.Instance.Port}/v1/chat/completions", stringContent);
                 var json = await answer.Content.ReadAsStringAsync();
+                Console.WriteLine(json);
                 var model = JsonSerializer.Deserialize<ResponceModel>(json);
                 if (model == null)
                     return new Message 
@@ -75,6 +76,7 @@ namespace WaifuAI.Services
         {
             queryModel.Model = SettingsVM.Instance.Model;
             var json = JsonSerializer.Serialize(queryModel);
+            Console.WriteLine(json);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
             _httpClient.DefaultRequestHeaders.Clear();
             _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {SettingsVM.Instance.ApiKey}");
@@ -82,14 +84,16 @@ namespace WaifuAI.Services
             {
                 var response = await _httpClient.PostAsync(SettingsVM.Instance.ApiUrl, content);
                 var resJson = await response.Content.ReadAsStringAsync();
+                Console.WriteLine(resJson);
                 var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                 var result = JsonSerializer.Deserialize<ResponceModel>(resJson, options);
-                return result?.Choices[0].Message ?? new Message { Content = "Тишина..." };
+                return result?.Choices[0].Message ?? new Message { Role = "system", Content = "Тишина..." };
             }
             catch (Exception ex)
             {
                 return new Message 
                 { 
+                    Role = "system",
                     Content = "Ошибка: " + ex.Message 
                 };
             }
