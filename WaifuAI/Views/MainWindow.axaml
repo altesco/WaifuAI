@@ -297,139 +297,140 @@
                         <Setter Property="Opacity" Value="0.5"/>
                     </Style>
                 </Border.Styles>
-                <ScrollViewer>
-                    <StackPanel Spacing="8" >
-                        <Border
-                            Height="50"
-                            BorderThickness="0,0,0,1"
-                            BorderBrush="#bbbfcb"
-                            Background="{DynamicResource SystemChromeLowColor}">
-                            <TextBlock 
-                                Text="Источник модели" 
-                                VerticalAlignment="Center"
-                                FontSize="18" 
-                                FontWeight="Bold" 
-                                Margin="16,0,16,0"
-                                TextTrimming="CharacterEllipsis"/>
-                        </Border>
-                        
-                        <RadioButton 
-                            x:Name="ServerButton" 
-                            GroupName="ModelSource" 
-                            IsChecked="{Binding IsServerQuery}"
-                            Margin="16,0,16,0">
-                            <TextBlock 
-                                Text="Сервер" 
-                                VerticalAlignment="Center"
-                                FontWeight="DemiBold" 
-                                FontSize="16"
-                                TextTrimming="CharacterEllipsis"/>
-                        </RadioButton>
-                        
-                        <StackPanel Tag="{Binding #ServerButton.IsChecked}" Margin="16,0,16,0" Spacing="4">
-                            <Grid ColumnDefinitions="Auto,*">
-                                <LucideIcon Kind="Hash" Size="16" StrokeWidth="2"/>
+                <Grid RowDefinitions="Auto,*">
+                    <Border
+                        Height="50"
+                        BorderThickness="0,0,0,1"
+                        BorderBrush="#bbbfcb"
+                        Background="{DynamicResource SystemChromeLowColor}">
+                        <TextBlock 
+                            Text="Источник модели" 
+                            VerticalAlignment="Center"
+                            FontSize="18" 
+                            FontWeight="Bold" 
+                            Margin="16,0,16,0"
+                            TextTrimming="CharacterEllipsis"/>
+                    </Border>
+                    <ScrollViewer Grid.Row="1">
+                        <StackPanel Spacing="8" Margin="16,8,16,16">
+                            <RadioButton 
+                                x:Name="ServerButton" 
+                                GroupName="ModelSource" 
+                                IsChecked="{Binding IsServerQuery}"
+                                Command="{Binding SaveCommand}">
                                 <TextBlock 
-                                    FontWeight="DemiBold"
-                                    Grid.Column="1"
-                                    Margin="4,0,0,0"
-                                    Text="Порт" 
+                                    Text="Сервер" 
                                     VerticalAlignment="Center"
+                                    FontWeight="DemiBold" 
+                                    FontSize="16"
                                     TextTrimming="CharacterEllipsis"/>
-                            </Grid>
-                            <TextBox Text="{Binding Port, Mode=TwoWay}">
-                                <Interaction.Behaviors>
-                                    <EventTriggerBehavior EventName="LostFocus">
-                                        <InvokeCommandAction Command="{Binding SaveCommand}"/>
-                                    </EventTriggerBehavior>
-                                </Interaction.Behaviors>
-                            </TextBox>
-                            <Grid ColumnDefinitions="Auto,*" Margin="0,8,0,0">
-                                <LucideIcon Kind="Network" Size="16" StrokeWidth="2"/>
+                            </RadioButton>
+                            
+                            <StackPanel Tag="{Binding #ServerButton.IsChecked}" Spacing="4">
+                                <Grid ColumnDefinitions="Auto,*">
+                                    <LucideIcon Kind="Hash" Size="16" StrokeWidth="2"/>
+                                    <TextBlock 
+                                        FontWeight="DemiBold"
+                                        Grid.Column="1"
+                                        Margin="4,0,0,0"
+                                        Text="Порт" 
+                                        VerticalAlignment="Center"
+                                        TextTrimming="CharacterEllipsis"/>
+                                </Grid>
+                                <TextBox Text="{Binding Port, Mode=TwoWay}">
+                                    <Interaction.Behaviors>
+                                        <EventTriggerBehavior EventName="LostFocus">
+                                            <InvokeCommandAction Command="{Binding SaveCommand}"/>
+                                        </EventTriggerBehavior>
+                                    </Interaction.Behaviors>
+                                </TextBox>
+                                <Grid ColumnDefinitions="Auto,*" Margin="0,8,0,0">
+                                    <LucideIcon Kind="Network" Size="16" StrokeWidth="2"/>
+                                    <TextBlock 
+                                        Grid.Column="1"
+                                        FontWeight="DemiBold"
+                                        Margin="4,0,0,0"
+                                        Text="IP-адрес" 
+                                        VerticalAlignment="Center" 
+                                        TextTrimming="CharacterEllipsis"/>
+                                </Grid>
+                                <TextBox Text="{Binding IpAddress, Mode=TwoWay}">
+                                    <Interaction.Behaviors>
+                                        <EventTriggerBehavior EventName="LostFocus">
+                                            <InvokeCommandAction Command="{Binding SaveCommand}"/>
+                                        </EventTriggerBehavior>
+                                    </Interaction.Behaviors>
+                                </TextBox>
+                            </StackPanel>
+                            
+                            <RadioButton 
+                                x:Name="ProviderButton" 
+                                GroupName="ModelSource" 
+                                IsChecked="{Binding !IsServerQuery}"
+                                Command="{Binding SaveCommand}">
                                 <TextBlock 
-                                    Grid.Column="1"
-                                    FontWeight="DemiBold"
-                                    Margin="4,0,0,0"
-                                    Text="IP-адрес" 
-                                    VerticalAlignment="Center" 
-                                    TextTrimming="CharacterEllipsis"/>
-                            </Grid>
-                            <TextBox Text="{Binding IpAddress, Mode=TwoWay}">
-                                <Interaction.Behaviors>
-                                    <EventTriggerBehavior EventName="LostFocus">
-                                        <InvokeCommandAction Command="{Binding SaveCommand}"/>
-                                    </EventTriggerBehavior>
-                                </Interaction.Behaviors>
-                            </TextBox>
+                                    Text="Облачный провайдер" 
+                                    VerticalAlignment="Center"
+                                    FontWeight="DemiBold" 
+                                    FontSize="16"/>
+                            </RadioButton>
+                            
+                            <StackPanel Tag="{Binding #ProviderButton.IsChecked}" Spacing="4">
+                                <Grid ColumnDefinitions="Auto,*" >
+                                    <LucideIcon Kind="KeyRound" Size="16" StrokeWidth="2" />
+                                    <TextBlock 
+                                        Grid.Column="1" 
+                                        FontWeight="DemiBold"
+                                        Margin="4,0,0,0"
+                                        Text="API Ключ" 
+                                        VerticalAlignment="Center"
+                                        TextTrimming="CharacterEllipsis"/>
+                                </Grid>
+                                <TextBox Text="{Binding ApiKey, Mode=TwoWay}">
+                                    <Interaction.Behaviors>
+                                        <EventTriggerBehavior EventName="LostFocus">
+                                            <InvokeCommandAction Command="{Binding SaveCommand}"/>
+                                        </EventTriggerBehavior>
+                                    </Interaction.Behaviors>
+                                </TextBox>
+                                <Grid ColumnDefinitions="Auto,*" Margin="0,8,0,0">
+                                    <LucideIcon Kind="Link" Size="16" StrokeWidth="2"/>
+                                    <TextBlock 
+                                        Grid.Column="1" 
+                                        FontWeight="DemiBold"
+                                        Margin="4,0,0,0"
+                                        Text="API URL" 
+                                        VerticalAlignment="Center"
+                                        TextTrimming="CharacterEllipsis"/>
+                                </Grid>
+                                <TextBox Text="{Binding ApiUrl, Mode=TwoWay}">
+                                    <Interaction.Behaviors>
+                                        <EventTriggerBehavior EventName="LostFocus">
+                                            <InvokeCommandAction Command="{Binding SaveCommand}"/>
+                                        </EventTriggerBehavior>
+                                    </Interaction.Behaviors>
+                                </TextBox>
+                                <Grid ColumnDefinitions="Auto,*" Margin="0,8,0,0">
+                                    <LucideIcon Kind="Bot" Size="16" StrokeWidth="2"/>
+                                    <TextBlock 
+                                        Grid.Column="1" 
+                                        FontWeight="DemiBold"
+                                        Margin="4,0,0,0"
+                                        Text="Модель" 
+                                        VerticalAlignment="Center" 
+                                        TextTrimming="CharacterEllipsis"/>
+                                </Grid>
+                                <TextBox Text="{Binding Model, Mode=TwoWay}">
+                                    <Interaction.Behaviors>
+                                        <EventTriggerBehavior EventName="LostFocus">
+                                            <InvokeCommandAction Command="{Binding SaveCommand}"/>
+                                        </EventTriggerBehavior>
+                                    </Interaction.Behaviors>
+                                </TextBox>
+                            </StackPanel>    
                         </StackPanel>
-                        
-                        <RadioButton 
-                            x:Name="ProviderButton" 
-                            GroupName="ModelSource" 
-                            IsChecked="{Binding !IsServerQuery}" 
-                            Margin="16,0,16,0">
-                            <TextBlock 
-                                Text="Облачный провайдер" 
-                                VerticalAlignment="Center"
-                                FontWeight="DemiBold" 
-                                FontSize="16"/>
-                        </RadioButton>
-                        
-                        <StackPanel Tag="{Binding #ProviderButton.IsChecked}" Margin="16,0,16,0" Spacing="4">
-                            <Grid ColumnDefinitions="Auto,*" >
-                                <LucideIcon Kind="KeyRound" Size="16" StrokeWidth="2" />
-                                <TextBlock 
-                                    Grid.Column="1" 
-                                    FontWeight="DemiBold"
-                                    Margin="4,0,0,0"
-                                    Text="API Ключ" 
-                                    VerticalAlignment="Center"
-                                    TextTrimming="CharacterEllipsis"/>
-                            </Grid>
-                            <TextBox Text="{Binding ApiKey, Mode=TwoWay}">
-                                <Interaction.Behaviors>
-                                    <EventTriggerBehavior EventName="LostFocus">
-                                        <InvokeCommandAction Command="{Binding SaveCommand}"/>
-                                    </EventTriggerBehavior>
-                                </Interaction.Behaviors>
-                            </TextBox>
-                            <Grid ColumnDefinitions="Auto,*" Margin="0,8,0,0">
-                                <LucideIcon Kind="Link" Size="16" StrokeWidth="2"/>
-                                <TextBlock 
-                                    Grid.Column="1" 
-                                    FontWeight="DemiBold"
-                                    Margin="4,0,0,0"
-                                    Text="API URL" 
-                                    VerticalAlignment="Center"
-                                    TextTrimming="CharacterEllipsis"/>
-                            </Grid>
-                            <TextBox Text="{Binding ApiUrl, Mode=TwoWay}">
-                                <Interaction.Behaviors>
-                                    <EventTriggerBehavior EventName="LostFocus">
-                                        <InvokeCommandAction Command="{Binding SaveCommand}"/>
-                                    </EventTriggerBehavior>
-                                </Interaction.Behaviors>
-                            </TextBox>
-                            <Grid ColumnDefinitions="Auto,*" Margin="0,8,0,0">
-                                <LucideIcon Kind="Bot" Size="16" StrokeWidth="2"/>
-                                <TextBlock 
-                                    Grid.Column="1" 
-                                    FontWeight="DemiBold"
-                                    Margin="4,0,0,0"
-                                    Text="Модель" 
-                                    VerticalAlignment="Center" 
-                                    TextTrimming="CharacterEllipsis"/>
-                            </Grid>
-                            <TextBox Text="{Binding Model, Mode=TwoWay}">
-                                <Interaction.Behaviors>
-                                    <EventTriggerBehavior EventName="LostFocus">
-                                        <InvokeCommandAction Command="{Binding SaveCommand}"/>
-                                    </EventTriggerBehavior>
-                                </Interaction.Behaviors>
-                            </TextBox>
-                        </StackPanel>    
-                    </StackPanel>
-                </ScrollViewer>    
+                    </ScrollViewer>    
+                </Grid>    
             </Border>
             <GridSplitter
                 Width="4"
