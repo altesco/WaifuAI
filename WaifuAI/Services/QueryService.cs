@@ -18,7 +18,6 @@ namespace WaifuAI.Services
         
         public static async Task<Message> DoServerQuery(QueryModel queryModel)
         {
-            Console.WriteLine("я тут");
             try
             {
                 var query = JsonSerializer.Serialize(queryModel);
