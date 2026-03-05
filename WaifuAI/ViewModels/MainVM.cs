@@ -28,8 +28,9 @@ namespace WaifuAI.ViewModels
 
         [ObservableProperty] private string _question = string.Empty;
         [ObservableProperty] private string _webAddress;
+        [ObservableProperty] private string? _error;
 
-        public ObservableCollection<Message> Messages { get; } = 
+        public ObservableCollection<MessageVM> Chat { get; } = 
             [
                 /*new Message { Role = "user", Content = "привет" },
                 new Message { Role = "assistant", Content = "привет, как дела? у меня вот нормально. Че делаешь? мне вот надо щас напиздеть в одном сообщении много слов чтобы хватило для wrap" }
@@ -44,41 +45,57 @@ namespace WaifuAI.ViewModels
             }];
 
         [RelayCommand]
-        public async Task Query(object param)
+        private async Task Query(object param)
         {
             if (param is not WebView source)
                 return;
             try
             {
+                CloseErrorMessage();
                 var query = new QueryModel();
-                var message = new Message
+                var message = new MessageVM
                 {
-                    Role = "user", 
-                    Content = Question,
-                    Time = DateTime.Now.ToString("HH:mm"),
+                    MessageModel = new Message { Role = "user", Content = Question },
+                    Time = DateTime.Now.ToString("HH:mm")
                 };
-                _history.Add(message);
-                Messages.Add(message);
+                Chat.Add(message);
                 Question = string.Empty;
                 query.Messages.AddRange(_history);
-                var tempMessage = new Message { Role = "temp" };
-                Messages.Add(tempMessage);
-                Message resultMessage;
+                var tempMessage = new MessageVM
+                {
+                    MessageModel = new Message { Role = "temp" }
+                };
+                Chat.Add(tempMessage);
+                MessageVM resultMessage = new MessageVM();
                 if (SettingsVM.Instance.IsServerQuery)
-                    resultMessage = await QueryService.DoServerQuery(query);
+                    resultMessage.MessageModel = await QueryService.DoServerQuery(query);
                 else
-                    resultMessage = await QueryService.DoProviderQuery(query);
+                    resultMessage.MessageModel = await QueryService.DoProviderQuery(query);
+                Chat.Remove(tempMessage);
+                if (resultMessage.MessageModel.Role == "system")
+                {
+                    Question = message.MessageModel.Content;
+                    Error = resultMessage.MessageModel.Content;
+                    message.IsFailed = true;
+                    return;
+                }
+                _history.Add(message.MessageModel);
+                _history.Add(resultMessage.MessageModel);
+                VoiceService.Say(resultMessage.MessageModel.Content, source);
+                resultMessage.MessageModel.Content = EmotionParser.CleanText(resultMessage.MessageModel.Content);
                 resultMessage.Time = DateTime.Now.ToString("HH:mm");
-                _history.Add(resultMessage);
-                Messages.Remove(tempMessage);
-                VoiceService.Say(resultMessage.Content, source);
-                resultMessage.Content = EmotionParser.CleanText(resultMessage.Content);
-                Messages.Add(resultMessage);
+                Chat.Add(resultMessage);
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                Debug.WriteLine("Ошибка в Query: " + ex.Message);
+                Debug.WriteLine("Ошибка в Query: " + e.Message);
             }
+        }
+
+        [RelayCommand]
+        private void CloseErrorMessage()
+        {
+            Error = null;
         }
     }
 }
