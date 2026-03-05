@@ -9,7 +9,4 @@ public class Message
 
     [JsonPropertyName("content")]
     public string Content { get; set; } = string.Empty;
-    
-    [JsonIgnore]
-    public string Time { get; set; } = string.Empty;
 }

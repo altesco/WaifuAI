@@ -1,7 +1,6 @@
 <Application 
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:themes="clr-namespace:Material.Styles.Themes;assembly=Material.Styles"
     x:Class="WaifuAI.App"
     xmlns:local="using:WaifuAI"
     RequestedThemeVariant="Default">

@@ -10,7 +10,7 @@ namespace WaifuAI.Models
     internal class QueryModel
     {
         [JsonPropertyName("model")]
-        public string Model { get; set; } = "gemini-2.5-flash";//"any";
+        public string Model { get; set; } = "any";
 
         [JsonPropertyName("messages")]
         public List<Message> Messages { get; set; } = [];

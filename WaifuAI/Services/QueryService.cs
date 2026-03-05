@@ -12,7 +12,7 @@ namespace WaifuAI.Services
 {
     internal static class QueryService
     {
-        private static readonly HttpClient _httpClient = new HttpClient();
+        private static readonly HttpClient _httpClient = new HttpClient() { Timeout = TimeSpan.FromMinutes(3) };
         private static HttpListener _httpListener;
         private static byte[] _latestAudioData;
         
@@ -40,8 +40,8 @@ namespace WaifuAI.Services
                 Console.WriteLine(e);
                 return new Message 
                 { 
-                    Role = "assistant", 
-                    Content = e.Message
+                    Role = "system",
+                    Content = "Ошибка: " + e.Message 
                 };
             }
         }

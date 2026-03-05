@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:wv="clr-namespace:WebViewControl;assembly=WebViewControl.Avalonia"
         xmlns:i="using:Avalonia.Xaml.Interactivity"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        mc:Ignorable="d" d:DesignWidth="1024" d:DesignHeight="720"
         x:Class="WaifuAI.Views.MainWindow"
         x:DataType="vm:MainVM"
         Icon="/Assets/avalonia-logo.ico"
@@ -99,7 +99,7 @@
         <Grid Grid.Row="1" x:Name="MainGrid">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="40"/>
-                <ColumnDefinition Width="350" MinWidth="256"/>
+                <ColumnDefinition Width="350" MinWidth="400"/>
                 <ColumnDefinition/>
                 <ColumnDefinition Width="350" MinWidth="256"/>
                 <ColumnDefinition Width="40"/>
@@ -128,6 +128,7 @@
                 BorderBrush="#bbbfcb"
                 Background="{DynamicResource SystemChromeLowColor}">
                 <Panel>
+                    <!-- Chat -->
                     <Grid IsVisible="{Binding #ChatButton.IsChecked}">
                         <Grid.RowDefinitions>
                             <RowDefinition/>
@@ -135,7 +136,7 @@
                         </Grid.RowDefinitions>
                         <ListBox 
                             x:Name="MessageList"
-                            ItemsSource="{Binding Messages}"
+                            ItemsSource="{Binding Chat}"
                             Background="{DynamicResource SystemChromeLowColor}"
                             Padding="6">
                             <ListBox.Styles>
@@ -151,46 +152,95 @@
                             </ListBox.ItemContainerTheme>
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
-                                    <Border 
-                                        Background="LightSkyBlue"
-                                        Tag="{Binding Role}"
-                                        Padding="12,6,12,6"
-                                        MinHeight="32"
-                                        MaxWidth="360">
-                                        <Border.Styles>
-                                            <Style Selector="Border">
-                                                <Setter Property="HorizontalAlignment" Value="Right"/>
-                                                <Setter Property="CornerRadius" Value="16,0,16,16"/>
-                                            </Style>
-                                            <Style Selector="Border[Tag=assistant]">
-                                                <Setter Property="HorizontalAlignment" Value="Left"/>
-                                                <Setter Property="CornerRadius" Value="0,16,16,16"/>
-                                            </Style>
-                                            <Style Selector="Border[Tag=temp]">
-                                                <Setter Property="HorizontalAlignment" Value="Left"/>
-                                                <Setter Property="CornerRadius" Value="0,16,16,16"/>
-                                                <Setter Property="Width" Value="64"/>
-                                            </Style>
-                                        </Border.Styles>
-                                        <StackPanel Spacing="2">
-                                            <TextBlock 
-                                                HorizontalAlignment="Center"
-                                                VerticalAlignment="Center"
-                                                TextWrapping="Wrap"
-                                                Text="{Binding Content}"/>
-                                            <TextBlock 
-                                                Text="{Binding Time}"
-                                                HorizontalAlignment="Right"
-                                                FontSize="12"
-                                                Opacity="0.5"
-                                                IsVisible="{Binding Role, 
-                                                Converter={x:Static ObjectConverters.NotEqual}, 
-                                                ConverterParameter=temp}"/>
-                                        </StackPanel>
-                                    </Border>
+                                    <Grid ColumnDefinitions="Auto,*,Auto" >
+                                        <Border 
+                                            Background="LightSkyBlue"
+                                            Tag="{Binding MessageModel.Role}"
+                                            Padding="12,6,12,6"
+                                            MinHeight="32"
+                                            MaxWidth="360">
+                                            <Border.Styles>
+                                                <Style Selector="Border">
+                                                    <Setter Property="Grid.Column" Value="2"/>
+                                                    <Setter Property="CornerRadius" Value="16,0,16,16"/>
+                                                </Style>
+                                                <Style Selector="Border[Tag=assistant]">
+                                                    <Setter Property="Grid.Column" Value="0"/>
+                                                    <Setter Property="CornerRadius" Value="0,16,16,16"/>
+                                                </Style>
+                                                <Style Selector="Border[Tag=temp]">
+                                                    <Setter Property="Grid.Column" Value="0"/>
+                                                    <Setter Property="CornerRadius" Value="0,16,16,16"/>
+                                                    <Setter Property="Width" Value="64"/>
+                                                </Style>
+                                            </Border.Styles>
+                                            <StackPanel Spacing="2">
+                                                <SelectableTextBlock 
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center"
+                                                    TextWrapping="Wrap"
+                                                    Text="{Binding MessageModel.Content}"/>
+                                                <TextBlock
+                                                    Text="{Binding Time}"
+                                                    HorizontalAlignment="Right"
+                                                    FontSize="12"
+                                                    Opacity="0.5"
+                                                    IsVisible="{Binding MessageModel.Role, 
+                                                    Converter={x:Static ObjectConverters.NotEqual}, 
+                                                    ConverterParameter=temp}"/>
+                                            </StackPanel>
+                                        </Border>
+                                        <LucideIcon 
+                                            Kind="CircleAlert" 
+                                            Size="20"
+                                            Margin="6"
+                                            Grid.Column="1"
+                                            IsVisible="{Binding IsFailed}"
+                                            VerticalAlignment="Bottom"
+                                            HorizontalAlignment="Right"/>
+                                    </Grid>    
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>
+                        <Border 
+                            Grid.Row="0"
+                            Background="#FF979C"
+                            MinHeight="60"
+                            MaxWidth="720"
+                            BorderBrush="#842426"
+                            CornerRadius="7"
+                            VerticalAlignment="Bottom"
+                            Margin="10"
+                            BorderThickness="1"
+                            IsVisible="{Binding Error, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <SelectableTextBlock 
+                                    Foreground="#842426"
+                                    Text="{Binding Error}"
+                                    TextWrapping="Wrap"
+                                    Margin="10,6,10,6"
+                                    />
+                                <Button 
+                                    Grid.Column="1"
+                                    Margin="4"
+                                    VerticalAlignment="Top" 
+                                    Height="24" 
+                                    Width="24" 
+                                    Foreground="#842426"
+                                    Command="{Binding CloseErrorMessageCommand}">
+                                    <LucideIcon Kind="X" Size="18"/>
+                                </Button>
+                                <Button 
+                                    Grid.Column="1"
+                                    Margin="4"
+                                    VerticalAlignment="Bottom" 
+                                    Height="24" 
+                                    Width="24" 
+                                    Foreground="#842426">
+                                    <LucideIcon Kind="Copy" Size="14"/>
+                                </Button>
+                            </Grid>
+                        </Border>
                         <Border
                             Grid.Row="1"
                             BorderBrush="#bbbfcb"
@@ -451,7 +501,9 @@
                     <ToggleButton 
                         x:Name="ModelButton" 
                         IsChecked="True"
-                        IsCheckedChanged="RightToggleButton_OnIsCheckedChanged">
+                        IsCheckedChanged="RightToggleButton_OnIsCheckedChanged"
+                        ToolTip.Tip="Источник модели"
+                        ToolTip.Placement="LeftEdgeAlignedTop">
                         <LucideIcon Kind="Brain" Size="20"/>
                     </ToggleButton>
                 </StackPanel>

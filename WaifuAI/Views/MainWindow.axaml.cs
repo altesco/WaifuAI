@@ -33,7 +33,7 @@ namespace WaifuAI.Views
             _lastRightBarWidth = MainGrid.ColumnDefinitions[3].Width;
         }
         
-        private void MessagesOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        private void ChatOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             if (e.Action != NotifyCollectionChangedAction.Add || e.NewItems == null)
                 return;
@@ -44,7 +44,7 @@ namespace WaifuAI.Views
         {
             if (DataContext is not MainVM mainVM)
                 return;
-            mainVM.Messages.CollectionChanged += MessagesOnCollectionChanged;
+            mainVM.Chat.CollectionChanged += ChatOnCollectionChanged;
         }
 
         private void LeftToggleButton_OnIsCheckedChanged(object? sender, RoutedEventArgs e)
