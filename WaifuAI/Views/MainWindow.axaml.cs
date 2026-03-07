@@ -1,11 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Linq;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
+using Avalonia.Input.Platform;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using WaifuAI.ViewModels;
 using WaifuAI.Models;
 
@@ -40,7 +44,7 @@ namespace WaifuAI.Views
             Dispatcher.UIThread.Post(() => MessageList.ScrollIntoView(e.NewItems[0]));
         }
 
-        private void Control_OnLoaded(object? sender, RoutedEventArgs e)
+        private void Window_OnLoaded(object? sender, RoutedEventArgs e)
         {
             if (DataContext is not MainVM mainVM)
                 return;

@@ -4,14 +4,20 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Input;
+using Avalonia.Input.Platform;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using WaifuAI.Models;
 using WaifuAI.Services;
 using WebViewControl;
+using Xilium.CefGlue;
 
 namespace WaifuAI.ViewModels
 {
@@ -41,7 +47,7 @@ namespace WaifuAI.ViewModels
             new Message 
             { 
                 Role = "system", 
-                Content = File.ReadAllText(Path.Combine(".", "promt.txt")) 
+                Content = File.ReadAllText(Path.Combine(".", "prompt.txt")) 
             }];
 
         [RelayCommand]
@@ -58,9 +64,10 @@ namespace WaifuAI.ViewModels
                     MessageModel = new Message { Role = "user", Content = Question },
                     Time = DateTime.Now.ToString("HH:mm")
                 };
+                _history.Add(message.MessageModel);
+                query.Messages.AddRange(_history);
                 Chat.Add(message);
                 Question = string.Empty;
-                query.Messages.AddRange(_history);
                 var tempMessage = new MessageVM
                 {
                     MessageModel = new Message { Role = "temp" }
@@ -77,10 +84,14 @@ namespace WaifuAI.ViewModels
                     Question = message.MessageModel.Content;
                     Error = resultMessage.MessageModel.Content;
                     message.IsFailed = true;
+                    _history.Remove(_history.Last());
                     return;
                 }
-                _history.Add(message.MessageModel);
-                _history.Add(resultMessage.MessageModel);
+                _history.Add(new Message
+                {
+                    Role = resultMessage.MessageModel.Role,
+                    Content = resultMessage.MessageModel.Content
+                });
                 VoiceService.Say(resultMessage.MessageModel.Content, source);
                 resultMessage.MessageModel.Content = EmotionParser.CleanText(resultMessage.MessageModel.Content);
                 resultMessage.Time = DateTime.Now.ToString("HH:mm");
@@ -96,6 +107,34 @@ namespace WaifuAI.ViewModels
         private void CloseErrorMessage()
         {
             Error = null;
+        }
+        
+        // for some reason Cut() in TextBox is not working
+        [RelayCommand]
+        public void ManualCut(TextBox? textBox)
+        {
+            if (textBox == null || string.IsNullOrEmpty(textBox.SelectedText))
+                return;
+            textBox.Copy();
+            Dispatcher.UIThread.Post(() =>
+            {
+                int start = Math.Min(textBox.SelectionStart, textBox.SelectionEnd);
+                int length = Math.Abs(textBox.SelectionStart - textBox.SelectionEnd);
+                string currentText = textBox.Text ?? string.Empty;
+                textBox.Text = currentText.Remove(start, length);
+                textBox.SelectionStart = start;
+                textBox.SelectionEnd = start;
+            }, DispatcherPriority.Background);
+        }
+
+        [RelayCommand]
+        private void CopyMessageText(SelectableTextBlock? textBlock)
+        {
+            if (textBlock is null)
+                return;
+            textBlock.SelectAll();
+            textBlock.Copy();
+            textBlock.ClearSelection();
         }
     }
 }

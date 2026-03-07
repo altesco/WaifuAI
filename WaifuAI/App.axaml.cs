@@ -1,8 +1,12 @@
+using System;
 using System.Linq;
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
+using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using WaifuAI.ViewModels;
 using WaifuAI.Views;
@@ -27,6 +31,10 @@ namespace WaifuAI
                 {
                     DataContext = new MainVM(),
                 };
+                InputElement.KeyDownEvent.AddClassHandler(
+                    typeof(TextBox), 
+                    GlobalCutHandler, 
+                    RoutingStrategies.Tunnel);
             }
 
             base.OnFrameworkInitializationCompleted();
@@ -43,6 +51,15 @@ namespace WaifuAI
             {
                 BindingPlugins.DataValidators.Remove(plugin);
             }
+        }
+
+        private void GlobalCutHandler(object? sender, RoutedEventArgs e)
+        {
+            if (ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop ||
+                desktop.MainWindow?.DataContext is not MainVM mainVM)
+                return;
+            if (e is KeyEventArgs keyArgs && keyArgs.Key == Key.X && keyArgs.KeyModifiers == KeyModifiers.Control)
+                mainVM.ManualCutCommand.Execute(sender);
         }
     }
 }

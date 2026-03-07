@@ -4,13 +4,12 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:wv="clr-namespace:WebViewControl;assembly=WebViewControl.Avalonia"
-        xmlns:i="using:Avalonia.Xaml.Interactivity"
         mc:Ignorable="d" d:DesignWidth="1024" d:DesignHeight="720"
         x:Class="WaifuAI.Views.MainWindow"
         x:DataType="vm:MainVM"
         Icon="/Assets/avalonia-logo.ico"
         Title="WaifuAI"
-        Loaded="Control_OnLoaded">
+        Loaded="Window_OnLoaded">
     <Window.Resources>
         <ControlTheme x:Key="RadioButtonWithIcon" TargetType="RadioButton">
             <Setter Property="Width" Value="28"/>
@@ -53,7 +52,7 @@
             </Setter>
         </ControlTheme>
     </Window.Resources>
-    <Grid RowDefinitions="40,*">
+    <Grid RowDefinitions="40,*" x:Name="RootPanel"  >
         <Grid.Styles>
             <Style Selector="Button">
                 <Setter Property="Width" Value="28"/>
@@ -70,6 +69,23 @@
                 <Setter Property="Padding" Value="0"/>
                 <Setter Property="CornerRadius" Value="5"/>
                 <Setter Property="Cursor" Value="Hand"/>
+            </Style>
+            <Style Selector="ContextMenu">
+                <Setter Property="CornerRadius" Value="7"/>
+                <Setter Property="Background" Value="{DynamicResource SystemChromeLowColor}"/>
+                <Setter Property="Padding" Value="6,1,6,1"/>
+                <Setter Property="Cursor" Value="Arrow"/>
+            </Style>
+            <Style Selector="MenuItem">
+                <Setter Property="CornerRadius" Value="4"/>
+                <Setter Property="FontSize" Value="13"/>
+            </Style>
+            <Style Selector="MenuItem:pointerover /template/ Border#PART_LayoutRoot, 
+                 MenuItem:selected /template/ Border#PART_LayoutRoot">
+                <Setter Property="Background" Value="{DynamicResource ButtonBackgroundPointerOver}"/>
+            </Style>
+            <Style Selector="LucideIcon:disabled">
+                <Setter Property="Opacity" Value="0.5"/>
             </Style>
         </Grid.Styles>
         <Border
@@ -120,22 +136,34 @@
                         IsCheckedChanged="LeftToggleButton_OnIsCheckedChanged">
                         <LucideIcon Kind="BookText" Size="20"/>
                     </ToggleButton>
+                    <ToggleButton 
+                        x:Name="MemoryButton" 
+                        IsCheckedChanged="LeftToggleButton_OnIsCheckedChanged">
+                        <LucideIcon Kind="Brain" Size="20"/>
+                    </ToggleButton>
                 </StackPanel>
             </Border>
             <Border 
+                x:Name="ChatPanel"
                 Grid.Column="1" 
                 BorderThickness="0,0,1,0"
                 BorderBrush="#bbbfcb"
                 Background="{DynamicResource SystemChromeLowColor}">
                 <Panel>
                     <!-- Chat -->
-                    <Grid IsVisible="{Binding #ChatButton.IsChecked}">
-                        <Grid.RowDefinitions>
-                            <RowDefinition/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
+                    <Grid IsVisible="{Binding #ChatButton.IsChecked}" RowDefinitions="Auto,*,Auto">
+                        <Border BorderBrush="#bbbfcb" BorderThickness="0,0,0,1" Height="48">
+                            <TextBlock 
+                                Text="Чат" 
+                                VerticalAlignment="Center"
+                                FontSize="18" 
+                                FontWeight="Bold" 
+                                Margin="16,0,16,0"
+                                TextTrimming="CharacterEllipsis"/>
+                        </Border>
                         <ListBox 
                             x:Name="MessageList"
+                            Grid.Row="1"
                             ItemsSource="{Binding Chat}"
                             Background="{DynamicResource SystemChromeLowColor}"
                             Padding="6">
@@ -158,7 +186,34 @@
                                             Tag="{Binding MessageModel.Role}"
                                             Padding="12,6,12,6"
                                             MinHeight="32"
-                                            MaxWidth="360">
+                                            MaxWidth="360"
+                                            Focusable="False">
+                                            <Border.ContextMenu>
+                                                <ContextMenu>
+                                                    <MenuItem
+                                                        Header="Копировать текст"
+                                                        DataContext="{Binding $parent[ListBox].DataContext}"
+                                                        x:DataType="vm:MainVM"
+                                                        Command="{Binding CopyMessageTextCommand}"
+                                                        CommandParameter="{Binding #PART_SelectableTextBlock}">
+                                                        <MenuItem.Icon>
+                                                            <LucideIcon Kind="Copy" Size="20"/>
+                                                        </MenuItem.Icon>
+                                                    </MenuItem>
+                                                    <MenuItem
+                                                        Header="Цитировать">
+                                                        <MenuItem.Icon>
+                                                            <LucideIcon Kind="MessageSquareQuote" Size="20"/>
+                                                        </MenuItem.Icon>
+                                                    </MenuItem>
+                                                    <MenuItem
+                                                        Header="Удалить">
+                                                        <MenuItem.Icon>
+                                                            <LucideIcon Kind="Trash2" Size="20"/>
+                                                        </MenuItem.Icon>
+                                                    </MenuItem>
+                                                </ContextMenu>
+                                            </Border.ContextMenu>
                                             <Border.Styles>
                                                 <Style Selector="Border">
                                                     <Setter Property="Grid.Column" Value="2"/>
@@ -174,21 +229,109 @@
                                                     <Setter Property="Width" Value="64"/>
                                                 </Style>
                                             </Border.Styles>
-                                            <StackPanel Spacing="2">
-                                                <SelectableTextBlock 
+                                            <Grid>
+                                                <StackPanel Spacing="2">
+                                                    <SelectableTextBlock
+                                                        x:Name="PART_SelectableTextBlock"
+                                                        HorizontalAlignment="Center"
+                                                        VerticalAlignment="Center"
+                                                        TextWrapping="Wrap"
+                                                        Text="{Binding MessageModel.Content}"
+                                                        ContextFlyout="{x:Null}">
+                                                        <SelectableTextBlock.ContextMenu>
+                                                            <ContextMenu>
+                                                                <MenuItem
+                                                                    Tag="{Binding #PART_SelectableTextBlock.CanCopy}"
+                                                                    DataContext="{Binding $parent[ListBox].DataContext}"
+                                                                    x:DataType="vm:MainVM">
+                                                                    <MenuItem.Icon>
+                                                                        <LucideIcon Kind="Copy" Size="20"/>
+                                                                    </MenuItem.Icon>
+                                                                    <MenuItem.Styles>
+                                                                        <Style Selector="MenuItem[Tag=True]">
+                                                                            <Setter Property="Header" Value="Копировать выделенное"/>
+                                                                            <Setter Property="Command" Value="{Binding #PART_SelectableTextBlock.Copy}"/>
+                                                                        </Style>
+                                                                        <Style Selector="MenuItem[Tag=False]">
+                                                                            <Setter Property="Header" Value="Копировать текст"/>
+                                                                            <Setter Property="Command" Value="{Binding CopyMessageTextCommand}"/>
+                                                                            <Setter Property="CommandParameter" Value="{Binding #PART_SelectableTextBlock}"/>
+                                                                        </Style>
+                                                                    </MenuItem.Styles>
+                                                                </MenuItem>
+                                                                <MenuItem
+                                                                    Header="Цитировать">
+                                                                    <MenuItem.Icon>
+                                                                        <LucideIcon Kind="MessageSquareQuote" Size="20"/>
+                                                                    </MenuItem.Icon>
+                                                                </MenuItem>
+                                                                <MenuItem
+                                                                    Header="Удалить">
+                                                                    <MenuItem.Icon>
+                                                                        <LucideIcon Kind="Trash2" Size="20"/>
+                                                                    </MenuItem.Icon>
+                                                                </MenuItem>
+                                                            </ContextMenu>
+                                                        </SelectableTextBlock.ContextMenu>
+                                                    </SelectableTextBlock>
+                                                    <TextBlock
+                                                        Text="{Binding Time}"
+                                                        HorizontalAlignment="Right"
+                                                        FontSize="12"
+                                                        Opacity="0.5"
+                                                        IsVisible="{Binding MessageModel.Role, 
+                                                        Converter={x:Static ObjectConverters.NotEqual}, 
+                                                        ConverterParameter=temp}"/>
+                                                </StackPanel>
+                                                <!-- Loading animation -->
+                                                <StackPanel 
+                                                    Grid.Column="0" 
+                                                    Orientation="Horizontal" 
+                                                    Spacing="5" 
                                                     HorizontalAlignment="Center"
-                                                    VerticalAlignment="Center"
-                                                    TextWrapping="Wrap"
-                                                    Text="{Binding MessageModel.Content}"/>
-                                                <TextBlock
-                                                    Text="{Binding Time}"
-                                                    HorizontalAlignment="Right"
-                                                    FontSize="12"
-                                                    Opacity="0.5"
                                                     IsVisible="{Binding MessageModel.Role, 
-                                                    Converter={x:Static ObjectConverters.NotEqual}, 
-                                                    ConverterParameter=temp}"/>
-                                            </StackPanel>
+                                                    Converter={x:Static ObjectConverters.Equal},
+                                                    ConverterParameter=temp}">
+                                                    <StackPanel.Styles>
+                                                        <Style Selector="Ellipse.dot">
+                                                            <Setter Property="Width" Value="8"/>
+                                                            <Setter Property="Height" Value="8"/>
+                                                            <Setter Property="Fill" Value="{DynamicResource SystemBaseHighColor}"/>
+                                                            <Setter Property="RenderTransformOrigin" Value="50%,50%"/>
+                                                        </Style>
+                                                        <Style Selector="Ellipse.dot1">
+                                                            <Style.Animations>
+                                                                <Animation Duration="0:0:1.2" IterationCount="Infinite" Delay="0:0:0.0">
+                                                                    <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.2"/><Setter Property="ScaleTransform.ScaleX" Value="0.8"/><Setter Property="ScaleTransform.ScaleY" Value="0.8"/></KeyFrame>
+                                                                    <KeyFrame Cue="50%"><Setter Property="Opacity" Value="1"/><Setter Property="ScaleTransform.ScaleX" Value="1.2"/><Setter Property="ScaleTransform.ScaleY" Value="1.2"/></KeyFrame>
+                                                                    <KeyFrame Cue="100%"><Setter Property="Opacity" Value="0.2"/><Setter Property="ScaleTransform.ScaleX" Value="0.8"/><Setter Property="ScaleTransform.ScaleY" Value="0.8"/></KeyFrame>
+                                                                </Animation>
+                                                            </Style.Animations>
+                                                        </Style>
+                                                        <Style Selector="Ellipse.dot2">
+                                                            <Style.Animations>
+                                                                <Animation Duration="0:0:1.2" IterationCount="Infinite" Delay="0:0:0.4">
+                                                                    <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.2"/><Setter Property="ScaleTransform.ScaleX" Value="0.8"/><Setter Property="ScaleTransform.ScaleY" Value="0.8"/></KeyFrame>
+                                                                    <KeyFrame Cue="50%"><Setter Property="Opacity" Value="1"/><Setter Property="ScaleTransform.ScaleX" Value="1.2"/><Setter Property="ScaleTransform.ScaleY" Value="1.2"/></KeyFrame>
+                                                                    <KeyFrame Cue="100%"><Setter Property="Opacity" Value="0.2"/><Setter Property="ScaleTransform.ScaleX" Value="0.8"/><Setter Property="ScaleTransform.ScaleY" Value="0.8"/></KeyFrame>
+                                                                </Animation>
+                                                            </Style.Animations>
+                                                        </Style>
+                                                        <Style Selector="Ellipse.dot3">
+                                                            <Style.Animations>
+                                                                <Animation Duration="0:0:1.2" IterationCount="Infinite" Delay="0:0:0.8">
+                                                                    <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.2"/><Setter Property="ScaleTransform.ScaleX" Value="0.8"/><Setter Property="ScaleTransform.ScaleY" Value="0.8"/></KeyFrame>
+                                                                    <KeyFrame Cue="50%"><Setter Property="Opacity" Value="1"/><Setter Property="ScaleTransform.ScaleX" Value="1.2"/><Setter Property="ScaleTransform.ScaleY" Value="1.2"/></KeyFrame>
+                                                                    <KeyFrame Cue="100%"><Setter Property="Opacity" Value="0.2"/><Setter Property="ScaleTransform.ScaleX" Value="0.8"/><Setter Property="ScaleTransform.ScaleY" Value="0.8"/></KeyFrame>
+                                                                </Animation>
+                                                            </Style.Animations>
+                                                        </Style>
+                                                    </StackPanel.Styles>
+                                                    <Ellipse Classes="dot dot1"/>
+                                                    <Ellipse Classes="dot dot2"/>
+                                                    <Ellipse Classes="dot dot3"/>
+                                                </StackPanel>
+                                            </Grid>    
                                         </Border>
                                         <LucideIcon 
                                             Kind="CircleAlert" 
@@ -203,7 +346,7 @@
                             </ListBox.ItemTemplate>
                         </ListBox>
                         <Border 
-                            Grid.Row="0"
+                            Grid.Row="1"
                             Background="#FF979C"
                             MinHeight="60"
                             MaxWidth="720"
@@ -214,12 +357,11 @@
                             BorderThickness="1"
                             IsVisible="{Binding Error, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
                             <Grid ColumnDefinitions="*,Auto">
-                                <SelectableTextBlock 
+                                <SelectableTextBlock
                                     Foreground="#842426"
                                     Text="{Binding Error}"
                                     TextWrapping="Wrap"
-                                    Margin="10,6,10,6"
-                                    />
+                                    Margin="10,6,10,6"/>
                                 <Button 
                                     Grid.Column="1"
                                     Margin="4"
@@ -242,7 +384,7 @@
                             </Grid>
                         </Border>
                         <Border
-                            Grid.Row="1"
+                            Grid.Row="2"
                             BorderBrush="#bbbfcb"
                             Background="{DynamicResource SystemChromeMediumColor}"
                             MaxWidth="720"
@@ -257,11 +399,7 @@
                                     <Setter Property="BorderThickness" Value="1,1,1,1"/>
                                 </Style>
                             </Border.Styles>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition />
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
+                            <Grid ColumnDefinitions="*,Auto">
                                 <TextBlock 
                                     Text="Сообщение..."
                                     VerticalAlignment="Center"
@@ -281,6 +419,42 @@
                                     Background="Transparent"
                                     VerticalContentAlignment="Center"
                                     Text="{Binding Question, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                    <TextBox.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem
+                                                Header="Копировать"
+                                                Command="{Binding $parent[TextBox].Copy}"
+                                                IsEnabled="{Binding $parent[TextBox].CanCopy}">
+                                                <MenuItem.Icon>
+                                                    <LucideIcon Kind="Copy" Size="20"/>
+                                                </MenuItem.Icon>
+                                            </MenuItem>
+                                            <MenuItem
+                                                Header="Вырезать"
+                                                Command="{Binding ManualCut}"
+                                                CommandParameter="{Binding $parent[TextBox]}"
+                                                IsEnabled="{Binding $parent[TextBox].CanCut}">
+                                                <MenuItem.Icon>
+                                                    <LucideIcon Kind="Scissors" Size="20"/>
+                                                </MenuItem.Icon>
+                                            </MenuItem>
+                                            <MenuItem
+                                                Header="Вставить"
+                                                Command="{Binding $parent[TextBox].Paste}"
+                                                IsEnabled="{Binding $parent[TextBox].CanPaste}">
+                                                <MenuItem.Icon>
+                                                    <LucideIcon Kind="ClipboardPaste" Size="20"/>
+                                                </MenuItem.Icon>
+                                            </MenuItem>
+                                            <MenuItem
+                                                Header="Выделить все"
+                                                Command="{Binding $parent[TextBox].SelectAll}">
+                                                <MenuItem.Icon>
+                                                    <LucideIcon Kind="SquareDashed" Size="20"/>
+                                                </MenuItem.Icon>
+                                            </MenuItem>
+                                        </ContextMenu>
+                                    </TextBox.ContextMenu>
                                     <TextBox.Resources>
                                         <Thickness x:Key="TextControlBorderThemeThicknessFocused">0</Thickness>
                                         <SolidColorBrush x:Key="TextControlBackgroundFocused">Transparent</SolidColorBrush>
@@ -327,7 +501,7 @@
                 Grid.Column="1"
                 HorizontalAlignment="Right"
                 DragCompleted="LeftThumb_OnDragCompleted"/>
-            <wv:WebView x:Name="MyWebView" Address="{Binding WebAddress}" Grid.Column="2"/>
+            <wv:WebView x:Name="MyWebView" Address="{Binding WebAddress}" Grid.Column="2" />
             <Border 
                 Grid.Column="3" 
                 BorderThickness="1,0,0,0"
@@ -349,10 +523,9 @@
                 </Border.Styles>
                 <Grid RowDefinitions="Auto,*">
                     <Border
-                        Height="50"
+                        Height="48"
                         BorderThickness="0,0,0,1"
-                        BorderBrush="#bbbfcb"
-                        Background="{DynamicResource SystemChromeLowColor}">
+                        BorderBrush="#bbbfcb">
                         <TextBlock 
                             Text="Источник модели" 
                             VerticalAlignment="Center"
@@ -471,6 +644,31 @@
                                         TextTrimming="CharacterEllipsis"/>
                                 </Grid>
                                 <TextBox Text="{Binding Model, Mode=TwoWay}">
+                                    <TextBox.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem 
+                                                Header="Копировать" 
+                                                Command="{Binding $parent[TextBox].Copy}">
+                                                <MenuItem.Icon>
+                                                    <LucideIcon Kind="Copy" Size="20"/>
+                                                </MenuItem.Icon>
+                                            </MenuItem>
+                                            <MenuItem 
+                                                Header="Вставить"
+                                                Command="{Binding $parent[TextBox].Paste}">
+                                                <MenuItem.Icon>
+                                                    <LucideIcon Kind="ClipboardPaste" Size="20"/>
+                                                </MenuItem.Icon>
+                                            </MenuItem>
+                                            <MenuItem 
+                                                Header="Вырезать"
+                                                Command="{Binding $parent[TextBox].Cut}">
+                                                <MenuItem.Icon>
+                                                    <LucideIcon Kind="Scissors" Size="20"/>
+                                                </MenuItem.Icon>
+                                            </MenuItem>
+                                        </ContextMenu>
+                                    </TextBox.ContextMenu>
                                     <Interaction.Behaviors>
                                         <EventTriggerBehavior EventName="LostFocus">
                                             <InvokeCommandAction Command="{Binding SaveCommand}"/>
@@ -495,7 +693,8 @@
                 Background="{DynamicResource SystemChromeLowColor}">
                 <StackPanel HorizontalAlignment="Center" Margin="5" Spacing="4">
                     <ToggleButton 
-                        x:Name="ParametersButton" >
+                        x:Name="ParametersButton" 
+                        IsCheckedChanged="RightToggleButton_OnIsCheckedChanged">
                         <LucideIcon Kind="Settings2" Size="20"/>
                     </ToggleButton>
                     <ToggleButton 
@@ -504,10 +703,10 @@
                         IsCheckedChanged="RightToggleButton_OnIsCheckedChanged"
                         ToolTip.Tip="Источник модели"
                         ToolTip.Placement="LeftEdgeAlignedTop">
-                        <LucideIcon Kind="Brain" Size="20"/>
+                        <LucideIcon Kind="Server" Size="20"/>
                     </ToggleButton>
                 </StackPanel>
             </Border>
-        </Grid>
+        </Grid> 
     </Grid>
 </Window>

@@ -9,4 +9,6 @@ public partial class MessageVM : ObservableObject
     
     [ObservableProperty] private string _time = string.Empty;
     [ObservableProperty] private bool _isFailed;
+    [ObservableProperty] private int? _selectionStart;
+    [ObservableProperty] private int _selectionEnd;
 }
