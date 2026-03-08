@@ -14,5 +14,6 @@ public partial class MessageVM : ObservableObject
     [ObservableProperty] private string? _quote;
     [ObservableProperty] private int _quoteStart;
     [ObservableProperty] private int _quoteEnd;
-    [ObservableProperty] private bool? _isReplying;
+    [ObservableProperty] private bool? _isReplied; // or quoted BY OTHER MESSAGE, else nothing (null)
+    [ObservableProperty] private MessageVM? _replyMessage;
 }

@@ -69,6 +69,8 @@ namespace WaifuAI.ViewModels
                 _history.Add(message.MessageModel);
                 query.Messages.AddRange(_history);
                 Chat.Add(message);
+                message.ReplyMessage = ReplyMessage;
+                ReplyMessage = null;
                 Question = string.Empty;
                 var tempMessage = new MessageVM
                 {
@@ -86,6 +88,7 @@ namespace WaifuAI.ViewModels
                     Question = message.MessageModel.Content;
                     Error = resultMessage.MessageModel.Content;
                     message.IsFailed = true;
+                    ReplyMessage = message.ReplyMessage;
                     _history.Remove(_history.Last());
                     return;
                 }
@@ -148,7 +151,7 @@ namespace WaifuAI.ViewModels
             ReplyMessage.Quote = text;
             ReplyMessage.QuoteStart = Math.Min(ReplyMessage.SelectionStart, ReplyMessage.SelectionEnd);
             ReplyMessage.QuoteEnd = Math.Max(ReplyMessage.SelectionStart, ReplyMessage.SelectionEnd); 
-            ReplyMessage.IsReplying = false;
+            ReplyMessage.IsReplied = false;
         }
         
         [RelayCommand]
@@ -158,7 +161,7 @@ namespace WaifuAI.ViewModels
             if (ReplyMessage is null)
                 return;
             ReplyMessage.Quote = SelectedMessage?.MessageModel?.Content;
-            ReplyMessage.IsReplying = true;
+            ReplyMessage.IsReplied = true;
         }
 
         [RelayCommand]
@@ -169,7 +172,7 @@ namespace WaifuAI.ViewModels
             ReplyMessage.Quote = null;
             ReplyMessage.QuoteStart = 0;
             ReplyMessage.QuoteEnd = 0;
-            ReplyMessage.IsReplying = null;
+            ReplyMessage.IsReplied = null;
             ReplyMessage = null;
         }
     }

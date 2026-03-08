@@ -12,6 +12,8 @@ using Avalonia.Threading;
 using Avalonia.VisualTree;
 using WaifuAI.ViewModels;
 using WaifuAI.Models;
+using Lucide.Avalonia;
+using System.Threading.Tasks;
 
 namespace WaifuAI.Views
 {
@@ -109,6 +111,27 @@ namespace WaifuAI.Views
                 RoutingStrategies.Tunnel | RoutingStrategies.Bubble,
                 true
             );
+        }
+
+        private async void CopyErrorButton_Click(object? sender, RoutedEventArgs e)
+        {
+            if (sender is not Button btn || btn.Content is not LucideIcon oldIcon)
+                return;
+            btn.IsHitTestVisible = false;
+            btn.Content = new LucideIcon
+            {
+                Kind = LucideIconKind.Check,
+                Size = 16,
+                StrokeWidth = oldIcon.StrokeWidth
+            };
+            await Task.Delay(1500);
+            btn.Content = new LucideIcon
+            {
+                Kind = LucideIconKind.Copy,
+                Size = 14,
+                StrokeWidth = oldIcon.StrokeWidth
+            };
+            btn.IsHitTestVisible = true;
         }
     }
 }
