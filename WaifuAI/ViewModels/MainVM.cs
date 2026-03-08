@@ -34,7 +34,9 @@ namespace WaifuAI.ViewModels
 
         [ObservableProperty] private string _question = string.Empty;
         [ObservableProperty] private string _webAddress;
+        [ObservableProperty] private MessageVM? _selectedMessage;
         [ObservableProperty] private string? _error;
+        [ObservableProperty] private MessageVM? _replyMessage;
 
         public ObservableCollection<MessageVM> Chat { get; } = 
             [
@@ -135,6 +137,40 @@ namespace WaifuAI.ViewModels
             textBlock.SelectAll();
             textBlock.Copy();
             textBlock.ClearSelection();
+        }
+
+        [RelayCommand]
+        private void MakeQuote(string? text)
+        {
+            ReplyMessage = SelectedMessage;
+            if (ReplyMessage is null)
+                return;
+            ReplyMessage.Quote = text;
+            ReplyMessage.QuoteStart = Math.Min(ReplyMessage.SelectionStart, ReplyMessage.SelectionEnd);
+            ReplyMessage.QuoteEnd = Math.Max(ReplyMessage.SelectionStart, ReplyMessage.SelectionEnd); 
+            ReplyMessage.IsReplying = false;
+        }
+        
+        [RelayCommand]
+        private void MakeReply()
+        {
+            ReplyMessage = SelectedMessage;
+            if (ReplyMessage is null)
+                return;
+            ReplyMessage.Quote = SelectedMessage?.MessageModel?.Content;
+            ReplyMessage.IsReplying = true;
+        }
+
+        [RelayCommand]
+        private void ReleaseReplyAndQuote()
+        {
+            if (ReplyMessage is null)
+                return;
+            ReplyMessage.Quote = null;
+            ReplyMessage.QuoteStart = 0;
+            ReplyMessage.QuoteEnd = 0;
+            ReplyMessage.IsReplying = null;
+            ReplyMessage = null;
         }
     }
 }

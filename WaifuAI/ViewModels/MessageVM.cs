@@ -9,6 +9,10 @@ public partial class MessageVM : ObservableObject
     
     [ObservableProperty] private string _time = string.Empty;
     [ObservableProperty] private bool _isFailed;
-    [ObservableProperty] private int? _selectionStart;
+    [ObservableProperty] private int _selectionStart;
     [ObservableProperty] private int _selectionEnd;
+    [ObservableProperty] private string? _quote;
+    [ObservableProperty] private int _quoteStart;
+    [ObservableProperty] private int _quoteEnd;
+    [ObservableProperty] private bool? _isReplying;
 }

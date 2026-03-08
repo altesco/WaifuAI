@@ -90,5 +90,25 @@ namespace WaifuAI.Views
                     break;
             }
         }
+
+        private void PART_SelectableTextBlock_PointerPressed(object? sender, PointerPressedEventArgs e)
+        {
+            if (sender is not Control control)
+                return;
+            var item = control.FindAncestorOfType<ListBoxItem>();
+            if (item is null)
+                return;
+            item.IsSelected = true;
+        }
+
+        private void PART_SelectableTextBlock_Initialized(object? sender, EventArgs e)
+        {
+            (sender as SelectableTextBlock)?.AddHandler(
+                PointerPressedEvent,
+                PART_SelectableTextBlock_PointerPressed,
+                RoutingStrategies.Tunnel | RoutingStrategies.Bubble,
+                true
+            );
+        }
     }
 }

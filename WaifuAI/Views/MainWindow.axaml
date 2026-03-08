@@ -166,7 +166,8 @@
                             Grid.Row="1"
                             ItemsSource="{Binding Chat}"
                             Background="{DynamicResource SystemChromeLowColor}"
-                            Padding="6">
+                            Padding="6"
+                            SelectedItem="{Binding SelectedMessage, Mode=TwoWay}">
                             <ListBox.Styles>
                                 <Style Selector="ListBox /template/ ItemsPresenter">
                                     <Setter Property="MaxWidth" Value="720"/>
@@ -201,9 +202,12 @@
                                                         </MenuItem.Icon>
                                                     </MenuItem>
                                                     <MenuItem
-                                                        Header="Цитировать">
+                                                        DataContext="{Binding $parent[ListBox].DataContext}"
+                                                        x:DataType="vm:MainVM"
+                                                        Header="Ответить на сообщение"
+                                                        Command="{Binding MakeReplyCommand}">
                                                         <MenuItem.Icon>
-                                                            <LucideIcon Kind="MessageSquareQuote" Size="20"/>
+                                                            <LucideIcon Kind="MessageSquareReply" Size="20"/>
                                                         </MenuItem.Icon>
                                                     </MenuItem>
                                                     <MenuItem
@@ -237,7 +241,9 @@
                                                         VerticalAlignment="Center"
                                                         TextWrapping="Wrap"
                                                         Text="{Binding MessageModel.Content}"
-                                                        ContextFlyout="{x:Null}">
+                                                        SelectionStart="{Binding SelectionStart, Mode=TwoWay}"
+                                                        SelectionEnd="{Binding SelectionEnd, Mode=TwoWay}"
+                                                        Initialized="PART_SelectableTextBlock_Initialized">
                                                         <SelectableTextBlock.ContextMenu>
                                                             <ContextMenu>
                                                                 <MenuItem
@@ -260,10 +266,34 @@
                                                                     </MenuItem.Styles>
                                                                 </MenuItem>
                                                                 <MenuItem
-                                                                    Header="Цитировать">
-                                                                    <MenuItem.Icon>
-                                                                        <LucideIcon Kind="MessageSquareQuote" Size="20"/>
-                                                                    </MenuItem.Icon>
+                                                                    Tag="{Binding #PART_SelectableTextBlock.CanCopy}"
+                                                                    DataContext="{Binding $parent[ListBox].DataContext}"
+                                                                    x:DataType="vm:MainVM">
+                                                                    <MenuItem.Styles>
+                                                                        <Style Selector="MenuItem[Tag=True]">
+                                                                            <Setter Property="Header" Value="Ответить на цитату"/>
+                                                                            <Setter Property="Icon">
+                                                                                <Setter.Value>
+                                                                                    <Template>
+                                                                                        <LucideIcon Kind="MessageSquareQuote" Size="20"/>
+                                                                                    </Template>
+                                                                                </Setter.Value>
+                                                                            </Setter>
+                                                                            <Setter Property="Command" Value="{Binding MakeQuoteCommand}"/>
+                                                                            <Setter Property="CommandParameter" Value="{Binding #PART_SelectableTextBlock.SelectedText}"/>
+                                                                        </Style>
+                                                                        <Style Selector="MenuItem[Tag=False]">
+                                                                            <Setter Property="Header" Value="Ответить на сообщение"/>
+                                                                            <Setter Property="Icon">
+                                                                                <Setter.Value>
+                                                                                    <Template>
+                                                                                        <LucideIcon Kind="MessageSquareReply" Size="20"/>
+                                                                                    </Template>
+                                                                                </Setter.Value>
+                                                                            </Setter>
+                                                                            <Setter Property="Command" Value="{Binding MakeReplyCommand}"/>
+                                                                        </Style>
+                                                                    </MenuItem.Styles>
                                                                 </MenuItem>
                                                                 <MenuItem
                                                                     Header="Удалить">
@@ -345,6 +375,7 @@
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>
+                        <!-- Error Popup -->
                         <Border 
                             Grid.Row="1"
                             Background="#FF979C"
@@ -383,6 +414,7 @@
                                 </Button>
                             </Grid>
                         </Border>
+                        <!-- Text Input -->
                         <Border
                             Grid.Row="2"
                             BorderBrush="#bbbfcb"
@@ -399,9 +431,67 @@
                                     <Setter Property="BorderThickness" Value="1,1,1,1"/>
                                 </Style>
                             </Border.Styles>
-                            <Grid ColumnDefinitions="*,Auto">
+                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
+                                <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="*,*" Grid.ColumnSpan="2">
+                                    <LucideIcon 
+                                        Size="24"
+                                        Grid.RowSpan="2"
+                                        Tag="{Binding ReplyMessage.IsReplying}"
+                                        Margin="10,0,10,0"
+                                        IsVisible="{Binding ReplyMessage, 
+                                        Converter={x:Static ObjectConverters.IsNotNull}}">
+                                        <LucideIcon.Styles>
+                                            <Style Selector="LucideIcon[Tag=true]">
+                                                <Setter Property="Kind" Value="MessageSquareReply"/>
+                                            </Style>   
+                                            <Style Selector="LucideIcon[Tag=false]">
+                                                <Setter Property="Kind" Value="MessageSquareQuote"/>
+                                            </Style>     
+                                        </LucideIcon.Styles>   
+                                    </LucideIcon>    
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        Grid.Row="0"
+                                        FontWeight="Bold"
+                                        TextTrimming="CharacterEllipsis"
+                                        Tag="{Binding ReplyMessage.IsReplying}"
+                                        Margin="0,4,0,0"
+                                        IsVisible="{Binding ReplyMessage, 
+                                        Converter={x:Static ObjectConverters.IsNotNull}}">
+                                        <TextBlock.Styles>
+                                            <Style Selector="TextBlock[Tag=true]">
+                                                <Setter Property="Text" Value="Ответ на сообщение"/>
+                                            </Style>
+                                            <Style Selector="TextBlock[Tag=false]">
+                                                <Setter Property="Text" Value="Ответ на цитату"/>
+                                            </Style>
+                                        </TextBlock.Styles>
+                                    </TextBlock> 
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        Grid.Row="1"
+                                        Text="{Binding ReplyMessage.Quote}"
+                                        TextTrimming="CharacterEllipsis"
+                                        IsVisible="{Binding ReplyMessage, 
+                                        Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                                    <Button
+                                        Grid.Column="2"
+                                        Grid.Row="0"
+                                        Grid.RowSpan="2"
+                                        VerticalAlignment="Center"
+                                        Margin="6,0,6,0"
+                                        Height="30"
+                                        Width="30"
+                                        Command="{Binding ReleaseReplyAndQuoteCommand}"
+                                        IsVisible="{Binding ReplyMessage,
+                                        Converter={x:Static ObjectConverters.IsNotNull}}">
+                                        <LucideIcon Kind="X"/>
+                                    </Button>
+                                </Grid>
                                 <TextBlock 
                                     Text="Сообщение..."
+                                    Grid.Column="0"
+                                    Grid.Row="1"
                                     VerticalAlignment="Center"
                                     Margin="12,0,0,0"
                                     Opacity="0.5"
@@ -410,6 +500,7 @@
                                 <TextBox 
                                     x:Name="TextBox"
                                     Grid.Column="0"
+                                    Grid.Row="1"
                                     Margin="2,-1,0,0"
                                     TextWrapping="Wrap"
                                     BorderThickness="0"
@@ -473,6 +564,7 @@
                                 </TextBox>
                                 <StackPanel 
                                     Grid.Column="1" 
+                                    Grid.Row="1"
                                     Orientation="Horizontal" 
                                     Margin="3"
                                     VerticalAlignment="Bottom"
