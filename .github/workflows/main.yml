@@ -20,14 +20,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           
       - name: Install dependencies
-        run: |
-          python -m venv ./WaifuAI/venv
-          if [ "$RUNNER_OS" == "Windows" ]; then
-            PIP_PATH="./WaifuAI/venv/Scripts/pip.exe"
-          else
-            PIP_PATH="./WaifuAI/venv/bin/pip"
-          fi
-          $PIP_PATH install -r requirements.txt
+        run: python -m venv ./WaifuAI/venv
           
       - name: Run code check
         run: |
