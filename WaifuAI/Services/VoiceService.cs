@@ -36,19 +36,20 @@ public static class VoiceService
         }
     }
 
-    public static void Say(string text, WebView source)
+    public static void Say(string text, WebView source, string service, string speaker)
     {
         var parsedResult = EmotionParser.ParseTextForEmotions(text);
         var dialogueData = new
         {
             cleanText = parsedResult.CleanText,
-            emotions = parsedResult.Emotions.Select(e => new { 
-                name = e.Name, 
-                pos = e.OriginalPos 
+            emotions = parsedResult.Emotions.Select(e => new
+            {
+                name = e.Name,
+                pos = e.OriginalPos
             }).ToList()
         };
         string jsonParams = JsonSerializer.Serialize(dialogueData);
-        string jsCall = $"window.say({jsonParams}, 1.2, {port});";
+        string jsCall = $"window.say({jsonParams}, 1.1, {port}, '{service}', '{speaker}');";
         source.ExecuteScript(jsCall);
     }
 }

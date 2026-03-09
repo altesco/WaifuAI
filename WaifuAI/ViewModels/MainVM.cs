@@ -48,8 +48,8 @@ namespace WaifuAI.ViewModels
         private readonly List<Message> _history = [
             new Message 
             { 
-                Role = "system", 
-                Content = File.ReadAllText(Path.Combine(".", "prompt.txt")) 
+                Role = "system",
+                Content = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "prompt.txt"))
             }];
 
         [RelayCommand]
@@ -97,7 +97,7 @@ namespace WaifuAI.ViewModels
                     Role = resultMessage.MessageModel.Role,
                     Content = resultMessage.MessageModel.Content
                 });
-                VoiceService.Say(resultMessage.MessageModel.Content, source);
+                VoiceService.Say(resultMessage.MessageModel.Content, source, "silero_tts", "kseniya");
                 resultMessage.MessageModel.Content = EmotionParser.CleanText(resultMessage.MessageModel.Content);
                 resultMessage.Time = DateTime.Now.ToString("HH:mm");
                 Chat.Add(resultMessage);
