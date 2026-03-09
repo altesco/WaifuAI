@@ -25,3 +25,9 @@ jobs:
       - name: Run code check
         run: |
           echo "Проверка установки завершена успешно!"
+
+      - name: Upload venv as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: venv-${{ matrix.os }}
+          path: ./WaifuAI/venv/    
