@@ -23,7 +23,7 @@ jobs:
           pip install fastapi uvicorn pydantic torch
         
       - name: Build with PyInstaller
-        run: pyinstaller --onefile --collect-all torch say.py
+        run: python -m PyInstaller --onefile --collect-all torch say.py
         
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
