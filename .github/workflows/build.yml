@@ -25,11 +25,7 @@ jobs:
       - name: Build with PyInstaller
         run: |
           cd WaifuAI
-          python -m PyInstaller --onefile \
-            --hidden-import torch \
-            --exclude-module nvidia \
-            --exclude-module torch.cuda \
-            say.py
+          python -m PyInstaller --onefile --hidden-import torch --exclude-module nvidia --exclude-module torch.cuda say.py
         
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
