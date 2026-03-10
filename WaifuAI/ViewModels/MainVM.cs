@@ -37,6 +37,7 @@ namespace WaifuAI.ViewModels
         [ObservableProperty] private MessageVM? _selectedMessage;
         [ObservableProperty] private string? _error;
         [ObservableProperty] private MessageVM? _replyMessage;
+        [ObservableProperty] private bool _isSettingsOpen;
 
         public ObservableCollection<MessageVM> Chat { get; } = 
             [
@@ -174,6 +175,12 @@ namespace WaifuAI.ViewModels
             ReplyMessage.QuoteEnd = 0;
             ReplyMessage.IsReplied = null;
             ReplyMessage = null;
+        }
+
+        [RelayCommand]
+        private void Settings()
+        {
+            IsSettingsOpen = !IsSettingsOpen;
         }
     }
 }

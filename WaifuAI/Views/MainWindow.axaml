@@ -6,6 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="using:WaifuAI.ViewModels"
     xmlns:wv="clr-namespace:WebViewControl;assembly=WebViewControl.Avalonia"
+    xmlns:views="using:WaifuAI.Views"
     Title="WaifuAI"
     d:DesignHeight="720"
     d:DesignWidth="1024"
@@ -153,7 +154,7 @@
                     <Button>
                         <LucideIcon Kind="Search" Size="20" />
                     </Button>
-                    <Button>
+                    <Button Command="{Binding SettingsCommand}">
                         <LucideIcon Kind="Settings" Size="20" />
                     </Button>
                 </StackPanel>
@@ -931,5 +932,148 @@
                 </StackPanel>
             </Border>
         </Grid>
+        <!-- Settings -->
+        <Popup
+            Grid.Row="0"
+            Grid.RowSpan="2"
+            Placement="Center"
+            IsOpen="True">
+            <Popup.Styles>
+                <Style Selector="GridSplitter">
+                    <Setter Property="MinHeight" Value="1"/>
+                    <Setter Property="Background" Value="{DynamicResource SystemBaseHighColor}"/>
+                    <Setter Property="Opacity" Value="0.5"/>
+                    <Setter Property="Margin" Value="0,18,0,18"/>
+                </Style>
+            </Popup.Styles>
+            <!-- IsOpen="{Binding IsSettingsOpen, Mode=TwoWay}" -->
+            <Border
+                CornerRadius="8"
+                Height="600"
+                Width="800"
+                Background="#eef1f5"
+                BorderThickness="1"
+                BorderBrush="#bbbfcb">
+                <Grid ColumnDefinitions="Auto,*">
+                    <ListBox
+                        Background="Transparent"
+                        Grid.Column="0"
+                        Padding="10"
+                        BorderThickness="0,0,1,0"
+                        BorderBrush="#bbbfcb">
+                        <ListBox.Styles>
+                            <Style Selector="ListBoxItem">
+                                <Setter Property="CornerRadius" Value="4"/>
+                                <Setter Property="Padding" Value="8,4,24,4"/>
+                                <Setter Property="Margin" Value="1"/>
+                            </Style>
+                            <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                                <Setter Property="Background" Value="{DynamicResource ToggleButtonBackgroundChecked}"/>
+                            </Style>
+                            <Style Selector="ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+                                <Setter Property="Background" Value="{DynamicResource ToggleButtonBackgroundChecked}"/>
+                            </Style>
+                        </ListBox.Styles>
+                        <ListBoxItem>
+                            <Grid ColumnDefinitions="Auto,*">
+                                <LucideIcon 
+                                    Kind="Palette" 
+                                    Size="18"
+                                    Margin="0,0,8,0"/>
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Text="Оформление"
+                                    TextTrimming="CharacterEllipsis"
+                                    VerticalAlignment="Center"/>
+                            </Grid>
+                        </ListBoxItem>
+                        <ListBoxItem>
+                            <Grid ColumnDefinitions="Auto,*">
+                                <LucideIcon 
+                                    Kind="Volume2" 
+                                    Size="18"
+                                    Margin="0,0,8,0"/>
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Text="Звук"
+                                    TextTrimming="CharacterEllipsis"
+                                    VerticalAlignment="Center"/>
+                            </Grid>
+                        </ListBoxItem>
+                        <ListBoxItem>
+                            <Grid ColumnDefinitions="Auto,*">
+                                <LucideIcon 
+                                    Kind="Shirt" 
+                                    Size="18"
+                                    Margin="0,0,8,0"/>
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Text="Внешний вид"
+                                    TextTrimming="CharacterEllipsis"
+                                    VerticalAlignment="Center"/>
+                            </Grid>
+                        </ListBoxItem>
+                        <ListBoxItem>
+                            <Grid ColumnDefinitions="Auto,*">
+                                <LucideIcon 
+                                    Kind="Info" 
+                                    Size="18"
+                                    Margin="0,0,8,0"/>
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Text="О программе"
+                                    TextTrimming="CharacterEllipsis"
+                                    VerticalAlignment="Center"/>
+                            </Grid>
+                        </ListBoxItem>
+                    </ListBox>
+                    <ScrollViewer Grid.Column="1" Padding="24,12,24,12">
+                        <Border
+                            VerticalAlignment="Top"
+                            Margin="12"
+                            CornerRadius="12"
+                            Background="{DynamicResource SystemChromeLowColor}"
+                            Padding="18">
+                            <StackPanel>
+                                <views:SettingsCard 
+                                    Icon="{LucideIconContent SunMoon, 20}"
+                                    Header="Тема" 
+                                    Description="Основная тема приложения">
+                                    <ComboBox>
+                                        <ComboBoxItem Content="Система" IsSelected="True"/>
+                                        <ComboBoxItem Content="Светлая"/>
+                                        <ComboBoxItem Content="Темная"/>
+                                    </ComboBox>
+                                </views:SettingsCard>
+                                <GridSplitter/>
+                                <views:SettingsCard 
+                                    Icon="{LucideIconContent Pipette, 20}"
+                                    Header="Акцентный цвет" 
+                                    Description="Выбор акцентного цвета приложения">
+                                    <Border Height="24" Width="24" CornerRadius="12" Background="{DynamicResource SystemAccentColor}"/>
+                                </views:SettingsCard>
+                                <GridSplitter/>
+                                <views:SettingsCard 
+                                    Icon="{LucideIconContent Type, 20}"
+                                    Header="Шрифт" 
+                                    Description="Выбор шрифта интерфейса приложения">
+                                    <ComboBox>
+                                    </ComboBox>
+                                </views:SettingsCard>
+                            </StackPanel>
+                        </Border>
+                    </ScrollViewer>
+                    <Button
+                        Grid.Column="0"
+                        Grid.ColumnSpan="2"
+                        VerticalAlignment="Top"
+                        HorizontalAlignment="Right"
+                        Margin="6"
+                        Command="{Binding SettingsCommand}">
+                        <LucideIcon Kind="X" Size="18"/>
+                    </Button>
+                </Grid>
+            </Border>    
+        </Popup>
     </Grid>
 </Window>

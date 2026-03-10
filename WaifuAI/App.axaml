@@ -37,5 +37,6 @@
                 <ColorPaletteResources x:Key="Dark" />
             </FluentTheme.Palettes>
         </FluentTheme>
+        <StyleInclude Source="/Views/SettingsCard.axaml" />
     </Application.Styles>
 </Application>
