@@ -20,16 +20,21 @@ jobs:
           # Кэшируем pip, чтобы не качать torch каждый раз
           cache: 'pip'
           
-      - name: Install dependencies
+      - name: Install dependencies (Windows)
+        if: runner.os == 'Windows'
         run: |
           python -m venv venv
-          if [ "$RUNNER_OS" == "Windows" ]; then
-            ./venv/Scripts/activate
-            ./venv/Scripts/pip install -r requirements.txt
-          else
-            source venv/bin/activate
-            pip install -r requirements.txt
-          fi
+          ./venv/Scripts/activate
+          ./venv/Scripts/python -m pip install --upgrade pip
+          ./venv/Scripts/pip install -r requirements.txt
+
+      - name: Install dependencies (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
 
       - name: Run code check
         run: |
