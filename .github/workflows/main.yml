@@ -23,7 +23,6 @@ jobs:
       - name: Install dependencies
         run: |
           python -m venv venv
-          # Активация venv для Linux и Windows
           if [ "$RUNNER_OS" == "Windows" ]; then
             ./venv/Scripts/activate
             ./venv/Scripts/pip install -r requirements.txt
@@ -34,6 +33,4 @@ jobs:
 
       - name: Run code check
         run: |
-          # Здесь вы можете добавить запуск тестов, например:
-          # source venv/bin/activate && pytest
           echo "Зависимости установлены, проект готов к проверке!"
