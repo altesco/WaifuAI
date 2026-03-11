@@ -4,7 +4,6 @@ on: [push, pull_request]
 
 jobs:
   test:
-    # Запускаем тест на обеих системах
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -18,16 +17,23 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+          # Кэшируем pip, чтобы не качать torch каждый раз
+          cache: 'pip'
           
       - name: Install dependencies
-        run: python -m venv ./WaifuAI/venv
-          
+        run: |
+          python -m venv venv
+          # Активация venv для Linux и Windows
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            ./venv/Scripts/activate
+            ./venv/Scripts/pip install -r requirements.txt
+          else
+            source venv/bin/activate
+            pip install -r requirements.txt
+          fi
+
       - name: Run code check
         run: |
-          echo "Проверка установки завершена успешно!"
-
-      - name: Upload venv as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: venv-${{ matrix.os }}
-          path: ./WaifuAI/venv/    
+          # Здесь вы можете добавить запуск тестов, например:
+          # source venv/bin/activate && pytest
+          echo "Зависимости установлены, проект готов к проверке!"
