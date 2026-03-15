@@ -56,7 +56,7 @@
             </Setter>
         </ControlTheme>
     </Window.Resources>
-    <Grid x:Name="RootPanel" RowDefinitions="40,*">
+    <Grid x:Name="RootPanel" RowDefinitions="40,*" PointerPressed="OnBackgroundPointerPressed" Focusable="True">
         <Grid.Styles>
             <Style Selector="Button">
                 <Setter Property="Width" Value="28" />
@@ -91,6 +91,11 @@
                 <Setter Property="Opacity" Value="0.5" />
             </Style>
             <Style Selector="TextBox">
+                <Setter Property="CornerRadius" Value="5" />
+                <Setter Property="FontFamily" Value="{StaticResource CascadiaCode}" />
+                <Setter Property="Height" Value="30"/>
+                <Setter Property="MinHeight" Value="0"/>
+                <Setter Property="MinWidth" Value="0"/>
                 <Setter Property="ContextMenu">
                     <Setter.Value>
                         <ContextMenu>
@@ -125,6 +130,40 @@
                                 </MenuItem.Icon>
                             </MenuItem>
                         </ContextMenu>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            <Style Selector="Slider /template/ Thumb">
+                <Setter Property="Template">
+                    <ControlTemplate>
+                        <Border 
+                            Background="{Binding $parent[Window].Background}"
+                            Height="20"
+                            Width="20"
+                            CornerRadius="10"
+                            BorderBrush="#bbbfcb" 
+                            BorderThickness="1"/> 
+                    </ControlTemplate>
+                </Setter>
+            </Style>
+            <Style Selector="ComboBox">
+                <Setter Property="CornerRadius" Value="5"/>
+                <Setter Property="Height" Value="30"/>
+            </Style>
+            <Style Selector="DataValidationErrors">
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate>
+                            <ContentPresenter 
+                                Name="PART_ContentPresenter"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="{TemplateBinding CornerRadius}"
+                                Padding="{TemplateBinding Padding}"
+                                Content="{TemplateBinding Content}"
+                                ContentTemplate="{TemplateBinding ContentTemplate}" />
+                        </ControlTemplate>
                     </Setter.Value>
                 </Setter>
             </Style>
@@ -237,7 +276,6 @@
                                             MaxWidth="360"
                                             Padding="12,6,12,6"
                                             Background="LightSkyBlue"
-                                            Focusable="False"
                                             Tag="{Binding MessageModel.Role}">
                                             <Border.Styles>
                                                 <Style Selector="Border">
@@ -678,13 +716,15 @@
                                     Grid.Column="0"
                                     MinHeight="40"
                                     MaxHeight="300"
+                                    Height="NaN"
                                     Margin="2,-1,0,0"
                                     VerticalContentAlignment="Center"
                                     Background="Transparent"
                                     BorderThickness="0"
                                     ScrollViewer.VerticalScrollBarVisibility="Hidden"
                                     Text="{Binding Question, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                    TextWrapping="Wrap">
+                                    TextWrapping="Wrap"
+                                    FontFamily="Inter">
                                     <TextBox.Resources>
                                         <Thickness x:Key="TextControlBorderThemeThicknessFocused">0</Thickness>
                                         <SolidColorBrush x:Key="TextControlBackgroundFocused">Transparent</SolidColorBrush>
@@ -742,7 +782,6 @@
                 BorderBrush="#bbbfcb"
                 BorderThickness="1,0,0,0"
                 DataContext="{x:Static vm:SettingsVM.Instance}"
-                Focusable="True"
                 IsVisible="{Binding #ModelButton.IsChecked}">
                 <Border.Styles>
                     <Style Selector="TextBox">
@@ -771,7 +810,6 @@
                         <StackPanel Margin="16,8,16,16" Spacing="8">
                             <RadioButton
                                 x:Name="ServerButton"
-                                Command="{Binding SaveCommand}"
                                 GroupName="ModelSource"
                                 IsChecked="{Binding IsServerQuery}">
                                 <TextBlock
@@ -796,13 +834,7 @@
                                         Text="Порт"
                                         TextTrimming="CharacterEllipsis" />
                                 </Grid>
-                                <TextBox Text="{Binding Port, Mode=TwoWay}">
-                                    <Interaction.Behaviors>
-                                        <EventTriggerBehavior EventName="LostFocus">
-                                            <InvokeCommandAction Command="{Binding SaveCommand}" />
-                                        </EventTriggerBehavior>
-                                    </Interaction.Behaviors>
-                                </TextBox>
+                                <TextBox Text="{Binding Port, Mode=TwoWay}"/>
                                 <Grid Margin="0,8,0,0" ColumnDefinitions="Auto,*">
                                     <LucideIcon
                                         Kind="Network"
@@ -816,18 +848,11 @@
                                         Text="IP-адрес"
                                         TextTrimming="CharacterEllipsis" />
                                 </Grid>
-                                <TextBox Text="{Binding IpAddress, Mode=TwoWay}">
-                                    <Interaction.Behaviors>
-                                        <EventTriggerBehavior EventName="LostFocus">
-                                            <InvokeCommandAction Command="{Binding SaveCommand}" />
-                                        </EventTriggerBehavior>
-                                    </Interaction.Behaviors>
-                                </TextBox>
+                                <TextBox Text="{Binding IpAddress, Mode=TwoWay}"/>
                             </StackPanel>
 
                             <RadioButton
                                 x:Name="ProviderButton"
-                                Command="{Binding SaveCommand}"
                                 GroupName="ModelSource"
                                 IsChecked="{Binding !IsServerQuery}">
                                 <TextBlock
@@ -851,13 +876,7 @@
                                         Text="API Ключ"
                                         TextTrimming="CharacterEllipsis" />
                                 </Grid>
-                                <TextBox Text="{Binding ApiKey, Mode=TwoWay}">
-                                    <Interaction.Behaviors>
-                                        <EventTriggerBehavior EventName="LostFocus">
-                                            <InvokeCommandAction Command="{Binding SaveCommand}" />
-                                        </EventTriggerBehavior>
-                                    </Interaction.Behaviors>
-                                </TextBox>
+                                <TextBox Text="{Binding ApiKey, Mode=TwoWay}"/>
                                 <Grid Margin="0,8,0,0" ColumnDefinitions="Auto,*">
                                     <LucideIcon
                                         Kind="Link"
@@ -871,13 +890,7 @@
                                         Text="API URL"
                                         TextTrimming="CharacterEllipsis" />
                                 </Grid>
-                                <TextBox Text="{Binding ApiUrl, Mode=TwoWay}">
-                                    <Interaction.Behaviors>
-                                        <EventTriggerBehavior EventName="LostFocus">
-                                            <InvokeCommandAction Command="{Binding SaveCommand}" />
-                                        </EventTriggerBehavior>
-                                    </Interaction.Behaviors>
-                                </TextBox>
+                                <TextBox Text="{Binding ApiUrl, Mode=TwoWay}"/>
                                 <Grid Margin="0,8,0,0" ColumnDefinitions="Auto,*">
                                     <LucideIcon
                                         Kind="Bot"
@@ -891,13 +904,7 @@
                                         Text="Модель"
                                         TextTrimming="CharacterEllipsis" />
                                 </Grid>
-                                <TextBox Text="{Binding Model, Mode=TwoWay}">
-                                    <Interaction.Behaviors>
-                                        <EventTriggerBehavior EventName="LostFocus">
-                                            <InvokeCommandAction Command="{Binding SaveCommand}" />
-                                        </EventTriggerBehavior>
-                                    </Interaction.Behaviors>
-                                </TextBox>
+                                <TextBox Text="{Binding AiModel, Mode=TwoWay}"/>
                             </StackPanel>
                         </StackPanel>
                     </ScrollViewer>
@@ -938,15 +945,15 @@
             Grid.RowSpan="2"
             Placement="Center"
             IsOpen="True">
+            <!-- IsOpen="{Binding IsSettingsOpen, Mode=TwoWay}" -->
             <Popup.Styles>
-                <Style Selector="GridSplitter">
-                    <Setter Property="MinHeight" Value="1"/>
+                <Style Selector="Separator">
+                    <Setter Property="Height" Value="1"/>
                     <Setter Property="Background" Value="{DynamicResource SystemBaseHighColor}"/>
-                    <Setter Property="Opacity" Value="0.5"/>
+                    <Setter Property="Opacity" Value="0.3"/>
                     <Setter Property="Margin" Value="0,18,0,18"/>
                 </Style>
             </Popup.Styles>
-            <!-- IsOpen="{Binding IsSettingsOpen, Mode=TwoWay}" -->
             <Border
                 CornerRadius="8"
                 Height="600"
@@ -974,7 +981,7 @@
                                 <Setter Property="Background" Value="{DynamicResource ToggleButtonBackgroundChecked}"/>
                             </Style>
                         </ListBox.Styles>
-                        <ListBoxItem>
+                        <ListBoxItem x:Name="Appearence" >
                             <Grid ColumnDefinitions="Auto,*">
                                 <LucideIcon 
                                     Kind="Palette" 
@@ -987,7 +994,7 @@
                                     VerticalAlignment="Center"/>
                             </Grid>
                         </ListBoxItem>
-                        <ListBoxItem>
+                        <ListBoxItem x:Name="Sound" IsSelected="True">
                             <Grid ColumnDefinitions="Auto,*">
                                 <LucideIcon 
                                     Kind="Volume2" 
@@ -1027,41 +1034,185 @@
                             </Grid>
                         </ListBoxItem>
                     </ListBox>
-                    <ScrollViewer Grid.Column="1" Padding="24,12,24,12">
-                        <Border
-                            VerticalAlignment="Top"
-                            Margin="12"
-                            CornerRadius="12"
-                            Background="{DynamicResource SystemChromeLowColor}"
-                            Padding="18">
-                            <StackPanel>
-                                <views:SettingsCard 
-                                    Icon="{LucideIconContent SunMoon, 20}"
-                                    Header="Тема" 
-                                    Description="Основная тема приложения">
-                                    <ComboBox>
-                                        <ComboBoxItem Content="Система" IsSelected="True"/>
-                                        <ComboBoxItem Content="Светлая"/>
-                                        <ComboBoxItem Content="Темная"/>
-                                    </ComboBox>
-                                </views:SettingsCard>
-                                <GridSplitter/>
-                                <views:SettingsCard 
-                                    Icon="{LucideIconContent Pipette, 20}"
-                                    Header="Акцентный цвет" 
-                                    Description="Выбор акцентного цвета приложения">
-                                    <Border Height="24" Width="24" CornerRadius="12" Background="{DynamicResource SystemAccentColor}"/>
-                                </views:SettingsCard>
-                                <GridSplitter/>
-                                <views:SettingsCard 
-                                    Icon="{LucideIconContent Type, 20}"
-                                    Header="Шрифт" 
-                                    Description="Выбор шрифта интерфейса приложения">
-                                    <ComboBox>
-                                    </ComboBox>
-                                </views:SettingsCard>
+                    <ScrollViewer 
+                        Grid.Column="1"
+                        DataContext="{x:Static vm:SettingsVM.Instance}"
+                        x:DataType="vm:SettingsVM">
+                        <Grid>
+                            <Grid.Resources>
+                                <ControlTheme x:Key="SettingsGroup" TargetType="Border">
+                                    <Setter Property="Margin" Value="12"/>
+                                    <Setter Property="CornerRadius" Value="12"/>
+                                    <Setter Property="Padding" Value="18"/>
+                                    <Setter Property="Background" Value="{DynamicResource SystemChromeLowColor}"/>
+                                </ControlTheme>
+                            </Grid.Resources>
+                            <StackPanel Margin="24,12" IsVisible="{Binding #Appearence.IsSelected}">
+                                <Border Theme="{DynamicResource SettingsGroup}">
+                                    <StackPanel>
+                                        <views:SettingsCard 
+                                            Icon="{LucideIconContent SunMoon, 20}"
+                                            Header="Тема" 
+                                            Description="Основная тема приложения">
+                                            <ComboBox SelectedIndex="0">
+                                                <ComboBoxItem Content="Система"/>
+                                                <ComboBoxItem Content="Светлая"/>
+                                                <ComboBoxItem Content="Темная"/>
+                                            </ComboBox>
+                                        </views:SettingsCard>
+                                        <Separator/>
+                                        <views:SettingsCard 
+                                            Icon="{LucideIconContent Pipette, 20}"
+                                            Header="Акцентный цвет" 
+                                            Description="Выбор акцентного цвета приложения">
+                                            <Border Height="24" Width="24" CornerRadius="12" Background="{DynamicResource SystemAccentColor}"/>
+                                        </views:SettingsCard>
+                                        <Separator/>
+                                        <views:SettingsCard 
+                                            Icon="{LucideIconContent Type, 20}"
+                                            Header="Шрифт" 
+                                            Description="Выбор шрифта интерфейса приложения">
+                                            <ComboBox>
+                                            </ComboBox>
+                                        </views:SettingsCard>
+                                        <Separator/>
+                                        <views:SettingsCard 
+                                            Icon="{LucideIconContent SquareTerminal, 20}"
+                                            Header="Моноширинный рифт" 
+                                            Description="Выбор используемого в приложении моноширинного шрифта">
+                                            <ComboBox>
+                                            </ComboBox>
+                                        </views:SettingsCard>
+                                    </StackPanel>
+                                </Border>                           
                             </StackPanel>
-                        </Border>
+                            <StackPanel Margin="24,12" IsVisible="{Binding #Sound.IsSelected}">
+                                <TextBlock Text="Провайдер" Margin="24,6,0,0" FontSize="15" FontWeight="Bold"/>  
+                                <Border Theme="{DynamicResource SettingsGroup}">
+                                    <StackPanel>
+                                        <views:SettingsCard 
+                                            Icon="{LucideIconContent Cpu, 20}"
+                                            Header="Источник" 
+                                            Description="Выбор технологии синтеза речи">
+                                            <ComboBox 
+                                                ItemsSource="{Binding Sources}"
+                                                SelectedItem="{Binding SelectedSource}"/>
+                                        </views:SettingsCard>
+                                        <Separator/>
+                                        <views:SettingsCard 
+                                            Icon="{LucideIconContent Bot, 20}"
+                                            Header="Модель синтеза" 
+                                            Description="Технологическая база для генерации речи">
+                                            <ComboBox 
+                                                ItemsSource="{Binding Models}"
+                                                SelectedItem="{Binding SelectedVoiceModel}"/>
+                                        </views:SettingsCard>
+                                        <Separator/>
+                                        <views:SettingsCard 
+                                            Icon="{LucideIconContent Speech, 20}"
+                                            Header="Голос" 
+                                            Description="Конкретный голос и тембр, доступный в рамках выбранной модели">
+                                            <ComboBox 
+                                                ItemsSource="{Binding Speakers}"
+                                                SelectedItem="{Binding SelectedSpeaker}"/>
+                                        </views:SettingsCard>
+                                    </StackPanel>
+                                </Border>       
+                                <TextBlock Text="Голос" Margin="24,0,0,0" FontSize="15" FontWeight="Bold"/>                                
+                                <Border Theme="{DynamicResource SettingsGroup}">
+                                    <StackPanel>
+                                        <views:SettingsCard 
+                                            Tag="{Binding VolumeLevel}"
+                                            Header="Громкость" 
+                                            Description="Общая громкость голоса">
+                                            <views:SettingsCard.Styles>
+                                                <Style Selector="views|SettingsCard[Tag=0]">
+                                                    <Setter Property="Icon">
+                                                        <Setter.Value>
+                                                            <Template>
+                                                                <LucideIcon Kind="VolumeX" Size="20"/>
+                                                            </Template>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                </Style>
+                                                <Style Selector="views|SettingsCard[Tag=1]">
+                                                    <Setter Property="Icon">
+                                                        <Setter.Value>
+                                                            <Template>
+                                                                <LucideIcon Kind="Volume" Size="20"/>
+                                                            </Template>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                </Style>
+                                                <Style Selector="views|SettingsCard[Tag=2]">
+                                                    <Setter Property="Icon">
+                                                        <Setter.Value>
+                                                            <Template>
+                                                                <LucideIcon Kind="Volume1" Size="20"/>
+                                                            </Template>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                </Style>
+                                                <Style Selector="views|SettingsCard[Tag=3]">
+                                                    <Setter Property="Icon">
+                                                        <Setter.Value>
+                                                            <Template>
+                                                                <LucideIcon Kind="Volume2" Size="20"/>
+                                                            </Template>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                </Style>
+                                            </views:SettingsCard.Styles>
+                                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                                <Slider 
+                                                    Width="120" 
+                                                    Minimum="0.0" 
+                                                    Maximum="2.0"
+                                                    Value="{Binding Volume, Mode=TwoWay}"/>
+                                                <TextBox
+                                                    Width="64"
+                                                    Text="{Binding Volume, Mode=TwoWay, StringFormat='{}{0:0.0}'}"
+                                                    HorizontalContentAlignment="Center"/>
+                                            </StackPanel>
+                                        </views:SettingsCard>
+                                        <Separator/>
+                                        <views:SettingsCard 
+                                            Icon="{LucideIconContent ChartNoAxesColumnIncreasing, 20}"
+                                            Header="Верхние частоты" 
+                                            Description="Ясность и звонкость произношения. Повышает четкость и разборчивость слов">
+                                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                                <Slider 
+                                                    Width="120" 
+                                                    Minimum="-10.0" 
+                                                    Maximum="10.0"
+                                                    Value="{Binding Treble, Mode=TwoWay}"/>
+                                                <TextBox
+                                                    Width="64"
+                                                    Text="{Binding Treble, Mode=TwoWay, StringFormat='{}{0:0.0}'}"
+                                                    HorizontalContentAlignment="Center"/>
+                                            </StackPanel>
+                                        </views:SettingsCard>
+                                        <Separator/>
+                                        <views:SettingsCard 
+                                            Icon="{LucideIconContent ChartNoAxesColumnDecreasing, 20}"
+                                            Header="Нижние частоты" 
+                                            Description="Глубина и плотность голоса. Помогает убрать писклявость">
+                                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                                <Slider 
+                                                    Width="120" 
+                                                    Minimum="-10.0" 
+                                                    Maximum="10.0"
+                                                    Value="{Binding Bass, Mode=TwoWay}"/>
+                                                <TextBox
+                                                    Width="64"
+                                                    Text="{Binding Bass, Mode=TwoWay, StringFormat='{}{0:0.0}'}"
+                                                    HorizontalContentAlignment="Center"/>
+                                            </StackPanel>
+                                        </views:SettingsCard>
+                                    </StackPanel>
+                                </Border>               
+                            </StackPanel>   
+                        </Grid>                            
                     </ScrollViewer>
                     <Button
                         Grid.Column="0"

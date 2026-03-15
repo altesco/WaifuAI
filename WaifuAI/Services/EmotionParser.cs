@@ -7,7 +7,6 @@ namespace WaifuAI.Services;
 
 public class EmotionParser
 {
-    // Паттерн для поиска *эмоция*
     private static readonly Regex EmotionRegex = new Regex(@"\*(.*?)\*", RegexOptions.Compiled);
 
     public static ParsedDialogue ParseTextForEmotions(string text)
@@ -37,4 +36,5 @@ public class EmotionParser
         return result;
     }
         
+    
 }

@@ -18,10 +18,11 @@ using WaifuAI.Models;
 using WaifuAI.Services;
 using WebViewControl;
 using Xilium.CefGlue;
+using System.ComponentModel.DataAnnotations;
 
 namespace WaifuAI.ViewModels
 {
-    public partial class MainVM : ObservableObject
+    public partial class MainVM : ObservableValidator
     {
         public MainVM()
         {
@@ -37,14 +38,13 @@ namespace WaifuAI.ViewModels
         [ObservableProperty] private MessageVM? _selectedMessage;
         [ObservableProperty] private string? _error;
         [ObservableProperty] private MessageVM? _replyMessage;
+
+
         [ObservableProperty] private bool _isSettingsOpen;
 
-        public ObservableCollection<MessageVM> Chat { get; } = 
-            [
-                /*new Message { Role = "user", Content = "привет" },
-                new Message { Role = "assistant", Content = "привет, как дела? у меня вот нормально. Че делаешь? мне вот надо щас напиздеть в одном сообщении много слов чтобы хватило для wrap" }
-            */
-            ];
+        
+
+        public ObservableCollection<MessageVM> Chat { get; } = [];
 
         private readonly List<Message> _history = [
             new Message 
@@ -98,7 +98,15 @@ namespace WaifuAI.ViewModels
                     Role = resultMessage.MessageModel.Role,
                     Content = resultMessage.MessageModel.Content
                 });
-                VoiceService.Say(resultMessage.MessageModel.Content, source, "silero_tts", "kseniya");
+                VoiceService.Say(
+                    resultMessage.MessageModel.Content, 
+                    source, 
+                    SettingsVM.Instance.SelectedSource, 
+                    SettingsVM.Instance.SelectedVoiceModel, 
+                    SettingsVM.Instance.SelectedSpeaker, 
+                    SettingsVM.Instance.Volume, 
+                    SettingsVM.Instance.Bass, 
+                    SettingsVM.Instance.Treble);
                 resultMessage.MessageModel.Content = EmotionParser.CleanText(resultMessage.MessageModel.Content);
                 resultMessage.Time = DateTime.Now.ToString("HH:mm");
                 Chat.Add(resultMessage);

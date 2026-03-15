@@ -29,6 +29,11 @@ namespace WaifuAI.Views
         private GridLength _lastLeftBarWidth;
         private GridLength _lastRightBarWidth;
 
+        private void OnBackgroundPointerPressed(object? sender, PointerPressedEventArgs e)
+        {
+            RootPanel.Focus();
+        }
+
         private void LeftThumb_OnDragCompleted(object? sender, VectorEventArgs e)
         {
             _lastLeftBarWidth = MainGrid.ColumnDefinitions[1].Width;

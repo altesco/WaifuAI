@@ -23,7 +23,8 @@
                                 FontSize="12" 
                                 Opacity="0.7"
                                 IsVisible="{TemplateBinding Description, 
-                                Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+                                Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                                TextWrapping="Wrap"/>
                         </StackPanel>
                         <ContentPresenter 
                             Grid.Column="2"

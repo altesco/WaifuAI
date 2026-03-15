@@ -16,12 +16,25 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+'''
 device = torch.device('cpu')
 model, utils = torch.hub.load(repo_or_dir='snakers4/silero-models',
                               model='silero_tts',
                               language='ru',
                               speaker='v5_2_ru')
-model.to(device)
+model.to(device)'''
+loaded_models = {} 
+
+def get_model(model_name):
+    if model_name in loaded_models:
+        return loaded_models[model_name]
+    print(f"Загрузка модели для спикера: {model_name}...")
+    model, _ = torch.hub.load(repo_or_dir='snakers4/silero-models',
+                              model='silero_tts',
+                              language='ru',
+                              speaker=model_name)
+    loaded_models[model_name] = model
+    return model
 
 class EmotionItem(BaseModel):
     name: str
@@ -39,8 +52,14 @@ async def generate_timings(data: TimingRequest):
         timings.append({"expression": em.name, "time_ms": time_ms})
     return timings
 
+@app.get("/speakers")
+async def get_speakers(model_name: str = Query(...)):
+    model = get_model(model_name)
+    return {"speakers": model.speakers}
+
 @app.get("/silero_tts")
-async def silero_tts(text: str = Query(...), speaker: str = "baya", sample_rate: int = 48000):
+async def silero_tts(text: str = Query(...), model_name: str, speaker: str = "baya", sample_rate: int = 48000):
+    model = get_model(model_name)
     audio_path = model.save_wav(text=text, speaker=speaker, sample_rate=sample_rate)
     with open(audio_path, "rb") as f:
         audio_data = f.read()
