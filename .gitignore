@@ -54,8 +54,16 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
 # Python
 **/venv/
 __pycache__/
 *.py[cod]
 *.pytest_cache/
+
+Model3D/node_modules/
+Model3D/dist/
+Model3D/build/
+Model3D/out/
+Model3D/.eslintcache
+Model3D/.cache/
