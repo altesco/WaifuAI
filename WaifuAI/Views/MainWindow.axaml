@@ -1304,13 +1304,13 @@
                                             ItemsSource="{Binding Models3D}" 
                                             SelectedItem="{Binding SelectedModel3D, Mode=TwoWay}"
                                             Background="Transparent" 
-                                            Margin="-2,8,-2,8">
+                                            Margin="-3,8,-3,0">
                                             <ListBox.Styles>
                                                 <Style Selector="ListBoxItem">
                                                     <Setter Property="Height" Value="30"/>
                                                     <Setter Property="Padding" Value="14,0"/>
                                                     <Setter Property="VerticalContentAlignment" Value="Center"/>
-                                                    <Setter Property="Margin" Value="2"/>
+                                                    <Setter Property="Margin" Value="3"/>
                                                     <Setter Property="CornerRadius" Value="15"/>
                                                     <Setter Property="Background" Value="{DynamicResource SystemAccentColorLight3}"/>
                                                 </Style>
@@ -1328,6 +1328,29 @@
                                                 </ItemsPanelTemplate>
                                             </ListBox.ItemsPanel>
                                         </ListBox>
+                                        <Separator/>
+                                        <views:SettingsCard
+                                            Icon="{LucideIconContent FolderClosed, Size=20}"
+                                            Header="Папка моделей"
+                                            Description="Путь к папке, в которую должны добавляться модели">
+                                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                                <Border 
+                                                    VerticalAlignment="Center"
+                                                    MaxWidth="300"
+                                                    CornerRadius="4" 
+                                                    Background="{DynamicResource SystemBaseMediumLowColor}">
+                                                    <TextBlock 
+                                                        FontFamily="{StaticResource CascadiaCode}"
+                                                        Text="{Binding Model3DFolder}"
+                                                        TextTrimming="LeadingCharacterEllipsis"
+                                                        Margin="0"
+                                                        Padding="2"/>
+                                                </Border>
+                                                <Button
+                                                    Content="Изменить"
+                                                    Command="{Binding ChangeModel3DFolderCommand}"/>
+                                            </StackPanel>
+                                        </views:SettingsCard>                                        
                                     </StackPanel>
                                 </Border>
                             </StackPanel>    

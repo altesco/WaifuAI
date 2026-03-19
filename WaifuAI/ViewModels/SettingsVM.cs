@@ -72,16 +72,11 @@ public partial class SettingsVM : ObservableValidator
         Pitch = SettingsModel.Pitch;
 
         // 3D Model Settings
-        if (Directory.Exists(Model3DFolder))
-        {
-            var files = Directory.GetFiles(Model3DFolder);
-            foreach (var file in files)
-                Models3D.Add(Path.GetFileName(file));
-            if (Models3D.Contains(SettingsModel.SelectedModel3D))
-                SelectedModel3D = SettingsModel.SelectedModel3D;
-            else if (Models3D.Count > 0)
-                SelectedModel3D = Models3D[0];
-        }
+        if (Directory.Exists(SettingsModel.Model3DFolder))
+            Model3DFolder = SettingsModel.Model3DFolder;
+        else
+            Directory.CreateDirectory(Model3DFolder);
+        RefreshModels3D();
 
         _isLoading = false;
     }
@@ -114,6 +109,7 @@ public partial class SettingsVM : ObservableValidator
 
         // 3D Model Settings
         SettingsModel.SelectedModel3D = SelectedModel3D;
+        SettingsModel.Model3DFolder = Model3DFolder;
 
         var options = new JsonSerializerOptions { WriteIndented = true };
         var json = JsonSerializer.Serialize(SettingsModel, options);
@@ -250,7 +246,12 @@ public partial class SettingsVM : ObservableValidator
 
     #region Model3D
 
-    [ObservableProperty] private string _model3DFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "WebAssets", "models");
+    private static readonly string WebAssets = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "WebAssets");
+
+    private static readonly string BaseModel3DFolder = 
+        Path.Combine(WebAssets, "models");
+
+    [ObservableProperty] private string _model3DFolder = BaseModel3DFolder;
 
     public ObservableCollection<string> Models3D { get; } = [];
     [ObservableProperty] private string _selectedModel3D;
@@ -286,13 +287,64 @@ public partial class SettingsVM : ObservableValidator
         Models3D.Add(fileName);
     }
 
-    partial void OnSelectedModel3DChanged(string value)
+    [RelayCommand]
+    private async Task ChangeModel3DFolder()
     {
-        string urlForJs = $"./models/{value}";
+        var topLevel = TopLevel
+            .GetTopLevel((Application.Current?.ApplicationLifetime as 
+                IClassicDesktopStyleApplicationLifetime)?.MainWindow);
+        if (topLevel is null) 
+            return;
+        var directories = await topLevel.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+        {
+            AllowMultiple = false
+        });
+        if (directories.Count <= 0)
+            return;
+        Model3DFolder = directories[0].Path.LocalPath;
+        RefreshModels3D();
+    }
+
+    partial void OnSelectedModel3DChanged(string? oldValue, string newValue)
+    {
+        Directory.CreateDirectory(BaseModel3DFolder);
+        string url;
+        if (Model3DFolder != BaseModel3DFolder)
+        {
+            // remove old temp
+            if (oldValue != null)
+            {
+                var files = Directory.GetFiles(BaseModel3DFolder, "temp_*.vrm");
+                if (files.Length > 0)
+                    foreach (var file in files)
+                        File.Delete(file);   
+            }
+            // set new temp
+            var time = DateTime.Now.ToString("dd_MM_yyyy_HH_mm_ss");
+            var fileName = $"temp_{time}.vrm";
+            var source = Path.Combine(Model3DFolder, newValue);
+            var target = Path.Combine(BaseModel3DFolder, fileName);
+            File.Copy(source, target, true);
+            url = $"./models/{fileName}";
+        }
+        else
+            url = $"./models/{newValue}";
         WeakReferenceMessenger.Default.Send(
             new ExecuteScriptMessage(
-                $"window.vrmApp.changeModel('{urlForJs}')"
+                $"window.vrmApp.changeModel('{url}')"
                 ));
+    }
+
+    private void RefreshModels3D()
+    {
+        Models3D.Clear();
+        var files = Directory.GetFiles(Model3DFolder, "*.vrm");
+        foreach (var file in files)
+            Models3D.Add(Path.GetFileName(file));
+        if (Models3D.Contains(SettingsModel.SelectedModel3D))
+            SelectedModel3D = SettingsModel.SelectedModel3D;
+        else if (Models3D.Count > 0)
+            SelectedModel3D = Models3D[0];
     }
 
     #endregion
