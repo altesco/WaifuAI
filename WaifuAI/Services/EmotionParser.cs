@@ -13,13 +13,16 @@ public class EmotionParser
     {
         var emotions = new List<EmotionInfo>();
         MatchCollection matches = EmotionRegex.Matches(text);
+        int accumulatedOffset = 0;
         foreach (Match match in matches)
         {
+            int posInCleanText = match.Index - accumulatedOffset;
             emotions.Add(new EmotionInfo
             {
                 Name = match.Groups[1].Value,
-                OriginalPos = match.Index
+                OriginalPos = posInCleanText
             });
+            accumulatedOffset += match.Length;
         }
         string cleanText = CleanText(text);
         return new ParsedDialogue

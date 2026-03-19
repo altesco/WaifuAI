@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Text.Json;
+using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.Messaging;
 using Cyrillic.Convert;
 using WaifuAI.ViewModels;
 using WebViewControl;
@@ -14,7 +17,32 @@ namespace WaifuAI.Services;
 public static class VoiceService
 {
     public static int port = 5050;
+
+    public static Process? PythonProcess;
     
+    // public static void StartPythonServer()
+    // {
+    //     try
+    //     {
+    //         string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+    //         string scriptPath = Path.Combine(baseDir, "say.py");
+    //         string venvPython = Path.Combine(baseDir, "venv", "bin", "python");
+    //         string pythonExe = File.Exists(venvPython) ? venvPython : "python";
+    //         ProcessStartInfo info = new ProcessStartInfo
+    //         {
+    //             FileName = pythonExe,
+    //             Arguments = $"\"{scriptPath}\"",
+    //             UseShellExecute = false,
+    //             CreateNoWindow = true,
+    //             WorkingDirectory = baseDir
+    //         };
+    //         Process.Start(info);
+    //     }
+    //     catch (Exception e)
+    //     {
+    //         Console.WriteLine(e + "\n" + e.Message);
+    //     }
+    // }
     public static void StartPythonServer()
     {
         try
@@ -23,15 +51,38 @@ public static class VoiceService
             string scriptPath = Path.Combine(baseDir, "say.py");
             string venvPython = Path.Combine(baseDir, "venv", "bin", "python");
             string pythonExe = File.Exists(venvPython) ? venvPython : "python";
+
             ProcessStartInfo info = new ProcessStartInfo
             {
                 FileName = pythonExe,
-                Arguments = $"\"{scriptPath}\"",
+                Arguments = $"-u \"{scriptPath}\"", // Добавлен флаг -u для мгновенного вывода
                 UseShellExecute = false,
+                RedirectStandardOutput = true, // Перехватываем вывод
+                RedirectStandardError = true,  // Перехватываем ошибки
                 CreateNoWindow = true,
                 WorkingDirectory = baseDir
             };
-            Process.Start(info);
+
+            PythonProcess = new Process { StartInfo = info, EnableRaisingEvents = true };
+
+            // Подписываемся на события вывода
+            PythonProcess.OutputDataReceived += (sender, e) =>
+            {
+                if (!string.IsNullOrEmpty(e.Data))
+                    Console.WriteLine($"[Python]: {e.Data}");
+            };
+
+            PythonProcess.ErrorDataReceived += (sender, e) =>
+            {
+                if (!string.IsNullOrEmpty(e.Data))
+                    Console.Error.WriteLine($"[Python ERROR]: {e.Data}");
+            };
+
+            PythonProcess.Start();
+
+            // Начинаем асинхронное чтение
+            PythonProcess.BeginOutputReadLine();
+            PythonProcess.BeginErrorReadLine();
         }
         catch (Exception e)
         {
@@ -39,19 +90,37 @@ public static class VoiceService
         }
     }
 
+    public static async Task WaitForPythonServerAsync(int timeoutSeconds = 20)
+    {
+        using var client = new HttpClient();
+        var startTime = DateTime.Now;
+        while ((DateTime.Now - startTime).TotalSeconds < timeoutSeconds)
+        {
+            try 
+            {
+                var response = await client.GetAsync("http://127.0.0.1:5050/speakers?model_name=v5_2_ru");
+                if (response.IsSuccessStatusCode) 
+                    return;
+            }
+            catch {  }
+            await Task.Delay(1000);
+        }
+    }
+
     public static void Say(
         string text, 
-        WebView source, 
         string service, 
         string model, 
         string speaker, 
         double volume, 
+        double pitch,
         double bass, 
         double treble)
     {
         var parsedResult = EmotionParser.ParseTextForEmotions(text);
         parsedResult.CleanText = parsedResult.CleanText.ToPhoneticCyrillic();
-        System.Console.WriteLine(parsedResult.CleanText);
+        Console.WriteLine(text);
+        Console.WriteLine(parsedResult.CleanText);
         var dialogueData = new
         {
             cleanText = parsedResult.CleanText,
@@ -62,8 +131,8 @@ public static class VoiceService
             }).ToList()
         };
         string jsonParams = JsonSerializer.Serialize(dialogueData);
-        string jsCall = $"window.say({jsonParams}, 1.1, {port}, '{service}', '{model}', '{speaker}', {volume}, {bass}, {treble});";
-        source.ExecuteScript(jsCall);
+        string jsCall = $"window.say({jsonParams}, {pitch}, {port}, '{service}', '{model}', '{speaker}', {volume}, {bass}, {treble});";
+        WeakReferenceMessenger.Default.Send(new ExecuteScriptMessage(jsCall));
     }
 
     public static string ToPhoneticCyrillic(this string text)

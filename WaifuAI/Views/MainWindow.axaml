@@ -7,14 +7,18 @@
     xmlns:vm="using:WaifuAI.ViewModels"
     xmlns:wv="clr-namespace:WebViewControl;assembly=WebViewControl.Avalonia"
     xmlns:views="using:WaifuAI.Views"
+    xmlns:conv="using:WaifuAI.Converters"
     Title="WaifuAI"
     d:DesignHeight="720"
     d:DesignWidth="1024"
     x:DataType="vm:MainVM"
     Icon="/Assets/avalonia-logo.ico"
     Loaded="Window_OnLoaded"
+    Closed="Window_Closed"
     mc:Ignorable="d">
     <Window.Resources>
+        <conv:MathConverter x:Key="MathConverter"/>
+        <conv:StringValueConverter x:Key="StringValueConverter"/>
         <ControlTheme x:Key="RadioButtonWithIcon" TargetType="RadioButton">
             <Setter Property="Width" Value="28" />
             <Setter Property="Height" Value="28" />
@@ -774,7 +778,8 @@
             <wv:WebView
                 x:Name="MyWebView"
                 Grid.Column="2"
-                Address="{Binding WebAddress}" />
+                Address="{Binding WebAddress}" 
+                DisableBuiltinContextMenus="True"/>
             <Border
                 Grid.Column="3"
                 x:DataType="vm:SettingsVM"
@@ -943,9 +948,12 @@
         <Popup
             Grid.Row="0"
             Grid.RowSpan="2"
+            MaxWidth="1400"
+            MaxHeight="900"
+            Width="{Binding $parent[Window].Bounds.Width, Converter={StaticResource MathConverter}, ConverterParameter=0.8}"
+            Height="{Binding $parent[Window].Bounds.Height, Converter={StaticResource MathConverter}, ConverterParameter=0.8}"
             Placement="Center"
-            IsOpen="True">
-            <!-- IsOpen="{Binding IsSettingsOpen, Mode=TwoWay}" -->
+            IsOpen="{Binding IsSettingsOpen, Mode=TwoWay}">
             <Popup.Styles>
                 <Style Selector="Separator">
                     <Setter Property="Height" Value="1"/>
@@ -956,8 +964,6 @@
             </Popup.Styles>
             <Border
                 CornerRadius="8"
-                Height="600"
-                Width="800"
                 Background="#eef1f5"
                 BorderThickness="1"
                 BorderBrush="#bbbfcb">
@@ -981,20 +987,20 @@
                                 <Setter Property="Background" Value="{DynamicResource ToggleButtonBackgroundChecked}"/>
                             </Style>
                         </ListBox.Styles>
-                        <ListBoxItem x:Name="Appearence" >
+                        <ListBoxItem x:Name="General">
                             <Grid ColumnDefinitions="Auto,*">
                                 <LucideIcon 
-                                    Kind="Palette" 
+                                    Kind="Wrench" 
                                     Size="18"
                                     Margin="0,0,8,0"/>
                                 <TextBlock
                                     Grid.Column="1"
-                                    Text="Оформление"
+                                    Text="Общие"
                                     TextTrimming="CharacterEllipsis"
                                     VerticalAlignment="Center"/>
                             </Grid>
                         </ListBoxItem>
-                        <ListBoxItem x:Name="Sound" IsSelected="True">
+                        <ListBoxItem x:Name="Sound">
                             <Grid ColumnDefinitions="Auto,*">
                                 <LucideIcon 
                                     Kind="Volume2" 
@@ -1007,7 +1013,7 @@
                                     VerticalAlignment="Center"/>
                             </Grid>
                         </ListBoxItem>
-                        <ListBoxItem>
+                        <ListBoxItem x:Name="ModelAppearence" IsSelected="True">
                             <Grid ColumnDefinitions="Auto,*">
                                 <LucideIcon 
                                     Kind="Shirt" 
@@ -1047,9 +1053,31 @@
                                     <Setter Property="Background" Value="{DynamicResource SystemChromeLowColor}"/>
                                 </ControlTheme>
                             </Grid.Resources>
-                            <StackPanel Margin="24,12" IsVisible="{Binding #Appearence.IsSelected}">
+                            <Grid.Styles>
+                                <Style Selector="Slider">
+                                    <Setter Property="Width" Value="120"/>
+                                    <Setter Property="TickFrequency" Value="0.1"/>
+                                    <Setter Property="IsSnapToTickEnabled" Value="True"/>
+                                </Style>
+                                <Style Selector="Button">
+                                    <Setter Property="Width" Value="NaN"/>
+                                    <Setter Property="Height" Value="30"/>
+                                    <Setter Property="VerticalContentAlignment" Value="Center"/>
+                                    <Setter Property="Background" Value="{DynamicResource SystemBaseMediumLowColor}"/>
+                                    <Setter Property="BorderBrush" Value="#bbbfcb"/>
+                                    <Setter Property="BorderThickness" Value="1"/>
+                                    <Setter Property="Padding" Value="12,0"/>
+                                </Style>
+                                <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                                    <Setter Property="Background" Value="{DynamicResource SystemBaseMediumColor}"/>
+                                    <Setter Property="BorderBrush" Value="#bbbfcb"/>
+                                    <Setter Property="BorderThickness" Value="1"/>    
+                                </Style>
+                            </Grid.Styles>
+                            <StackPanel Margin="24,12" IsVisible="{Binding #General.IsSelected}">
+                                <TextBlock Text="Оформление" Margin="24,6,0,0" FontSize="15" FontWeight="Bold"/> 
                                 <Border Theme="{DynamicResource SettingsGroup}">
-                                    <StackPanel>
+                                    <StackPanel> 
                                         <views:SettingsCard 
                                             Icon="{LucideIconContent SunMoon, 20}"
                                             Header="Тема" 
@@ -1084,7 +1112,41 @@
                                             </ComboBox>
                                         </views:SettingsCard>
                                     </StackPanel>
-                                </Border>                           
+                                </Border>  
+                                <TextBlock Text="Язык" Margin="24,0,0,0" FontSize="15" FontWeight="Bold"/>                                 
+                                <Border Theme="{DynamicResource SettingsGroup}">
+                                    <StackPanel> 
+                                        <views:SettingsCard 
+                                            Icon="{LucideIconContent Globe, 20}"
+                                            Header="Язык интерфейса" 
+                                            Description="Язык интерфейса всего приложения">
+                                            <ComboBox 
+                                                ItemsSource="{Binding AppLanguages}"
+                                                SelectedItem="{Binding SelectedAppLanguage}">
+                                                <ComboBox.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding Converter={StaticResource StringValueConverter}}"/>
+                                                    </DataTemplate>
+                                                </ComboBox.ItemTemplate>
+                                            </ComboBox>
+                                        </views:SettingsCard>
+                                        <Separator/>
+                                        <views:SettingsCard 
+                                            Icon="{LucideIconContent Languages, 20}"
+                                            Header="Язык модели" 
+                                            Description="Язык, на котором будет происходить общение с моделью. От этого параметра зависит список доступных голосовых моделей">
+                                            <ComboBox
+                                                ItemsSource="{Binding Languages}"
+                                                SelectedItem="{Binding SelectedLanguage}">
+                                                <ComboBox.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding Converter={StaticResource StringValueConverter}}"/>
+                                                    </DataTemplate>
+                                                </ComboBox.ItemTemplate>
+                                            </ComboBox>
+                                        </views:SettingsCard>
+                                    </StackPanel>
+                                </Border>                                                          
                             </StackPanel>
                             <StackPanel Margin="24,12" IsVisible="{Binding #Sound.IsSelected}">
                                 <TextBlock Text="Провайдер" Margin="24,6,0,0" FontSize="15" FontWeight="Bold"/>  
@@ -1114,7 +1176,8 @@
                                             Description="Конкретный голос и тембр, доступный в рамках выбранной модели">
                                             <ComboBox 
                                                 ItemsSource="{Binding Speakers}"
-                                                SelectedItem="{Binding SelectedSpeaker}"/>
+                                                SelectedItem="{Binding SelectedSpeaker}"
+                                                IsEnabled="{Binding !IsSpeakersLoading}"/>
                                         </views:SettingsCard>
                                     </StackPanel>
                                 </Border>       
@@ -1165,7 +1228,6 @@
                                             </views:SettingsCard.Styles>
                                             <StackPanel Orientation="Horizontal" Spacing="10">
                                                 <Slider 
-                                                    Width="120" 
                                                     Minimum="0.0" 
                                                     Maximum="2.0"
                                                     Value="{Binding Volume, Mode=TwoWay}"/>
@@ -1177,12 +1239,27 @@
                                         </views:SettingsCard>
                                         <Separator/>
                                         <views:SettingsCard 
+                                            Icon="{LucideIconContent AudioLines, 20}"
+                                            Header="Высота голоса" 
+                                            Description="Регулировка высоты тона: низкие значения делают голос более грубым и глубоким, высокие — тонким и звонким">
+                                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                                <Slider 
+                                                    Minimum="0.0" 
+                                                    Maximum="2.0"
+                                                    Value="{Binding Pitch, Mode=TwoWay}"/>
+                                                <TextBox
+                                                    Width="64"
+                                                    Text="{Binding Pitch, Mode=TwoWay, StringFormat='{}{0:0.0}'}"
+                                                    HorizontalContentAlignment="Center"/>
+                                            </StackPanel>
+                                        </views:SettingsCard>
+                                        <Separator/>
+                                        <views:SettingsCard 
                                             Icon="{LucideIconContent ChartNoAxesColumnIncreasing, 20}"
                                             Header="Верхние частоты" 
                                             Description="Ясность и звонкость произношения. Повышает четкость и разборчивость слов">
                                             <StackPanel Orientation="Horizontal" Spacing="10">
                                                 <Slider 
-                                                    Width="120" 
                                                     Minimum="-10.0" 
                                                     Maximum="10.0"
                                                     Value="{Binding Treble, Mode=TwoWay}"/>
@@ -1199,7 +1276,6 @@
                                             Description="Глубина и плотность голоса. Помогает убрать писклявость">
                                             <StackPanel Orientation="Horizontal" Spacing="10">
                                                 <Slider 
-                                                    Width="120" 
                                                     Minimum="-10.0" 
                                                     Maximum="10.0"
                                                     Value="{Binding Bass, Mode=TwoWay}"/>
@@ -1212,6 +1288,49 @@
                                     </StackPanel>
                                 </Border>               
                             </StackPanel>   
+                            <StackPanel Margin="24,12" IsVisible="{Binding #ModelAppearence.IsSelected}">
+                                <TextBlock Text="Модель" Margin="24,6,0,0" FontSize="15" FontWeight="Bold"/>
+                                <Border Theme="{DynamicResource SettingsGroup}">
+                                    <StackPanel>
+                                        <views:SettingsCard
+                                            Icon="{LucideIconContent Box, Size=20}"
+                                            Header="Модель персонажа"
+                                            Description="Выбор модели персонажа с устройства. Скачанные .vrm файлы моделей доступны по пути /какой-то/путь. В эту же директорию файл модели скопируется при добавлении">
+                                            <Button
+                                                Content="Добавить"
+                                                Command="{Binding OpenModel3DFileCommand}"/>                                        
+                                        </views:SettingsCard>
+                                        <ListBox 
+                                            ItemsSource="{Binding Models3D}" 
+                                            SelectedItem="{Binding SelectedModel3D, Mode=TwoWay}"
+                                            Background="Transparent" 
+                                            Margin="-2,8,-2,8">
+                                            <ListBox.Styles>
+                                                <Style Selector="ListBoxItem">
+                                                    <Setter Property="Height" Value="30"/>
+                                                    <Setter Property="Padding" Value="14,0"/>
+                                                    <Setter Property="VerticalContentAlignment" Value="Center"/>
+                                                    <Setter Property="Margin" Value="2"/>
+                                                    <Setter Property="CornerRadius" Value="15"/>
+                                                    <Setter Property="Background" Value="{DynamicResource SystemAccentColorLight3}"/>
+                                                </Style>
+                                                <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                                                    <Setter Property="Background" Value="{DynamicResource SystemAccentColorLight2}"/>
+                                                </Style>
+                                                <Style Selector="ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+                                                    <Setter Property="Background" Value="{DynamicResource SystemAccentColorLight1}"/>
+                                                    <Setter Property="Foreground" Value="AliceBlue"/>
+                                                </Style>
+                                            </ListBox.Styles>
+                                            <ListBox.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <WrapPanel />
+                                                </ItemsPanelTemplate>
+                                            </ListBox.ItemsPanel>
+                                        </ListBox>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>    
                         </Grid>                            
                     </ScrollViewer>
                     <Button

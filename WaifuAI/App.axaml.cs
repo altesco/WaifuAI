@@ -12,6 +12,7 @@ using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using WaifuAI.ViewModels;
 using WaifuAI.Views;
+using WebViewControl;
 
 namespace WaifuAI
 {
@@ -28,6 +29,7 @@ namespace WaifuAI
             {
                 // Avoid duplicate validations from both Avalonia and the CommunityToolkit. 
                 // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
+                WebView.Settings.AddCommandLineSwitch("autoplay-policy", "no-user-gesture-required");
                 DisableAvaloniaDataAnnotationValidation();
                 desktop.MainWindow = new MainWindow
                 {

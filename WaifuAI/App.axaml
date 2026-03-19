@@ -5,7 +5,7 @@
     xmlns:local="using:WaifuAI"
     RequestedThemeVariant="Default">
     <Application.Resources>
-        <StaticResource x:Key="ToggleButtonForegroundChecked" ResourceKey="AccentButtonBackground"/>
+        <StaticResource x:Key="ToggleButtonForegroundChecked" ResourceKey="AccentButtonBackground" />
         <StaticResource x:Key="ToggleButtonBackgroundChecked" ResourceKey="ButtonBackgroundPointerOver"/>
         <StaticResource x:Key="ToggleButtonBackgroundPointerOver" ResourceKey="ButtonBackgroundPointerOver"/>
         <StaticResource x:Key="ToggleButtonBackgroundCheckedPointerOver" ResourceKey="ButtonBackgroundPointerOver"/>
@@ -17,6 +17,7 @@
         <SolidColorBrush x:Key="ButtonBackgroundDisabled" Color="Transparent"/>
         <FontFamily x:Key="CascadiaCode">avares://WaifuAI/Assets/Fonts/#Cascadia Code</FontFamily>
         <FontFamily x:Key="JetBrainsMono">avares://WaifuAI/Assets/Fonts/#JetBrains Mono</FontFamily>
+        <StaticResource x:Key="ComboBoxDropDownBackground" ResourceKey="SystemChromeLowColor"/>
     </Application.Resources>
     <Application.DataTemplates>
         <local:ViewLocator/>
@@ -31,9 +32,9 @@
                     ChromeMedium="#dbdfe7"
                     BaseHigh="#4d5069"
                     BaseMediumHigh="#abafbd"
-                    BaseMedium="#bbbfcb"
+                    BaseMedium="#c8ccd7"
                     BaseLow="#D4D6DC"
-                    BaseMediumLow="#7F4D5069"/>
+                    BaseMediumLow="#cbcfd9"/>
                 <ColorPaletteResources x:Key="Dark" />
             </FluentTheme.Palettes>
         </FluentTheme>

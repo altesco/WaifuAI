@@ -14,11 +14,11 @@
     <None Remove="App.Settings" />
   </ItemGroup>
 
-  <ItemGroup>
+  <!-- <ItemGroup>
     <None Update="WebAssets\**\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-  </ItemGroup>
+  </ItemGroup> -->
 
   <ItemGroup>
     <None Remove="say.py" />
@@ -59,4 +59,19 @@
     <PackageReference Include="Material.Avalonia" Version="3.13.4" />
     <PackageReference Include="WebViewControl-Avalonia" Version="3.120.11" />
   </ItemGroup>
+
+  <Target Name="BuildFrontend" BeforeTargets="BeforeBuild">
+    <Message Importance="high" Text="Building Frontend..." />
+    <Exec Command="npm run build" WorkingDirectory="$(ProjectDir)../Model3D" />
+  </Target>
+
+  <Target Name="IncludeFrontendAssets" BeforeTargets="AssignTargetPaths" DependsOnTargets="BuildFrontend">
+    <ItemGroup>
+      <FrontendFiles Include="$(ProjectDir)..\Model3D\dist\**\*" />
+      <Content Include="@(FrontendFiles)">
+        <Link>WebAssets\%(RecursiveDir)%(Filename)%(Extension)</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+  </Target>
 </Project>

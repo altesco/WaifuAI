@@ -16,9 +16,11 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using WaifuAI.Models;
 using WaifuAI.Services;
-using WebViewControl;
 using Xilium.CefGlue;
 using System.ComponentModel.DataAnnotations;
+using System.Text;
+using Avalonia.Media.Imaging;
+using System.Text.Json;
 
 namespace WaifuAI.ViewModels
 {
@@ -26,11 +28,17 @@ namespace WaifuAI.ViewModels
     {
         public MainVM()
         {
-            SettingsVM.Instance.Load();
+            _ = InitializeAsync();
+        }
+
+        private async Task InitializeAsync()
+        {
             QueryService.StartHttpServer(); 
             ModelService.StartWebServer(12347, out var url);
+            WebAddress = url;
             VoiceService.StartPythonServer();
-            _webAddress = url;
+            await VoiceService.WaitForPythonServerAsync();
+            await SettingsVM.Instance.Load();
         }
 
         [ObservableProperty] private string _question = string.Empty;
@@ -42,8 +50,6 @@ namespace WaifuAI.ViewModels
 
         [ObservableProperty] private bool _isSettingsOpen;
 
-        
-
         public ObservableCollection<MessageVM> Chat { get; } = [];
 
         private readonly List<Message> _history = [
@@ -54,10 +60,8 @@ namespace WaifuAI.ViewModels
             }];
 
         [RelayCommand]
-        private async Task Query(object param)
+        private async Task Query()
         {
-            if (param is not WebView source)
-                return;
             try
             {
                 CloseErrorMessage();
@@ -100,11 +104,11 @@ namespace WaifuAI.ViewModels
                 });
                 VoiceService.Say(
                     resultMessage.MessageModel.Content, 
-                    source, 
                     SettingsVM.Instance.SelectedSource, 
                     SettingsVM.Instance.SelectedVoiceModel, 
                     SettingsVM.Instance.SelectedSpeaker, 
                     SettingsVM.Instance.Volume, 
+                    SettingsVM.Instance.Pitch,
                     SettingsVM.Instance.Bass, 
                     SettingsVM.Instance.Treble);
                 resultMessage.MessageModel.Content = EmotionParser.CleanText(resultMessage.MessageModel.Content);

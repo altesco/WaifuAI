@@ -14,6 +14,13 @@ using WaifuAI.ViewModels;
 using WaifuAI.Models;
 using Lucide.Avalonia;
 using System.Threading.Tasks;
+using Avalonia.Controls.Shapes;
+using Avalonia.Xaml.Interactions.Custom;
+using WebViewControl;
+using System.Diagnostics;
+using WaifuAI.Services;
+using Avalonia.Media.Imaging;
+using CommunityToolkit.Mvvm.Messaging;
 
 namespace WaifuAI.Views
 {
@@ -24,10 +31,16 @@ namespace WaifuAI.Views
             InitializeComponent();
             _lastLeftBarWidth = MainGrid.ColumnDefinitions[1].Width;
             _lastRightBarWidth = MainGrid.ColumnDefinitions[3].Width;
+            WeakReferenceMessenger.Default.Register<ExecuteScriptMessage>(this, (_, m) =>
+            {
+                MyWebView.ExecuteScript(m.Value);
+            });
         }
 
         private GridLength _lastLeftBarWidth;
         private GridLength _lastRightBarWidth;
+
+        
 
         private void OnBackgroundPointerPressed(object? sender, PointerPressedEventArgs e)
         {
@@ -38,12 +51,12 @@ namespace WaifuAI.Views
         {
             _lastLeftBarWidth = MainGrid.ColumnDefinitions[1].Width;
         }
-        
+
         private void RightThumb_OnDragCompleted(object? sender, VectorEventArgs e)
         {
             _lastRightBarWidth = MainGrid.ColumnDefinitions[3].Width;
         }
-        
+
         private void ChatOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             if (e.Action != NotifyCollectionChangedAction.Add || e.NewItems == null)
@@ -56,6 +69,14 @@ namespace WaifuAI.Views
             if (DataContext is not MainVM mainVM)
                 return;
             mainVM.Chat.CollectionChanged += ChatOnCollectionChanged;
+        }
+
+        private void Window_Closed(object? sender, EventArgs e)
+        {
+            if (VoiceService.PythonProcess is null || VoiceService.PythonProcess.HasExited)
+                return;
+            VoiceService.PythonProcess.Kill(entireProcessTree: true);
+            VoiceService.PythonProcess.Dispose();
         }
 
         private void LeftToggleButton_OnIsCheckedChanged(object? sender, RoutedEventArgs e)

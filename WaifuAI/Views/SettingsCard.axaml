@@ -7,7 +7,7 @@
             <ControlTemplate>
                 <Border Background="{TemplateBinding Background}"
                         Padding="{TemplateBinding Padding}">
-                    <Grid ColumnDefinitions="Auto, *, Auto">
+                    <Grid ColumnDefinitions="Auto,*,Auto">
                         <ContentPresenter 
                             Grid.RowSpan="2" 
                             Content="{TemplateBinding Icon}"

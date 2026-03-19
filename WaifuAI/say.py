@@ -27,14 +27,29 @@ loaded_models = {}
 
 def get_model(model_name):
     if model_name in loaded_models:
+        print(f"DEBUG: Уже есть {model_name}...")
         return loaded_models[model_name]
-    print(f"Загрузка модели для спикера: {model_name}...")
+    '''print(f"Загрузка модели для спикера: {model_name}...")
     model, _ = torch.hub.load(repo_or_dir='snakers4/silero-models',
                               model='silero_tts',
                               language='ru',
                               speaker=model_name)
     loaded_models[model_name] = model
-    return model
+    return model'''
+    print(f"DEBUG: Начинаю запрос к torch.hub для {model_name}...", flush=True)
+    
+    try:
+        # Добавь trust_repo=True, в новых версиях torch это обязательно
+        model, _ = torch.hub.load(repo_or_dir='snakers4/silero-models',
+                                  model='silero_tts',
+                                  language='ru',
+                                  speaker=model_name,
+                                  trust_repo=True) 
+        loaded_models[model_name] = model
+        return model
+    except Exception as e:
+        print(f"ERROR: Ошибка при загрузке модели: {e}", flush=True)
+        raise e
 
 class EmotionItem(BaseModel):
     name: str
@@ -58,7 +73,7 @@ async def get_speakers(model_name: str = Query(...)):
     return {"speakers": model.speakers}
 
 @app.get("/silero_tts")
-async def silero_tts(text: str = Query(...), model_name: str, speaker: str = "baya", sample_rate: int = 48000):
+async def silero_tts(model_name: str, text: str = Query(...), speaker: str = "baya", sample_rate: int = 48000):
     model = get_model(model_name)
     audio_path = model.save_wav(text=text, speaker=speaker, sample_rate=sample_rate)
     with open(audio_path, "rb") as f:
