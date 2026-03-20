@@ -4,10 +4,12 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:actipro="http://schemas.actiprosoftware.com/avaloniaui"
     xmlns:vm="using:WaifuAI.ViewModels"
     xmlns:wv="clr-namespace:WebViewControl;assembly=WebViewControl.Avalonia"
     xmlns:views="using:WaifuAI.Views"
     xmlns:conv="using:WaifuAI.Converters"
+    xmlns:li="using:LoadingIndicators.Avalonia"
     Title="WaifuAI"
     d:DesignHeight="720"
     d:DesignWidth="1024"
@@ -171,6 +173,18 @@
                     </Setter.Value>
                 </Setter>
             </Style>
+            <Style Selector="Arc.loading">
+                <Style.Animations>
+                    <Animation Duration="0:0:1" IterationCount="Infinite">
+                        <KeyFrame Cue="0%">
+                            <Setter Property="RotateTransform.Angle" Value="0"/>
+                        </KeyFrame>
+                        <KeyFrame Cue="100%">
+                            <Setter Property="RotateTransform.Angle" Value="360"/>
+                        </KeyFrame>
+                    </Animation>
+                </Style.Animations>
+            </Style>    
         </Grid.Styles>
         <Border
             Background="{DynamicResource SystemChromeMediumColor}"
@@ -769,17 +783,39 @@
                     </Grid>
                 </Panel>
             </Border>
-            <GridSplitter
-                Grid.Column="1"
-                Width="4"
-                HorizontalAlignment="Right"
-                Background="Transparent"
-                DragCompleted="LeftThumb_OnDragCompleted" />
+            <StackPanel
+                Grid.Column="2"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Spacing="4"
+                IsVisible="{Binding Source={x:Static vm:SettingsVM.Instance}, Path=IsModel3DLoading}">
+                <Arc
+                    Classes="loading"
+                    Width="36" 
+                    Height="36" 
+                    Stroke="{Binding $parent[Window].Foreground}" 
+                    Opacity="0.4"
+                    StrokeThickness="2" 
+                    StrokeLineCap="Round"
+                    StartAngle="0" 
+                    SweepAngle="270">
+                    <Arc.Transitions>
+                        <Transitions>
+                            <DoubleTransition Property="RotateTransform.Angle" Duration="0:0:1" />
+                        </Transitions>
+                    </Arc.Transitions>
+                    <Arc.RenderTransform>
+                        <RotateTransform />
+                    </Arc.RenderTransform>
+                </Arc>
+            </StackPanel>
             <wv:WebView
                 x:Name="MyWebView"
                 Grid.Column="2"
                 Address="{Binding WebAddress}" 
-                DisableBuiltinContextMenus="True"/>
+                DisableBuiltinContextMenus="True"
+                IsVisible="{Binding Source={x:Static vm:SettingsVM.Instance}, Path=!IsModel3DLoading}"/>
+            <!-- RightPanel -->
             <Border
                 Grid.Column="3"
                 x:DataType="vm:SettingsVM"

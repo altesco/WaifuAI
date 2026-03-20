@@ -40,9 +40,9 @@ namespace WaifuAI.ViewModels
             await VoiceService.WaitForPythonServerAsync();
             await SettingsVM.Instance.Load();
         }
-
-        [ObservableProperty] private string _question = string.Empty;
+            
         [ObservableProperty] private string _webAddress;
+        [ObservableProperty] private string _question = string.Empty;
         [ObservableProperty] private MessageVM? _selectedMessage;
         [ObservableProperty] private string? _error;
         [ObservableProperty] private MessageVM? _replyMessage;

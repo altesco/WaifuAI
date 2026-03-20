@@ -116,42 +116,65 @@ async function loadFBX(animationUrl, isLooped = false) {
 }
 
 function loadVRM(modelUrl) {
-  const loader = new GLTFLoader();
-  loader.register((parser) => new VRMLoaderPlugin(parser, { autoUpdateHumanBones: true }));
+  // Возвращаем Promise, чтобы await в changeModel работал корректно
+  return new Promise((resolve, reject) => {
+    const loader = new GLTFLoader();
+    loader.register((parser) => new VRMLoaderPlugin(parser, { autoUpdateHumanBones: true }));
 
-  loader.load(modelUrl, async (gltf) => {
-    const vrm = gltf.userData.vrm;
-    VRMUtils.removeUnnecessaryVertices(gltf.scene);
-    VRMUtils.combineSkeletons(gltf.scene);
-    VRMUtils.combineMorphs(vrm);
+    loader.load(
+      modelUrl,
+      async (gltf) => {
+        try {
+          const vrm = gltf.userData.vrm;
+          VRMUtils.removeUnnecessaryVertices(gltf.scene);
+          VRMUtils.combineSkeletons(gltf.scene);
+          VRMUtils.combineMorphs(vrm);
 
-    if (currentVrm) {
-      scene.remove(currentVrm.scene);
-      VRMUtils.deepDispose(currentVrm.scene);
-    }
+          if (currentVrm) {
+            scene.remove(currentVrm.scene);
+            VRMUtils.deepDispose(currentVrm.scene);
+          }
 
-    currentVrm = vrm;
-    const leftUpperArm = vrm.humanoid.getRawBoneNode('leftUpperArm');
-    const rightUpperArm = vrm.humanoid.getRawBoneNode('rightUpperArm');
-    if (leftUpperArm) leftUpperArm.rotation.set(0, 0, 0.8); // Подбери значение
-    if (rightUpperArm) rightUpperArm.rotation.set(0, 0, -0.8);
+          currentVrm = vrm;
 
-    scene.add(vrm.scene);
-    VRMUtils.rotateVRM0(vrm);
-    currentMixer = new THREE.AnimationMixer(vrm.scene);
+          // Настройка поз
+          const leftUpperArm = vrm.humanoid.getRawBoneNode('leftUpperArm');
+          const rightUpperArm = vrm.humanoid.getRawBoneNode('rightUpperArm');
+          if (leftUpperArm) leftUpperArm.rotation.set(0, 0, 0.8);
+          if (rightUpperArm) rightUpperArm.rotation.set(0, 0, -0.8);
 
-    // ПРЕДЗАГРУЗКА
-    await preloadAnimations(vrm);
+          scene.add(vrm.scene);
+          VRMUtils.rotateVRM0(vrm);
+          currentMixer = new THREE.AnimationMixer(vrm.scene);
 
-    // После загрузки всех анимаций запускаем Idle
-    const idleUrl = '/animations/StandingIdle.fbx';
-    if (animationCache.has(idleUrl)) {
-      idleAction = currentMixer.clipAction(animationCache.get(idleUrl));
-      idleAction.play();
-      currentAction = idleAction;
-    }
+          // Ждем предзагрузку анимаций
+          await preloadAnimations(vrm);
 
-    vrm.scene.traverse((obj) => { obj.frustumCulled = false; });
+          // Запуск Idle
+          const idleUrl = '/animations/StandingIdle.fbx';
+          if (animationCache.has(idleUrl)) {
+            idleAction = currentMixer.clipAction(animationCache.get(idleUrl));
+            idleAction.play();
+            currentAction = idleAction;
+          }
+
+          vrm.scene.traverse((obj) => { obj.frustumCulled = false; });
+
+          console.log("JS: Внутренняя логика загрузки завершена");
+          resolve(); // ТОЛЬКО ТЕПЕРЬ Promise считается выполненным
+        } catch (err) {
+          reject(err);
+        }
+      },
+      (progress) => {
+        // Можно логировать прогресс, если надо
+        // console.log('Loading...', (progress.loaded / progress.total * 100) + '%');
+      },
+      (error) => {
+        console.error("Ошибка загрузчика:", error);
+        reject(error);
+      }
+    );
   });
 }
 
@@ -327,9 +350,15 @@ window.addEventListener('click', () => {
   if (audioContext.state === 'suspended') audioContext.resume();
 }, { once: true });
 
+window.vrmApp.isModelLoaded = 0;
+
 window.vrmApp.changeModel = async (modelUrl) => {
-  if (currentMixer) {
-    currentMixer.stopAllAction();
+  window.vrmApp.isModelLoaded = 0;
+  try {
+    await loadVRM(modelUrl);
+    window.vrmApp.isModelLoaded = 1;
+  } catch (e) {
+    console.error(e);
+    window.vrmApp.isModelLoaded = -1;
   }
-  loadVRM(modelUrl);
 };

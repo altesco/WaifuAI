@@ -30,10 +30,27 @@ namespace WaifuAI.Views
         {
             InitializeComponent();
             _lastLeftBarWidth = MainGrid.ColumnDefinitions[1].Width;
-            _lastRightBarWidth = MainGrid.ColumnDefinitions[3].Width;
+            _lastRightBarWidth = MainGrid.ColumnDefinitions[3].Width;        
             WeakReferenceMessenger.Default.Register<ExecuteScriptMessage>(this, (_, m) =>
             {
                 MyWebView.ExecuteScript(m.Value);
+            });
+            WeakReferenceMessenger.Default.Register<MainWindow, EvaluateScriptMessage>(this, (r, m) =>
+            {
+                var evalTask = Task.Run(async () =>
+                {
+                    try 
+                    {
+                        var result = await MyWebView.EvaluateScript<int>(m.Script);
+                        Console.WriteLine(result);
+                        return result;
+                    }
+                    catch 
+                    {
+                        return -1;
+                    }
+                });
+                m.Reply(evalTask);
             });
         }
 

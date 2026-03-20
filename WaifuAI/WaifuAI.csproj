@@ -42,6 +42,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="ActiproSoftware.Controls.Avalonia" Version="25.2.3" />
     <PackageReference Include="Avalonia" Version="11.3.9" />
     <PackageReference Include="Avalonia.Desktop" Version="11.3.9" />
     <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.9" />
@@ -55,6 +56,7 @@
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.1" />
     <PackageReference Include="Cyrillic.Convert" Version="3.2.1" />
     <PackageReference Include="EmbedIO" Version="3.5.2" />
+    <PackageReference Include="LoadingIndicators.Avalonia" Version="11.0.5" />
     <PackageReference Include="Lucide.Avalonia" Version="0.1.60" />
     <PackageReference Include="Material.Avalonia" Version="3.13.4" />
     <PackageReference Include="WebViewControl-Avalonia" Version="3.120.11" />

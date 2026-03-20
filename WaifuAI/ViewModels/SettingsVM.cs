@@ -22,7 +22,7 @@ namespace WaifuAI.ViewModels;
 
 public partial class SettingsVM : ObservableValidator
 {
-    private SettingsVM() { }
+    private SettingsVM() { }   
     
     private static SettingsVM? _instance;
     public static SettingsVM Instance => _instance ??= new SettingsVM();
@@ -77,6 +77,9 @@ public partial class SettingsVM : ObservableValidator
         else
             Directory.CreateDirectory(Model3DFolder);
         RefreshModels3D();
+
+        // Servers
+        
 
         _isLoading = false;
     }
@@ -305,34 +308,59 @@ public partial class SettingsVM : ObservableValidator
         RefreshModels3D();
     }
 
-    partial void OnSelectedModel3DChanged(string? oldValue, string newValue)
+    [ObservableProperty] private bool _isModel3DLoading;
+
+    partial void OnSelectedModel3DChanged(string value)
     {
+        IsModel3DLoading = true;
         Directory.CreateDirectory(BaseModel3DFolder);
         string url;
         if (Model3DFolder != BaseModel3DFolder)
         {
             // remove old temp
-            if (oldValue != null)
-            {
-                var files = Directory.GetFiles(BaseModel3DFolder, "temp_*.vrm");
+            var files = Directory.GetFiles(BaseModel3DFolder, "temp_*.vrm");
                 if (files.Length > 0)
                     foreach (var file in files)
-                        File.Delete(file);   
-            }
+                        File.Delete(file);  
             // set new temp
             var time = DateTime.Now.ToString("dd_MM_yyyy_HH_mm_ss");
             var fileName = $"temp_{time}.vrm";
-            var source = Path.Combine(Model3DFolder, newValue);
+            var source = Path.Combine(Model3DFolder, value);
             var target = Path.Combine(BaseModel3DFolder, fileName);
             File.Copy(source, target, true);
             url = $"./models/{fileName}";
         }
         else
-            url = $"./models/{newValue}";
-        WeakReferenceMessenger.Default.Send(
-            new ExecuteScriptMessage(
-                $"window.vrmApp.changeModel('{url}')"
-                ));
+            url = $"./models/{value}";
+        string script = $"window.vrmApp.changeModel('{url}')";
+        WeakReferenceMessenger.Default.Send(new ExecuteScriptMessage(script));
+        _ = Task.Run(async () =>
+        {
+            while (IsModel3DLoading)
+            {
+                await Task.Delay(2000);
+                try
+                {
+                    var message = new EvaluateScriptMessage("return window.vrmApp.isModelLoaded");
+                    await WeakReferenceMessenger.Default.Send(message);
+                    var responce = await message.Response;
+                    if (responce is Task<int> internalTask)
+                    {
+                        int status = await internalTask;
+                        if (status == 1)
+                            IsModel3DLoading = false;
+                    }
+                }
+                catch (TimeoutException)
+                {
+                    Console.WriteLine("[Цикл] UI-поток не ответил вовремя, пробуем снова...");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Ошибка в опросе: {ex.Message}");
+                }
+            }
+        });
     }
 
     private void RefreshModels3D()
@@ -349,4 +377,5 @@ public partial class SettingsVM : ObservableValidator
 
     #endregion
 
+    
 }

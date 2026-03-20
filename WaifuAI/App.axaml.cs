@@ -33,7 +33,7 @@ namespace WaifuAI
                 DisableAvaloniaDataAnnotationValidation();
                 desktop.MainWindow = new MainWindow
                 {
-                    DataContext = new MainVM(),
+                    DataContext = new MainVM()
                 };
                 InputElement.KeyDownEvent.AddClassHandler(
                     typeof(TextBox), 
