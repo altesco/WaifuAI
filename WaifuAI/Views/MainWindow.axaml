@@ -62,200 +62,798 @@
             </Setter>
         </ControlTheme>
     </Window.Resources>
-    <Grid x:Name="RootPanel" RowDefinitions="40,*" PointerPressed="OnBackgroundPointerPressed" Focusable="True">
+    <Grid 
+        x:Name="RootPanel" 
+        PointerPressed="OnBackgroundPointerPressed" 
+        Focusable="True">
         <Grid.Styles>
             <Style Selector="Button">
-                <Setter Property="Width" Value="28" />
-                <Setter Property="Height" Value="28" />
-                <Setter Property="Background" Value="Transparent" />
-                <Setter Property="Padding" Value="0" />
-                <Setter Property="CornerRadius" Value="5" />
-                <Setter Property="Cursor" Value="Hand" />
-            </Style>
+                    <Setter Property="Width" Value="28" />
+                    <Setter Property="Height" Value="28" />
+                    <Setter Property="Background" Value="Transparent" />
+                    <Setter Property="Padding" Value="0" />
+                    <Setter Property="CornerRadius" Value="5" />
+                    <Setter Property="Cursor" Value="Hand" />
+                </Style>
             <Style Selector="ToggleButton">
-                <Setter Property="Width" Value="28" />
-                <Setter Property="Height" Value="28" />
-                <Setter Property="Background" Value="Transparent" />
-                <Setter Property="Padding" Value="0" />
-                <Setter Property="CornerRadius" Value="5" />
-                <Setter Property="Cursor" Value="Hand" />
-            </Style>
+                    <Setter Property="Width" Value="28" />
+                    <Setter Property="Height" Value="28" />
+                    <Setter Property="Background" Value="Transparent" />
+                    <Setter Property="Padding" Value="0" />
+                    <Setter Property="CornerRadius" Value="5" />
+                    <Setter Property="Cursor" Value="Hand" />
+                </Style>
             <Style Selector="ContextMenu">
-                <Setter Property="CornerRadius" Value="7" />
-                <Setter Property="Background" Value="{DynamicResource SystemChromeLowColor}" />
-                <Setter Property="Padding" Value="6,1,6,1" />
-                <Setter Property="Cursor" Value="Arrow" />
-            </Style>
+                    <Setter Property="CornerRadius" Value="7" />
+                    <Setter Property="Background" Value="{DynamicResource SystemChromeLowColor}" />
+                    <Setter Property="Padding" Value="6,1,6,1" />
+                    <Setter Property="Cursor" Value="Arrow" />
+                </Style>
             <Style Selector="MenuItem">
-                <Setter Property="CornerRadius" Value="4" />
-                <Setter Property="FontSize" Value="13" />
-            </Style>
+                    <Setter Property="CornerRadius" Value="4" />
+                    <Setter Property="FontSize" Value="13" />
+                </Style>
             <Style Selector="MenuItem:pointerover /template/ Border#PART_LayoutRoot,                   MenuItem:selected /template/ Border#PART_LayoutRoot">
-                <Setter Property="Background" Value="{DynamicResource ButtonBackgroundPointerOver}" />
-            </Style>
+                    <Setter Property="Background" Value="{DynamicResource ButtonBackgroundPointerOver}" />
+                </Style>
             <Style Selector="LucideIcon:disabled">
-                <Setter Property="Opacity" Value="0.5" />
-            </Style>
+                    <Setter Property="Opacity" Value="0.5" />
+                </Style>
             <Style Selector="TextBox">
-                <Setter Property="CornerRadius" Value="5" />
-                <Setter Property="FontFamily" Value="{StaticResource CascadiaCode}" />
-                <Setter Property="Height" Value="30"/>
-                <Setter Property="MinHeight" Value="0"/>
-                <Setter Property="MinWidth" Value="0"/>
-                <Setter Property="ContextMenu">
-                    <Setter.Value>
-                        <ContextMenu>
-                            <MenuItem
-                                Command="{Binding $parent[TextBox].Copy}"
-                                Header="Копировать"
-                                IsEnabled="{Binding $parent[TextBox].CanCopy}">
-                                <MenuItem.Icon>
-                                    <LucideIcon Kind="Copy" Size="20" />
-                                </MenuItem.Icon>
-                            </MenuItem>
-                            <MenuItem
-                                Command="{Binding ManualCut}"
-                                CommandParameter="{Binding $parent[TextBox]}"
-                                Header="Вырезать"
-                                IsEnabled="{Binding $parent[TextBox].CanCut}">
-                                <MenuItem.Icon>
-                                    <LucideIcon Kind="Scissors" Size="20" />
-                                </MenuItem.Icon>
-                            </MenuItem>
-                            <MenuItem
-                                Command="{Binding $parent[TextBox].Paste}"
-                                Header="Вставить"
-                                IsEnabled="{Binding $parent[TextBox].CanPaste}">
-                                <MenuItem.Icon>
-                                    <LucideIcon Kind="ClipboardPaste" Size="20" />
-                                </MenuItem.Icon>
-                            </MenuItem>
-                            <MenuItem Command="{Binding $parent[TextBox].SelectAll}" Header="Выделить все">
-                                <MenuItem.Icon>
-                                    <LucideIcon Kind="SquareDashed" Size="20" />
-                                </MenuItem.Icon>
-                            </MenuItem>
-                        </ContextMenu>
-                    </Setter.Value>
-                </Setter>
-            </Style>
+                    <Setter Property="CornerRadius" Value="5" />
+                    <Setter Property="FontFamily" Value="{StaticResource CascadiaCode}" />
+                    <Setter Property="Height" Value="30"/>
+                    <Setter Property="MinHeight" Value="0"/>
+                    <Setter Property="MinWidth" Value="0"/>
+                    <Setter Property="ContextMenu">
+                        <Setter.Value>
+                            <ContextMenu>
+                                <MenuItem
+                                    Command="{Binding $parent[TextBox].Copy}"
+                                    Header="Копировать"
+                                    IsEnabled="{Binding $parent[TextBox].CanCopy}">
+                                    <MenuItem.Icon>
+                                        <LucideIcon Kind="Copy" Size="20" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem
+                                    Command="{Binding ManualCut}"
+                                    CommandParameter="{Binding $parent[TextBox]}"
+                                    Header="Вырезать"
+                                    IsEnabled="{Binding $parent[TextBox].CanCut}">
+                                    <MenuItem.Icon>
+                                        <LucideIcon Kind="Scissors" Size="20" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem
+                                    Command="{Binding $parent[TextBox].Paste}"
+                                    Header="Вставить"
+                                    IsEnabled="{Binding $parent[TextBox].CanPaste}">
+                                    <MenuItem.Icon>
+                                        <LucideIcon Kind="ClipboardPaste" Size="20" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding $parent[TextBox].SelectAll}" Header="Выделить все">
+                                    <MenuItem.Icon>
+                                        <LucideIcon Kind="SquareDashed" Size="20" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                            </ContextMenu>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
             <Style Selector="Slider /template/ Thumb">
-                <Setter Property="Template">
-                    <ControlTemplate>
-                        <Border 
-                            Background="{Binding $parent[Window].Background}"
-                            Height="20"
-                            Width="20"
-                            CornerRadius="10"
-                            BorderBrush="#bbbfcb" 
-                            BorderThickness="1"/> 
-                    </ControlTemplate>
-                </Setter>
-            </Style>
-            <Style Selector="ComboBox">
-                <Setter Property="CornerRadius" Value="5"/>
-                <Setter Property="Height" Value="30"/>
-            </Style>
-            <Style Selector="DataValidationErrors">
-                <Setter Property="Template">
-                    <Setter.Value>
+                    <Setter Property="Template">
                         <ControlTemplate>
-                            <ContentPresenter 
-                                Name="PART_ContentPresenter"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="{TemplateBinding CornerRadius}"
-                                Padding="{TemplateBinding Padding}"
-                                Content="{TemplateBinding Content}"
-                                ContentTemplate="{TemplateBinding ContentTemplate}" />
+                            <Border 
+                                Background="{Binding $parent[Window].Background}"
+                                Height="20"
+                                Width="20"
+                                CornerRadius="10"
+                                BorderBrush="#bbbfcb" 
+                                BorderThickness="1"/> 
                         </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
-            </Style>
+                    </Setter>
+                </Style>
+            <Style Selector="ComboBox">
+                    <Setter Property="CornerRadius" Value="5"/>
+                    <Setter Property="Height" Value="30"/>
+                </Style>
+            <Style Selector="DataValidationErrors">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate>
+                                <ContentPresenter 
+                                    Name="PART_ContentPresenter"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="{TemplateBinding CornerRadius}"
+                                    Padding="{TemplateBinding Padding}"
+                                    Content="{TemplateBinding Content}"
+                                    ContentTemplate="{TemplateBinding ContentTemplate}" />
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
             <Style Selector="Arc.loading">
-                <Style.Animations>
-                    <Animation Duration="0:0:1" IterationCount="Infinite">
-                        <KeyFrame Cue="0%">
-                            <Setter Property="RotateTransform.Angle" Value="0"/>
-                        </KeyFrame>
-                        <KeyFrame Cue="100%">
-                            <Setter Property="RotateTransform.Angle" Value="360"/>
-                        </KeyFrame>
-                    </Animation>
-                </Style.Animations>
-            </Style>    
+                    <Style.Animations>
+                        <Animation Duration="0:0:1" IterationCount="Infinite">
+                            <KeyFrame Cue="0%">
+                                <Setter Property="RotateTransform.Angle" Value="0"/>
+                            </KeyFrame>
+                            <KeyFrame Cue="100%">
+                                <Setter Property="RotateTransform.Angle" Value="360"/>
+                            </KeyFrame>
+                        </Animation>
+                    </Style.Animations>
+                </Style>    
         </Grid.Styles>
-        <Border
-            Background="{DynamicResource SystemChromeMediumColor}"
-            BorderBrush="#bbbfcb"
-            BorderThickness="0,0,0,1">
-            <Grid>
-                <StackPanel Orientation="Horizontal">
-                    <Border Width="40">
-                        <LucideIcon
-                            Kind="PawPrint"
-                            Size="20"
-                            StrokeWidth="2" />
-                    </Border>
-                    <TextBlock
-                        VerticalAlignment="Center"
-                        FontWeight="DemiBold"
-                        Text="WaifuAI" />
-                </StackPanel>
-                <StackPanel
-                    Margin="6,4"
-                    HorizontalAlignment="Right"
-                    Orientation="Horizontal"
-                    Spacing="2">
-                    <Button>
-                        <LucideIcon Kind="Search" Size="20" />
-                    </Button>
-                    <Button Command="{Binding SettingsCommand}">
-                        <LucideIcon Kind="Settings" Size="20" />
-                    </Button>
-                </StackPanel>
-            </Grid>
-        </Border>
-        <Grid x:Name="MainGrid" Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="40" />
-                <ColumnDefinition Width="350" MinWidth="400" />
-                <ColumnDefinition />
-                <ColumnDefinition Width="350" MinWidth="256" />
-                <ColumnDefinition Width="40" />
-            </Grid.ColumnDefinitions>
+        <Grid RowDefinitions="40,*" Classes.blurred="{Binding IsSettingsOpen}">
+            <Grid.Styles>
+                <Style Selector="Grid.blurred">
+                    <Setter Property="Effect">
+                        <Setter.Value>
+                            <BlurEffect Radius="10"/>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </Grid.Styles>
             <Border
-                Background="{DynamicResource SystemChromeLowColor}"
+                Background="{DynamicResource SystemChromeMediumColor}"
                 BorderBrush="#bbbfcb"
-                BorderThickness="0,0,1,0">
-                <StackPanel
-                    Margin="5"
-                    HorizontalAlignment="Center"
-                    Spacing="4">
-                    <ToggleButton
-                        x:Name="ChatButton"
-                        IsChecked="True"
-                        IsCheckedChanged="LeftToggleButton_OnIsCheckedChanged">
-                        <LucideIcon Kind="MessageSquareText" Size="20" />
-                    </ToggleButton>
-                    <ToggleButton x:Name="PersonalityButton" IsCheckedChanged="LeftToggleButton_OnIsCheckedChanged">
-                        <LucideIcon Kind="BookText" Size="20" />
-                    </ToggleButton>
-                    <ToggleButton x:Name="MemoryButton" IsCheckedChanged="LeftToggleButton_OnIsCheckedChanged">
-                        <LucideIcon Kind="Brain" Size="20" />
-                    </ToggleButton>
-                </StackPanel>
+                BorderThickness="0,0,0,1">
+                <Grid>
+                    <StackPanel Orientation="Horizontal">
+                        <Border Width="40">
+                            <LucideIcon
+                                Kind="PawPrint"
+                                Size="20"
+                                StrokeWidth="2" />
+                        </Border>
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontWeight="DemiBold"
+                            Text="WaifuAI" />
+                    </StackPanel>
+                    <StackPanel
+                        Margin="6,4"
+                        HorizontalAlignment="Right"
+                        Orientation="Horizontal"
+                        Spacing="2">
+                        <Button>
+                            <LucideIcon Kind="Search" Size="20" />
+                        </Button>
+                        <Button Command="{Binding SettingsCommand}">
+                            <LucideIcon Kind="Settings" Size="20" />
+                        </Button>
+                    </StackPanel>
+                </Grid>
             </Border>
-            <Border
-                x:Name="ChatPanel"
-                Grid.Column="1"
-                Background="{DynamicResource SystemChromeLowColor}"
-                BorderBrush="#bbbfcb"
-                BorderThickness="0,0,1,0">
-                <Panel>
-                    <!--  Chat  -->
-                    <Grid IsVisible="{Binding #ChatButton.IsChecked}" RowDefinitions="Auto,*,Auto">
+            <Grid x:Name="MainGrid" Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="40" />
+                    <ColumnDefinition Width="350" MinWidth="400" />
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="350" MinWidth="256" />
+                    <ColumnDefinition Width="40" />
+                </Grid.ColumnDefinitions>
+                <Border
+                    Background="{DynamicResource SystemChromeLowColor}"
+                    BorderBrush="#bbbfcb"
+                    BorderThickness="0,0,1,0">
+                    <StackPanel
+                        Margin="5"
+                        HorizontalAlignment="Center"
+                        Spacing="4">
+                        <ToggleButton
+                            x:Name="ChatButton"
+                            IsChecked="True"
+                            IsCheckedChanged="LeftToggleButton_OnIsCheckedChanged">
+                            <LucideIcon Kind="MessageSquareText" Size="20" />
+                        </ToggleButton>
+                        <ToggleButton x:Name="PersonalityButton" IsCheckedChanged="LeftToggleButton_OnIsCheckedChanged">
+                            <LucideIcon Kind="BookText" Size="20" />
+                        </ToggleButton>
+                        <ToggleButton x:Name="MemoryButton" IsCheckedChanged="LeftToggleButton_OnIsCheckedChanged">
+                            <LucideIcon Kind="Brain" Size="20" />
+                        </ToggleButton>
+                    </StackPanel>
+                </Border>
+                <Border
+                    x:Name="ChatPanel"
+                    Grid.Column="1"
+                    Background="{DynamicResource SystemChromeLowColor}"
+                    BorderBrush="#bbbfcb"
+                    BorderThickness="0,0,1,0">
+                    <Panel>
+                        <!--  Chat  -->
+                        <Grid IsVisible="{Binding #ChatButton.IsChecked}" RowDefinitions="Auto,*,Auto">
+                            <Border
+                                Height="48"
+                                BorderBrush="#bbbfcb"
+                                BorderThickness="0,0,0,1">
+                                <TextBlock
+                                    Margin="16,0,16,0"
+                                    VerticalAlignment="Center"
+                                    FontSize="18"
+                                    FontWeight="Bold"
+                                    Text="Чат"
+                                    TextTrimming="CharacterEllipsis" />
+                            </Border>
+                            <ListBox
+                                x:Name="MessageList"
+                                Grid.Row="1"
+                                Padding="6"
+                                Background="{DynamicResource SystemChromeLowColor}"
+                                ItemsSource="{Binding Chat}"
+                                SelectedItem="{Binding SelectedMessage, Mode=TwoWay}">
+                                <ListBox.Styles>
+                                    <Style Selector="ListBox /template/ ItemsPresenter">
+                                        <Setter Property="MaxWidth" Value="720" />
+                                    </Style>
+                                </ListBox.Styles>
+                                <ListBox.ItemContainerTheme>
+                                    <ControlTheme TargetType="ListBoxItem">
+                                        <Setter Property="Padding" Value="6" />
+                                        <Setter Property="Background" Value="Transparent" />
+                                    </ControlTheme>
+                                </ListBox.ItemContainerTheme>
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid ColumnDefinitions="Auto,*,Auto">
+                                            <Border
+                                                MinHeight="32"
+                                                MaxWidth="360"
+                                                Padding="12,6,12,6"
+                                                Background="LightSkyBlue"
+                                                Tag="{Binding MessageModel.Role}">
+                                                <Border.Styles>
+                                                    <Style Selector="Border">
+                                                        <Setter Property="Grid.Column" Value="2" />
+                                                        <Setter Property="CornerRadius" Value="16,16,4,16" />
+                                                        <Setter Property="ContextMenu">
+                                                            <Setter.Value>
+                                                                <ContextMenu>
+                                                                    <MenuItem
+                                                                        x:DataType="vm:MainVM"
+                                                                        Command="{Binding CopyMessageTextCommand}"
+                                                                        CommandParameter="{Binding #PART_SelectableTextBlock}"
+                                                                        DataContext="{Binding $parent[ListBox].DataContext}"
+                                                                        Header="Копировать текст">
+                                                                        <MenuItem.Icon>
+                                                                            <LucideIcon Kind="Copy" Size="20" />
+                                                                        </MenuItem.Icon>
+                                                                    </MenuItem>
+                                                                    <MenuItem
+                                                                        x:DataType="vm:MainVM"
+                                                                        Command="{Binding MakeReplyCommand}"
+                                                                        DataContext="{Binding $parent[ListBox].DataContext}"
+                                                                        Header="Ответить на сообщение">
+                                                                        <MenuItem.Icon>
+                                                                            <LucideIcon Kind="MessageSquareReply" Size="20" />
+                                                                        </MenuItem.Icon>
+                                                                    </MenuItem>
+                                                                    <MenuItem Header="Удалить">
+                                                                        <MenuItem.Icon>
+                                                                            <LucideIcon Kind="Trash2" Size="20" />
+                                                                        </MenuItem.Icon>
+                                                                    </MenuItem>
+                                                                </ContextMenu>
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </Style>
+                                                    <Style Selector="Border[Tag=assistant]">
+                                                        <Setter Property="Grid.Column" Value="0" />
+                                                        <Setter Property="CornerRadius" Value="16,16,16,4" />
+                                                        <Setter Property="ContextMenu">
+                                                            <Setter.Value>
+                                                                <ContextMenu>
+                                                                    <MenuItem
+                                                                        x:DataType="vm:MainVM"
+                                                                        Command="{Binding CopyMessageTextCommand}"
+                                                                        CommandParameter="{Binding #PART_SelectableTextBlock}"
+                                                                        DataContext="{Binding $parent[ListBox].DataContext}"
+                                                                        Header="Копировать текст">
+                                                                        <MenuItem.Icon>
+                                                                            <LucideIcon Kind="Copy" Size="20" />
+                                                                        </MenuItem.Icon>
+                                                                    </MenuItem>
+                                                                    <MenuItem
+                                                                        x:DataType="vm:MainVM"
+                                                                        Command="{Binding MakeReplyCommand}"
+                                                                        DataContext="{Binding $parent[ListBox].DataContext}"
+                                                                        Header="Ответить на сообщение">
+                                                                        <MenuItem.Icon>
+                                                                            <LucideIcon Kind="MessageSquareReply" Size="20" />
+                                                                        </MenuItem.Icon>
+                                                                    </MenuItem>
+                                                                    <MenuItem Header="Удалить">
+                                                                        <MenuItem.Icon>
+                                                                            <LucideIcon Kind="Trash2" Size="20" />
+                                                                        </MenuItem.Icon>
+                                                                    </MenuItem>
+                                                                </ContextMenu>
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </Style>
+                                                    <Style Selector="Border[Tag=temp]">
+                                                        <Setter Property="Grid.Column" Value="0" />
+                                                        <Setter Property="CornerRadius" Value="16,16,16,4" />
+                                                        <Setter Property="Width" Value="64" />
+                                                        <Setter Property="ContextMenu" Value="{x:Null}" />
+                                                    </Style>
+                                                </Border.Styles>
+                                                <Grid>
+                                                    <StackPanel Spacing="2">
+                                                        <Button
+                                                            Width="Nan"
+                                                            Height="Nan"
+                                                            Padding="0"
+                                                            Background="Yellow"
+                                                            BorderThickness="0"
+                                                            CornerRadius="6,12,6,6"
+                                                            IsVisible="{Binding ReplyMessage, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                                            <Grid ColumnDefinitions="4,*">
+                                                                <Border
+                                                                    Grid.Column="0"
+                                                                    Width="4"
+                                                                    Background="Blue"
+                                                                    CornerRadius="6,0,0,6" />
+                                                                <StackPanel
+                                                                    Grid.Column="1"
+                                                                    Margin="4"
+                                                                    Spacing="2">
+                                                                    <TextBlock
+                                                                        HorizontalAlignment="Left"
+                                                                        FontWeight="Bold"
+                                                                        Tag="{Binding ReplyMessage.MessageModel.Role}"
+                                                                        TextTrimming="CharacterEllipsis">
+                                                                        <TextBlock.Styles>
+                                                                            <Style Selector="TextBlock[Tag=assistant]">
+                                                                                <Setter Property="Text" Value="Вайфу" />
+                                                                            </Style>
+                                                                            <Style Selector="TextBlock[Tag=user]">
+                                                                                <Setter Property="Text" Value="Пользователь" />
+                                                                            </Style>
+                                                                        </TextBlock.Styles>
+                                                                    </TextBlock>
+                                                                    <TextBlock
+                                                                        HorizontalAlignment="Left"
+                                                                        Text="{Binding ReplyMessage.Quote}"
+                                                                        TextTrimming="CharacterEllipsis" />
+                                                                </StackPanel>
+                                                            </Grid>
+                                                        </Button>
+                                                        <SelectableTextBlock
+                                                            x:Name="PART_SelectableTextBlock"
+                                                            HorizontalAlignment="Left"
+                                                            VerticalAlignment="Center"
+                                                            Initialized="PART_SelectableTextBlock_Initialized"
+                                                            SelectionEnd="{Binding SelectionEnd, Mode=TwoWay}"
+                                                            SelectionStart="{Binding SelectionStart, Mode=TwoWay}"
+                                                            Text="{Binding MessageModel.Content}"
+                                                            TextWrapping="Wrap">
+                                                            <SelectableTextBlock.ContextMenu>
+                                                                <ContextMenu>
+                                                                    <MenuItem
+                                                                        x:DataType="vm:MainVM"
+                                                                        DataContext="{Binding $parent[ListBox].DataContext}"
+                                                                        Tag="{Binding #PART_SelectableTextBlock.CanCopy}">
+                                                                        <MenuItem.Icon>
+                                                                            <LucideIcon Kind="Copy" Size="20" />
+                                                                        </MenuItem.Icon>
+                                                                        <MenuItem.Styles>
+                                                                            <Style Selector="MenuItem[Tag=True]">
+                                                                                <Setter Property="Header" Value="Копировать выделенное" />
+                                                                                <Setter Property="Command" Value="{Binding #PART_SelectableTextBlock.Copy}" />
+                                                                            </Style>
+                                                                            <Style Selector="MenuItem[Tag=False]">
+                                                                                <Setter Property="Header" Value="Копировать текст" />
+                                                                                <Setter Property="Command" Value="{Binding CopyMessageTextCommand}" />
+                                                                                <Setter Property="CommandParameter" Value="{Binding #PART_SelectableTextBlock}" />
+                                                                            </Style>
+                                                                        </MenuItem.Styles>
+                                                                    </MenuItem>
+                                                                    <MenuItem
+                                                                        x:DataType="vm:MainVM"
+                                                                        DataContext="{Binding $parent[ListBox].DataContext}"
+                                                                        Tag="{Binding #PART_SelectableTextBlock.CanCopy}">
+                                                                        <MenuItem.Styles>
+                                                                            <Style Selector="MenuItem[Tag=True]">
+                                                                                <Setter Property="Header" Value="Ответить на цитату" />
+                                                                                <Setter Property="Icon">
+                                                                                    <Setter.Value>
+                                                                                        <Template>
+                                                                                            <LucideIcon Kind="MessageSquareQuote" Size="20" />
+                                                                                        </Template>
+                                                                                    </Setter.Value>
+                                                                                </Setter>
+                                                                                <Setter Property="Command" Value="{Binding MakeQuoteCommand}" />
+                                                                                <Setter Property="CommandParameter" Value="{Binding #PART_SelectableTextBlock.SelectedText}" />
+                                                                            </Style>
+                                                                            <Style Selector="MenuItem[Tag=False]">
+                                                                                <Setter Property="Header" Value="Ответить на сообщение" />
+                                                                                <Setter Property="Icon">
+                                                                                    <Setter.Value>
+                                                                                        <Template>
+                                                                                            <LucideIcon Kind="MessageSquareReply" Size="20" />
+                                                                                        </Template>
+                                                                                    </Setter.Value>
+                                                                                </Setter>
+                                                                                <Setter Property="Command" Value="{Binding MakeReplyCommand}" />
+                                                                            </Style>
+                                                                        </MenuItem.Styles>
+                                                                    </MenuItem>
+                                                                    <MenuItem Header="Удалить">
+                                                                        <MenuItem.Icon>
+                                                                            <LucideIcon Kind="Trash2" Size="20" />
+                                                                        </MenuItem.Icon>
+                                                                    </MenuItem>
+                                                                </ContextMenu>
+                                                            </SelectableTextBlock.ContextMenu>
+                                                        </SelectableTextBlock>
+                                                        <TextBlock
+                                                            HorizontalAlignment="Right"
+                                                            FontSize="12"
+                                                            IsVisible="{Binding MessageModel.Role, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter=temp}"
+                                                            Opacity="0.5"
+                                                            Text="{Binding Time}" />
+                                                    </StackPanel>
+                                                    <!--  Loading animation  -->
+                                                    <StackPanel
+                                                        Grid.Column="0"
+                                                        HorizontalAlignment="Center"
+                                                        IsVisible="{Binding MessageModel.Role, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=temp}"
+                                                        Orientation="Horizontal"
+                                                        Spacing="5">
+                                                        <StackPanel.Styles>
+                                                            <Style Selector="Ellipse.dot">
+                                                                <Setter Property="Width" Value="8" />
+                                                                <Setter Property="Height" Value="8" />
+                                                                <Setter Property="Fill" Value="{DynamicResource SystemBaseHighColor}" />
+                                                                <Setter Property="RenderTransformOrigin" Value="50%,50%" />
+                                                            </Style>
+                                                            <Style Selector="Ellipse.dot1">
+                                                                <Style.Animations>
+                                                                    <Animation
+                                                                        Delay="0:0:0.0"
+                                                                        IterationCount="Infinite"
+                                                                        Duration="0:0:1.2">
+                                                                        <KeyFrame Cue="0%">
+                                                                            <Setter Property="Opacity" Value="0.2" />
+                                                                            <Setter Property="ScaleTransform.ScaleX" Value="0.8" />
+                                                                            <Setter Property="ScaleTransform.ScaleY" Value="0.8" />
+                                                                        </KeyFrame>
+                                                                        <KeyFrame Cue="50%">
+                                                                            <Setter Property="Opacity" Value="1" />
+                                                                            <Setter Property="ScaleTransform.ScaleX" Value="1.2" />
+                                                                            <Setter Property="ScaleTransform.ScaleY" Value="1.2" />
+                                                                        </KeyFrame>
+                                                                        <KeyFrame Cue="100%">
+                                                                            <Setter Property="Opacity" Value="0.2" />
+                                                                            <Setter Property="ScaleTransform.ScaleX" Value="0.8" />
+                                                                            <Setter Property="ScaleTransform.ScaleY" Value="0.8" />
+                                                                        </KeyFrame>
+                                                                    </Animation>
+                                                                </Style.Animations>
+                                                            </Style>
+                                                            <Style Selector="Ellipse.dot2">
+                                                                <Style.Animations>
+                                                                    <Animation
+                                                                        Delay="0:0:0.4"
+                                                                        IterationCount="Infinite"
+                                                                        Duration="0:0:1.2">
+                                                                        <KeyFrame Cue="0%">
+                                                                            <Setter Property="Opacity" Value="0.2" />
+                                                                            <Setter Property="ScaleTransform.ScaleX" Value="0.8" />
+                                                                            <Setter Property="ScaleTransform.ScaleY" Value="0.8" />
+                                                                        </KeyFrame>
+                                                                        <KeyFrame Cue="50%">
+                                                                            <Setter Property="Opacity" Value="1" />
+                                                                            <Setter Property="ScaleTransform.ScaleX" Value="1.2" />
+                                                                            <Setter Property="ScaleTransform.ScaleY" Value="1.2" />
+                                                                        </KeyFrame>
+                                                                        <KeyFrame Cue="100%">
+                                                                            <Setter Property="Opacity" Value="0.2" />
+                                                                            <Setter Property="ScaleTransform.ScaleX" Value="0.8" />
+                                                                            <Setter Property="ScaleTransform.ScaleY" Value="0.8" />
+                                                                        </KeyFrame>
+                                                                    </Animation>
+                                                                </Style.Animations>
+                                                            </Style>
+                                                            <Style Selector="Ellipse.dot3">
+                                                                <Style.Animations>
+                                                                    <Animation
+                                                                        Delay="0:0:0.8"
+                                                                        IterationCount="Infinite"
+                                                                        Duration="0:0:1.2">
+                                                                        <KeyFrame Cue="0%">
+                                                                            <Setter Property="Opacity" Value="0.2" />
+                                                                            <Setter Property="ScaleTransform.ScaleX" Value="0.8" />
+                                                                            <Setter Property="ScaleTransform.ScaleY" Value="0.8" />
+                                                                        </KeyFrame>
+                                                                        <KeyFrame Cue="50%">
+                                                                            <Setter Property="Opacity" Value="1" />
+                                                                            <Setter Property="ScaleTransform.ScaleX" Value="1.2" />
+                                                                            <Setter Property="ScaleTransform.ScaleY" Value="1.2" />
+                                                                        </KeyFrame>
+                                                                        <KeyFrame Cue="100%">
+                                                                            <Setter Property="Opacity" Value="0.2" />
+                                                                            <Setter Property="ScaleTransform.ScaleX" Value="0.8" />
+                                                                            <Setter Property="ScaleTransform.ScaleY" Value="0.8" />
+                                                                        </KeyFrame>
+                                                                    </Animation>
+                                                                </Style.Animations>
+                                                            </Style>
+                                                        </StackPanel.Styles>
+                                                        <Ellipse Classes="dot dot1" />
+                                                        <Ellipse Classes="dot dot2" />
+                                                        <Ellipse Classes="dot dot3" />
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Border>
+                                            <LucideIcon
+                                                Grid.Column="1"
+                                                Margin="6"
+                                                HorizontalAlignment="Right"
+                                                VerticalAlignment="Bottom"
+                                                IsVisible="{Binding IsFailed}"
+                                                Kind="CircleAlert"
+                                                Size="20" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                            <!--  Error Popup  -->
+                            <Border
+                                Grid.Row="1"
+                                MinHeight="60"
+                                MaxWidth="720"
+                                Margin="10"
+                                VerticalAlignment="Bottom"
+                                Background="#FF979C"
+                                BorderBrush="#842426"
+                                BorderThickness="1"
+                                CornerRadius="7"
+                                IsVisible="{Binding Error, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <SelectableTextBlock
+                                        x:Name="ErrorTextBlock"
+                                        Margin="10,6,10,6"
+                                        Foreground="#842426"
+                                        Text="{Binding Error}"
+                                        TextWrapping="Wrap">
+                                        <SelectableTextBlock.ContextMenu>
+                                            <ContextMenu>
+                                                <MenuItem 
+                                                    Header="Копировать"
+                                                    Command="{Binding #ErrorTextBlock.Copy}">
+                                                    <MenuItem.Icon>
+                                                        <LucideIcon Kind="Copy" Size="20"/>
+                                                    </MenuItem.Icon>
+                                                </MenuItem>
+                                            </ContextMenu>
+                                        </SelectableTextBlock.ContextMenu>
+                                    </SelectableTextBlock>
+                                    <Button
+                                        Grid.Column="1"
+                                        Width="24"
+                                        Height="24"
+                                        Margin="4"
+                                        VerticalAlignment="Top"
+                                        Command="{Binding CloseErrorMessageCommand}"
+                                        Foreground="#842426">
+                                        <LucideIcon Kind="X" Size="18" />
+                                    </Button>
+                                    <Button
+                                        Grid.Column="1"
+                                        Width="24"
+                                        Height="24"
+                                        Margin="4"
+                                        VerticalAlignment="Bottom"
+                                        Command="{Binding CopyMessageTextCommand}"
+                                        CommandParameter="{Binding #ErrorTextBlock}"
+                                        Foreground="#842426"
+                                        Click="CopyErrorButton_Click">
+                                        <LucideIcon Kind="Copy" Size="14" />
+                                    </Button>
+                                </Grid>
+                            </Border>
+                            <!--  Text Input  -->
+                            <Border
+                                Grid.Row="2"
+                                MaxWidth="720"
+                                Background="{DynamicResource SystemChromeMediumColor}"
+                                BorderBrush="#bbbfcb"
+                                Tag="{Binding $self.Bounds.Width}">
+                                <Border.Styles>
+                                    <Style Selector="Border">
+                                        <Setter Property="BorderThickness" Value="0,1,0,0" />
+                                    </Style>
+                                    <Style Selector="Border[Tag=720]">
+                                        <Setter Property="Margin" Value="6,0,6,6" />
+                                        <Setter Property="CornerRadius" Value="7" />
+                                        <Setter Property="BorderThickness" Value="1,1,1,1" />
+                                    </Style>
+                                </Border.Styles>
+                                <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
+                                    <Grid
+                                        Grid.ColumnSpan="2"
+                                        ColumnDefinitions="Auto,*,Auto"
+                                        RowDefinitions="*,*">
+                                        <LucideIcon
+                                            Grid.RowSpan="2"
+                                            Margin="10,0,10,0"
+                                            IsVisible="{Binding ReplyMessage, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                            Size="24"
+                                            Tag="{Binding ReplyMessage.IsReplied}">
+                                            <LucideIcon.Styles>
+                                                <Style Selector="LucideIcon[Tag=true]">
+                                                    <Setter Property="Kind" Value="MessageSquareReply" />
+                                                </Style>
+                                                <Style Selector="LucideIcon[Tag=false]">
+                                                    <Setter Property="Kind" Value="MessageSquareQuote" />
+                                                </Style>
+                                            </LucideIcon.Styles>
+                                        </LucideIcon>
+                                        <TextBlock
+                                            Grid.Row="0"
+                                            Grid.Column="1"
+                                            Margin="0,4,0,0"
+                                            FontWeight="Bold"
+                                            IsVisible="{Binding ReplyMessage, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                            Tag="{Binding ReplyMessage.IsReplied}"
+                                            TextTrimming="CharacterEllipsis">
+                                            <TextBlock.Styles>
+                                                <Style Selector="TextBlock[Tag=true]">
+                                                    <Setter Property="Text" Value="Ответ на сообщение" />
+                                                </Style>
+                                                <Style Selector="TextBlock[Tag=false]">
+                                                    <Setter Property="Text" Value="Ответ на цитату" />
+                                                </Style>
+                                            </TextBlock.Styles>
+                                        </TextBlock>
+                                        <TextBlock
+                                            Grid.Row="1"
+                                            Grid.Column="1"
+                                            IsVisible="{Binding ReplyMessage, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                            Text="{Binding ReplyMessage.Quote}"
+                                            TextTrimming="CharacterEllipsis" />
+                                        <Button
+                                            Grid.Row="0"
+                                            Grid.RowSpan="2"
+                                            Grid.Column="2"
+                                            Width="30"
+                                            Height="30"
+                                            Margin="6,0,6,0"
+                                            VerticalAlignment="Center"
+                                            Command="{Binding ReleaseReplyAndQuoteCommand}"
+                                            IsVisible="{Binding ReplyMessage, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                            <LucideIcon Kind="X" />
+                                        </Button>
+                                    </Grid>
+                                    <TextBlock
+                                        Grid.Row="1"
+                                        Grid.Column="0"
+                                        Margin="12,0,0,0"
+                                        VerticalAlignment="Center"
+                                        IsVisible="{Binding #TextBox.Text, Converter={x:Static StringConverters.IsNullOrEmpty}}"
+                                        Opacity="0.5"
+                                        Text="Сообщение..." />
+                                    <TextBox
+                                        x:Name="TextBox"
+                                        Grid.Row="1"
+                                        Grid.Column="0"
+                                        MinHeight="40"
+                                        MaxHeight="300"
+                                        Height="NaN"
+                                        Margin="2,-1,0,0"
+                                        VerticalContentAlignment="Center"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        ScrollViewer.VerticalScrollBarVisibility="Hidden"
+                                        Text="{Binding Question, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        TextWrapping="Wrap"
+                                        FontFamily="Inter">
+                                        <TextBox.Resources>
+                                            <Thickness x:Key="TextControlBorderThemeThicknessFocused">0</Thickness>
+                                            <SolidColorBrush x:Key="TextControlBackgroundFocused">Transparent</SolidColorBrush>
+                                            <SolidColorBrush x:Key="TextControlBackgroundPointerOver">Transparent</SolidColorBrush>
+                                        </TextBox.Resources>
+                                        <TextBox.Styles>
+                                            <Style Selector="TextBox:focus /template/ Border#PART_Border">
+                                                <Setter Property="BorderThickness" Value="0" />
+                                                <Setter Property="Background" Value="Transparent" />
+                                            </Style>
+                                            <Style Selector="TextBox:pointerover /template/ Border#PART_Border">
+                                                <Setter Property="BorderThickness" Value="0" />
+                                                <Setter Property="Background" Value="Transparent" />
+                                            </Style>
+                                        </TextBox.Styles>
+                                    </TextBox>
+                                    <StackPanel
+                                        Grid.Row="1"
+                                        Grid.Column="1"
+                                        Margin="3"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Bottom"
+                                        Orientation="Horizontal">
+                                        <Button
+                                            Margin="3"
+                                            Command="{Binding QueryCommand}"
+                                            CommandParameter="{Binding #MyWebView}"
+                                            IsDefault="True"
+                                            IsEnabled="{Binding Question, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                                            <LucideIcon Kind="SendHorizontal" Size="20" />
+                                        </Button>
+                                        <Button Margin="3">
+                                            <LucideIcon Kind="Mic" Size="20" />
+                                        </Button>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </Panel>
+                </Border>
+                <StackPanel
+                    Grid.Column="2"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Spacing="4"
+                    IsVisible="{Binding Source={x:Static vm:SettingsVM.Instance}, Path=IsModel3DLoading}">
+                    <Arc
+                        Classes="loading"
+                        Width="36" 
+                        Height="36" 
+                        Stroke="{Binding $parent[Window].Foreground}" 
+                        Opacity="0.4"
+                        StrokeThickness="2" 
+                        StrokeLineCap="Round"
+                        StartAngle="0" 
+                        SweepAngle="270">
+                        <Arc.Transitions>
+                            <Transitions>
+                                <DoubleTransition Property="RotateTransform.Angle" Duration="0:0:1" />
+                            </Transitions>
+                        </Arc.Transitions>
+                        <Arc.RenderTransform>
+                            <RotateTransform />
+                        </Arc.RenderTransform>
+                    </Arc>
+                </StackPanel>
+                <wv:WebView
+                    x:Name="MyWebView"
+                    Grid.Column="2"
+                    Address="{Binding WebAddress}" 
+                    DisableBuiltinContextMenus="True">
+                    <wv:WebView.IsVisible>
+                        <MultiBinding Converter="{x:Static BoolConverters.And}">
+                            <Binding Source="{x:Static vm:SettingsVM.Instance}" Path="!IsModel3DLoading"/>
+                            <Binding Path="!IsSettingsOpen"/>
+                        </MultiBinding>
+                    </wv:WebView.IsVisible>
+                </wv:WebView>
+                <!-- RightPanel -->
+                <Border
+                    Grid.Column="3"
+                    x:DataType="vm:SettingsVM"
+                    Background="{DynamicResource SystemChromeLowColor}"
+                    BorderBrush="#bbbfcb"
+                    BorderThickness="1,0,0,0"
+                    DataContext="{x:Static vm:SettingsVM.Instance}"
+                    IsVisible="{Binding #ModelButton.IsChecked}">
+                    <Border.Styles>
+                        <Style Selector="TextBox">
+                            <Setter Property="CornerRadius" Value="5" />
+                            <Setter Property="FontFamily" Value="{StaticResource CascadiaCode}" />
+                        </Style>
+                        <Style Selector="StackPanel[Tag=False]">
+                            <Setter Property="IsEnabled" Value="False" />
+                            <Setter Property="Opacity" Value="0.5" />
+                        </Style>
+                    </Border.Styles>
+                    <Grid RowDefinitions="Auto,*">
                         <Border
                             Height="48"
                             BorderBrush="#bbbfcb"
@@ -265,744 +863,164 @@
                                 VerticalAlignment="Center"
                                 FontSize="18"
                                 FontWeight="Bold"
-                                Text="Чат"
+                                Text="Источник модели"
                                 TextTrimming="CharacterEllipsis" />
                         </Border>
-                        <ListBox
-                            x:Name="MessageList"
-                            Grid.Row="1"
-                            Padding="6"
-                            Background="{DynamicResource SystemChromeLowColor}"
-                            ItemsSource="{Binding Chat}"
-                            SelectedItem="{Binding SelectedMessage, Mode=TwoWay}">
-                            <ListBox.Styles>
-                                <Style Selector="ListBox /template/ ItemsPresenter">
-                                    <Setter Property="MaxWidth" Value="720" />
-                                </Style>
-                            </ListBox.Styles>
-                            <ListBox.ItemContainerTheme>
-                                <ControlTheme TargetType="ListBoxItem">
-                                    <Setter Property="Padding" Value="6" />
-                                    <Setter Property="Background" Value="Transparent" />
-                                </ControlTheme>
-                            </ListBox.ItemContainerTheme>
-                            <ListBox.ItemTemplate>
-                                <DataTemplate>
-                                    <Grid ColumnDefinitions="Auto,*,Auto">
-                                        <Border
-                                            MinHeight="32"
-                                            MaxWidth="360"
-                                            Padding="12,6,12,6"
-                                            Background="LightSkyBlue"
-                                            Tag="{Binding MessageModel.Role}">
-                                            <Border.Styles>
-                                                <Style Selector="Border">
-                                                    <Setter Property="Grid.Column" Value="2" />
-                                                    <Setter Property="CornerRadius" Value="16,16,4,16" />
-                                                    <Setter Property="ContextMenu">
-                                                        <Setter.Value>
-                                                            <ContextMenu>
-                                                                <MenuItem
-                                                                    x:DataType="vm:MainVM"
-                                                                    Command="{Binding CopyMessageTextCommand}"
-                                                                    CommandParameter="{Binding #PART_SelectableTextBlock}"
-                                                                    DataContext="{Binding $parent[ListBox].DataContext}"
-                                                                    Header="Копировать текст">
-                                                                    <MenuItem.Icon>
-                                                                        <LucideIcon Kind="Copy" Size="20" />
-                                                                    </MenuItem.Icon>
-                                                                </MenuItem>
-                                                                <MenuItem
-                                                                    x:DataType="vm:MainVM"
-                                                                    Command="{Binding MakeReplyCommand}"
-                                                                    DataContext="{Binding $parent[ListBox].DataContext}"
-                                                                    Header="Ответить на сообщение">
-                                                                    <MenuItem.Icon>
-                                                                        <LucideIcon Kind="MessageSquareReply" Size="20" />
-                                                                    </MenuItem.Icon>
-                                                                </MenuItem>
-                                                                <MenuItem Header="Удалить">
-                                                                    <MenuItem.Icon>
-                                                                        <LucideIcon Kind="Trash2" Size="20" />
-                                                                    </MenuItem.Icon>
-                                                                </MenuItem>
-                                                            </ContextMenu>
-                                                        </Setter.Value>
-                                                    </Setter>
-                                                </Style>
-                                                <Style Selector="Border[Tag=assistant]">
-                                                    <Setter Property="Grid.Column" Value="0" />
-                                                    <Setter Property="CornerRadius" Value="16,16,16,4" />
-                                                    <Setter Property="ContextMenu">
-                                                        <Setter.Value>
-                                                            <ContextMenu>
-                                                                <MenuItem
-                                                                    x:DataType="vm:MainVM"
-                                                                    Command="{Binding CopyMessageTextCommand}"
-                                                                    CommandParameter="{Binding #PART_SelectableTextBlock}"
-                                                                    DataContext="{Binding $parent[ListBox].DataContext}"
-                                                                    Header="Копировать текст">
-                                                                    <MenuItem.Icon>
-                                                                        <LucideIcon Kind="Copy" Size="20" />
-                                                                    </MenuItem.Icon>
-                                                                </MenuItem>
-                                                                <MenuItem
-                                                                    x:DataType="vm:MainVM"
-                                                                    Command="{Binding MakeReplyCommand}"
-                                                                    DataContext="{Binding $parent[ListBox].DataContext}"
-                                                                    Header="Ответить на сообщение">
-                                                                    <MenuItem.Icon>
-                                                                        <LucideIcon Kind="MessageSquareReply" Size="20" />
-                                                                    </MenuItem.Icon>
-                                                                </MenuItem>
-                                                                <MenuItem Header="Удалить">
-                                                                    <MenuItem.Icon>
-                                                                        <LucideIcon Kind="Trash2" Size="20" />
-                                                                    </MenuItem.Icon>
-                                                                </MenuItem>
-                                                            </ContextMenu>
-                                                        </Setter.Value>
-                                                    </Setter>
-                                                </Style>
-                                                <Style Selector="Border[Tag=temp]">
-                                                    <Setter Property="Grid.Column" Value="0" />
-                                                    <Setter Property="CornerRadius" Value="16,16,16,4" />
-                                                    <Setter Property="Width" Value="64" />
-                                                    <Setter Property="ContextMenu" Value="{x:Null}" />
-                                                </Style>
-                                            </Border.Styles>
-                                            <Grid>
-                                                <StackPanel Spacing="2">
-                                                    <Button
-                                                        Width="Nan"
-                                                        Height="Nan"
-                                                        Padding="0"
-                                                        Background="Yellow"
-                                                        BorderThickness="0"
-                                                        CornerRadius="6,12,6,6"
-                                                        IsVisible="{Binding ReplyMessage, Converter={x:Static ObjectConverters.IsNotNull}}">
-                                                        <Grid ColumnDefinitions="4,*">
-                                                            <Border
-                                                                Grid.Column="0"
-                                                                Width="4"
-                                                                Background="Blue"
-                                                                CornerRadius="6,0,0,6" />
-                                                            <StackPanel
-                                                                Grid.Column="1"
-                                                                Margin="4"
-                                                                Spacing="2">
-                                                                <TextBlock
-                                                                    HorizontalAlignment="Left"
-                                                                    FontWeight="Bold"
-                                                                    Tag="{Binding ReplyMessage.MessageModel.Role}"
-                                                                    TextTrimming="CharacterEllipsis">
-                                                                    <TextBlock.Styles>
-                                                                        <Style Selector="TextBlock[Tag=assistant]">
-                                                                            <Setter Property="Text" Value="Вайфу" />
-                                                                        </Style>
-                                                                        <Style Selector="TextBlock[Tag=user]">
-                                                                            <Setter Property="Text" Value="Пользователь" />
-                                                                        </Style>
-                                                                    </TextBlock.Styles>
-                                                                </TextBlock>
-                                                                <TextBlock
-                                                                    HorizontalAlignment="Left"
-                                                                    Text="{Binding ReplyMessage.Quote}"
-                                                                    TextTrimming="CharacterEllipsis" />
-                                                            </StackPanel>
-                                                        </Grid>
-                                                    </Button>
-                                                    <SelectableTextBlock
-                                                        x:Name="PART_SelectableTextBlock"
-                                                        HorizontalAlignment="Left"
-                                                        VerticalAlignment="Center"
-                                                        Initialized="PART_SelectableTextBlock_Initialized"
-                                                        SelectionEnd="{Binding SelectionEnd, Mode=TwoWay}"
-                                                        SelectionStart="{Binding SelectionStart, Mode=TwoWay}"
-                                                        Text="{Binding MessageModel.Content}"
-                                                        TextWrapping="Wrap">
-                                                        <SelectableTextBlock.ContextMenu>
-                                                            <ContextMenu>
-                                                                <MenuItem
-                                                                    x:DataType="vm:MainVM"
-                                                                    DataContext="{Binding $parent[ListBox].DataContext}"
-                                                                    Tag="{Binding #PART_SelectableTextBlock.CanCopy}">
-                                                                    <MenuItem.Icon>
-                                                                        <LucideIcon Kind="Copy" Size="20" />
-                                                                    </MenuItem.Icon>
-                                                                    <MenuItem.Styles>
-                                                                        <Style Selector="MenuItem[Tag=True]">
-                                                                            <Setter Property="Header" Value="Копировать выделенное" />
-                                                                            <Setter Property="Command" Value="{Binding #PART_SelectableTextBlock.Copy}" />
-                                                                        </Style>
-                                                                        <Style Selector="MenuItem[Tag=False]">
-                                                                            <Setter Property="Header" Value="Копировать текст" />
-                                                                            <Setter Property="Command" Value="{Binding CopyMessageTextCommand}" />
-                                                                            <Setter Property="CommandParameter" Value="{Binding #PART_SelectableTextBlock}" />
-                                                                        </Style>
-                                                                    </MenuItem.Styles>
-                                                                </MenuItem>
-                                                                <MenuItem
-                                                                    x:DataType="vm:MainVM"
-                                                                    DataContext="{Binding $parent[ListBox].DataContext}"
-                                                                    Tag="{Binding #PART_SelectableTextBlock.CanCopy}">
-                                                                    <MenuItem.Styles>
-                                                                        <Style Selector="MenuItem[Tag=True]">
-                                                                            <Setter Property="Header" Value="Ответить на цитату" />
-                                                                            <Setter Property="Icon">
-                                                                                <Setter.Value>
-                                                                                    <Template>
-                                                                                        <LucideIcon Kind="MessageSquareQuote" Size="20" />
-                                                                                    </Template>
-                                                                                </Setter.Value>
-                                                                            </Setter>
-                                                                            <Setter Property="Command" Value="{Binding MakeQuoteCommand}" />
-                                                                            <Setter Property="CommandParameter" Value="{Binding #PART_SelectableTextBlock.SelectedText}" />
-                                                                        </Style>
-                                                                        <Style Selector="MenuItem[Tag=False]">
-                                                                            <Setter Property="Header" Value="Ответить на сообщение" />
-                                                                            <Setter Property="Icon">
-                                                                                <Setter.Value>
-                                                                                    <Template>
-                                                                                        <LucideIcon Kind="MessageSquareReply" Size="20" />
-                                                                                    </Template>
-                                                                                </Setter.Value>
-                                                                            </Setter>
-                                                                            <Setter Property="Command" Value="{Binding MakeReplyCommand}" />
-                                                                        </Style>
-                                                                    </MenuItem.Styles>
-                                                                </MenuItem>
-                                                                <MenuItem Header="Удалить">
-                                                                    <MenuItem.Icon>
-                                                                        <LucideIcon Kind="Trash2" Size="20" />
-                                                                    </MenuItem.Icon>
-                                                                </MenuItem>
-                                                            </ContextMenu>
-                                                        </SelectableTextBlock.ContextMenu>
-                                                    </SelectableTextBlock>
-                                                    <TextBlock
-                                                        HorizontalAlignment="Right"
-                                                        FontSize="12"
-                                                        IsVisible="{Binding MessageModel.Role, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter=temp}"
-                                                        Opacity="0.5"
-                                                        Text="{Binding Time}" />
-                                                </StackPanel>
-                                                <!--  Loading animation  -->
-                                                <StackPanel
-                                                    Grid.Column="0"
-                                                    HorizontalAlignment="Center"
-                                                    IsVisible="{Binding MessageModel.Role, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=temp}"
-                                                    Orientation="Horizontal"
-                                                    Spacing="5">
-                                                    <StackPanel.Styles>
-                                                        <Style Selector="Ellipse.dot">
-                                                            <Setter Property="Width" Value="8" />
-                                                            <Setter Property="Height" Value="8" />
-                                                            <Setter Property="Fill" Value="{DynamicResource SystemBaseHighColor}" />
-                                                            <Setter Property="RenderTransformOrigin" Value="50%,50%" />
-                                                        </Style>
-                                                        <Style Selector="Ellipse.dot1">
-                                                            <Style.Animations>
-                                                                <Animation
-                                                                    Delay="0:0:0.0"
-                                                                    IterationCount="Infinite"
-                                                                    Duration="0:0:1.2">
-                                                                    <KeyFrame Cue="0%">
-                                                                        <Setter Property="Opacity" Value="0.2" />
-                                                                        <Setter Property="ScaleTransform.ScaleX" Value="0.8" />
-                                                                        <Setter Property="ScaleTransform.ScaleY" Value="0.8" />
-                                                                    </KeyFrame>
-                                                                    <KeyFrame Cue="50%">
-                                                                        <Setter Property="Opacity" Value="1" />
-                                                                        <Setter Property="ScaleTransform.ScaleX" Value="1.2" />
-                                                                        <Setter Property="ScaleTransform.ScaleY" Value="1.2" />
-                                                                    </KeyFrame>
-                                                                    <KeyFrame Cue="100%">
-                                                                        <Setter Property="Opacity" Value="0.2" />
-                                                                        <Setter Property="ScaleTransform.ScaleX" Value="0.8" />
-                                                                        <Setter Property="ScaleTransform.ScaleY" Value="0.8" />
-                                                                    </KeyFrame>
-                                                                </Animation>
-                                                            </Style.Animations>
-                                                        </Style>
-                                                        <Style Selector="Ellipse.dot2">
-                                                            <Style.Animations>
-                                                                <Animation
-                                                                    Delay="0:0:0.4"
-                                                                    IterationCount="Infinite"
-                                                                    Duration="0:0:1.2">
-                                                                    <KeyFrame Cue="0%">
-                                                                        <Setter Property="Opacity" Value="0.2" />
-                                                                        <Setter Property="ScaleTransform.ScaleX" Value="0.8" />
-                                                                        <Setter Property="ScaleTransform.ScaleY" Value="0.8" />
-                                                                    </KeyFrame>
-                                                                    <KeyFrame Cue="50%">
-                                                                        <Setter Property="Opacity" Value="1" />
-                                                                        <Setter Property="ScaleTransform.ScaleX" Value="1.2" />
-                                                                        <Setter Property="ScaleTransform.ScaleY" Value="1.2" />
-                                                                    </KeyFrame>
-                                                                    <KeyFrame Cue="100%">
-                                                                        <Setter Property="Opacity" Value="0.2" />
-                                                                        <Setter Property="ScaleTransform.ScaleX" Value="0.8" />
-                                                                        <Setter Property="ScaleTransform.ScaleY" Value="0.8" />
-                                                                    </KeyFrame>
-                                                                </Animation>
-                                                            </Style.Animations>
-                                                        </Style>
-                                                        <Style Selector="Ellipse.dot3">
-                                                            <Style.Animations>
-                                                                <Animation
-                                                                    Delay="0:0:0.8"
-                                                                    IterationCount="Infinite"
-                                                                    Duration="0:0:1.2">
-                                                                    <KeyFrame Cue="0%">
-                                                                        <Setter Property="Opacity" Value="0.2" />
-                                                                        <Setter Property="ScaleTransform.ScaleX" Value="0.8" />
-                                                                        <Setter Property="ScaleTransform.ScaleY" Value="0.8" />
-                                                                    </KeyFrame>
-                                                                    <KeyFrame Cue="50%">
-                                                                        <Setter Property="Opacity" Value="1" />
-                                                                        <Setter Property="ScaleTransform.ScaleX" Value="1.2" />
-                                                                        <Setter Property="ScaleTransform.ScaleY" Value="1.2" />
-                                                                    </KeyFrame>
-                                                                    <KeyFrame Cue="100%">
-                                                                        <Setter Property="Opacity" Value="0.2" />
-                                                                        <Setter Property="ScaleTransform.ScaleX" Value="0.8" />
-                                                                        <Setter Property="ScaleTransform.ScaleY" Value="0.8" />
-                                                                    </KeyFrame>
-                                                                </Animation>
-                                                            </Style.Animations>
-                                                        </Style>
-                                                    </StackPanel.Styles>
-                                                    <Ellipse Classes="dot dot1" />
-                                                    <Ellipse Classes="dot dot2" />
-                                                    <Ellipse Classes="dot dot3" />
-                                                </StackPanel>
-                                            </Grid>
-                                        </Border>
+                        <ScrollViewer Grid.Row="1">
+                            <StackPanel Margin="16,8,16,16" Spacing="8">
+                                <RadioButton
+                                    x:Name="ServerButton"
+                                    GroupName="ModelSource"
+                                    IsChecked="{Binding IsServerQuery}">
+                                    <TextBlock
+                                        VerticalAlignment="Center"
+                                        FontSize="16"
+                                        FontWeight="DemiBold"
+                                        Text="Сервер"
+                                        TextTrimming="CharacterEllipsis" />
+                                </RadioButton>
+
+                                <StackPanel Spacing="4" Tag="{Binding #ServerButton.IsChecked}">
+                                    <Grid ColumnDefinitions="Auto,*">
                                         <LucideIcon
+                                            Kind="Hash"
+                                            Size="16"
+                                            StrokeWidth="2" />
+                                        <TextBlock
                                             Grid.Column="1"
-                                            Margin="6"
-                                            HorizontalAlignment="Right"
-                                            VerticalAlignment="Bottom"
-                                            IsVisible="{Binding IsFailed}"
-                                            Kind="CircleAlert"
-                                            Size="20" />
+                                            Margin="4,0,0,0"
+                                            VerticalAlignment="Center"
+                                            FontWeight="DemiBold"
+                                            Text="Порт"
+                                            TextTrimming="CharacterEllipsis" />
                                     </Grid>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
-                        <!--  Error Popup  -->
-                        <Border
-                            Grid.Row="1"
-                            MinHeight="60"
-                            MaxWidth="720"
-                            Margin="10"
-                            VerticalAlignment="Bottom"
-                            Background="#FF979C"
-                            BorderBrush="#842426"
-                            BorderThickness="1"
-                            CornerRadius="7"
-                            IsVisible="{Binding Error, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
-                            <Grid ColumnDefinitions="*,Auto">
-                                <SelectableTextBlock
-                                    x:Name="ErrorTextBlock"
-                                    Margin="10,6,10,6"
-                                    Foreground="#842426"
-                                    Text="{Binding Error}"
-                                    TextWrapping="Wrap">
-                                    <SelectableTextBlock.ContextMenu>
-                                        <ContextMenu>
-                                            <MenuItem 
-                                                Header="Копировать"
-                                                Command="{Binding #ErrorTextBlock.Copy}">
-                                                <MenuItem.Icon>
-                                                    <LucideIcon Kind="Copy" Size="20"/>
-                                                </MenuItem.Icon>
-                                            </MenuItem>
-                                        </ContextMenu>
-                                    </SelectableTextBlock.ContextMenu>
-                                </SelectableTextBlock>
-                                <Button
-                                    Grid.Column="1"
-                                    Width="24"
-                                    Height="24"
-                                    Margin="4"
-                                    VerticalAlignment="Top"
-                                    Command="{Binding CloseErrorMessageCommand}"
-                                    Foreground="#842426">
-                                    <LucideIcon Kind="X" Size="18" />
-                                </Button>
-                                <Button
-                                    Grid.Column="1"
-                                    Width="24"
-                                    Height="24"
-                                    Margin="4"
-                                    VerticalAlignment="Bottom"
-                                    Command="{Binding CopyMessageTextCommand}"
-                                    CommandParameter="{Binding #ErrorTextBlock}"
-                                    Foreground="#842426"
-                                    Click="CopyErrorButton_Click">
-                                    <LucideIcon Kind="Copy" Size="14" />
-                                </Button>
-                            </Grid>
-                        </Border>
-                        <!--  Text Input  -->
-                        <Border
-                            Grid.Row="2"
-                            MaxWidth="720"
-                            Background="{DynamicResource SystemChromeMediumColor}"
-                            BorderBrush="#bbbfcb"
-                            Tag="{Binding $self.Bounds.Width}">
-                            <Border.Styles>
-                                <Style Selector="Border">
-                                    <Setter Property="BorderThickness" Value="0,1,0,0" />
-                                </Style>
-                                <Style Selector="Border[Tag=720]">
-                                    <Setter Property="Margin" Value="6,0,6,6" />
-                                    <Setter Property="CornerRadius" Value="7" />
-                                    <Setter Property="BorderThickness" Value="1,1,1,1" />
-                                </Style>
-                            </Border.Styles>
-                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
-                                <Grid
-                                    Grid.ColumnSpan="2"
-                                    ColumnDefinitions="Auto,*,Auto"
-                                    RowDefinitions="*,*">
-                                    <LucideIcon
-                                        Grid.RowSpan="2"
-                                        Margin="10,0,10,0"
-                                        IsVisible="{Binding ReplyMessage, Converter={x:Static ObjectConverters.IsNotNull}}"
-                                        Size="24"
-                                        Tag="{Binding ReplyMessage.IsReplied}">
-                                        <LucideIcon.Styles>
-                                            <Style Selector="LucideIcon[Tag=true]">
-                                                <Setter Property="Kind" Value="MessageSquareReply" />
-                                            </Style>
-                                            <Style Selector="LucideIcon[Tag=false]">
-                                                <Setter Property="Kind" Value="MessageSquareQuote" />
-                                            </Style>
-                                        </LucideIcon.Styles>
-                                    </LucideIcon>
-                                    <TextBlock
-                                        Grid.Row="0"
-                                        Grid.Column="1"
-                                        Margin="0,4,0,0"
-                                        FontWeight="Bold"
-                                        IsVisible="{Binding ReplyMessage, Converter={x:Static ObjectConverters.IsNotNull}}"
-                                        Tag="{Binding ReplyMessage.IsReplied}"
-                                        TextTrimming="CharacterEllipsis">
-                                        <TextBlock.Styles>
-                                            <Style Selector="TextBlock[Tag=true]">
-                                                <Setter Property="Text" Value="Ответ на сообщение" />
-                                            </Style>
-                                            <Style Selector="TextBlock[Tag=false]">
-                                                <Setter Property="Text" Value="Ответ на цитату" />
-                                            </Style>
-                                        </TextBlock.Styles>
-                                    </TextBlock>
-                                    <TextBlock
-                                        Grid.Row="1"
-                                        Grid.Column="1"
-                                        IsVisible="{Binding ReplyMessage, Converter={x:Static ObjectConverters.IsNotNull}}"
-                                        Text="{Binding ReplyMessage.Quote}"
-                                        TextTrimming="CharacterEllipsis" />
-                                    <Button
-                                        Grid.Row="0"
-                                        Grid.RowSpan="2"
-                                        Grid.Column="2"
-                                        Width="30"
-                                        Height="30"
-                                        Margin="6,0,6,0"
-                                        VerticalAlignment="Center"
-                                        Command="{Binding ReleaseReplyAndQuoteCommand}"
-                                        IsVisible="{Binding ReplyMessage, Converter={x:Static ObjectConverters.IsNotNull}}">
-                                        <LucideIcon Kind="X" />
-                                    </Button>
-                                </Grid>
-                                <TextBlock
-                                    Grid.Row="1"
-                                    Grid.Column="0"
-                                    Margin="12,0,0,0"
-                                    VerticalAlignment="Center"
-                                    IsVisible="{Binding #TextBox.Text, Converter={x:Static StringConverters.IsNullOrEmpty}}"
-                                    Opacity="0.5"
-                                    Text="Сообщение..." />
-                                <TextBox
-                                    x:Name="TextBox"
-                                    Grid.Row="1"
-                                    Grid.Column="0"
-                                    MinHeight="40"
-                                    MaxHeight="300"
-                                    Height="NaN"
-                                    Margin="2,-1,0,0"
-                                    VerticalContentAlignment="Center"
-                                    Background="Transparent"
-                                    BorderThickness="0"
-                                    ScrollViewer.VerticalScrollBarVisibility="Hidden"
-                                    Text="{Binding Question, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                    TextWrapping="Wrap"
-                                    FontFamily="Inter">
-                                    <TextBox.Resources>
-                                        <Thickness x:Key="TextControlBorderThemeThicknessFocused">0</Thickness>
-                                        <SolidColorBrush x:Key="TextControlBackgroundFocused">Transparent</SolidColorBrush>
-                                        <SolidColorBrush x:Key="TextControlBackgroundPointerOver">Transparent</SolidColorBrush>
-                                    </TextBox.Resources>
-                                    <TextBox.Styles>
-                                        <Style Selector="TextBox:focus /template/ Border#PART_Border">
-                                            <Setter Property="BorderThickness" Value="0" />
-                                            <Setter Property="Background" Value="Transparent" />
-                                        </Style>
-                                        <Style Selector="TextBox:pointerover /template/ Border#PART_Border">
-                                            <Setter Property="BorderThickness" Value="0" />
-                                            <Setter Property="Background" Value="Transparent" />
-                                        </Style>
-                                    </TextBox.Styles>
-                                </TextBox>
-                                <StackPanel
-                                    Grid.Row="1"
-                                    Grid.Column="1"
-                                    Margin="3"
-                                    HorizontalAlignment="Right"
-                                    VerticalAlignment="Bottom"
-                                    Orientation="Horizontal">
-                                    <Button
-                                        Margin="3"
-                                        Command="{Binding QueryCommand}"
-                                        CommandParameter="{Binding #MyWebView}"
-                                        IsDefault="True"
-                                        IsEnabled="{Binding Question, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
-                                        <LucideIcon Kind="SendHorizontal" Size="20" />
-                                    </Button>
-                                    <Button Margin="3">
-                                        <LucideIcon Kind="Mic" Size="20" />
-                                    </Button>
+                                    <TextBox Text="{Binding Port, Mode=TwoWay}"/>
+                                    <Grid Margin="0,8,0,0" ColumnDefinitions="Auto,*">
+                                        <LucideIcon
+                                            Kind="Network"
+                                            Size="16"
+                                            StrokeWidth="2" />
+                                        <TextBlock
+                                            Grid.Column="1"
+                                            Margin="4,0,0,0"
+                                            VerticalAlignment="Center"
+                                            FontWeight="DemiBold"
+                                            Text="IP-адрес"
+                                            TextTrimming="CharacterEllipsis" />
+                                    </Grid>
+                                    <TextBox Text="{Binding IpAddress, Mode=TwoWay}"/>
                                 </StackPanel>
-                            </Grid>
-                        </Border>
+
+                                <RadioButton
+                                    x:Name="ProviderButton"
+                                    GroupName="ModelSource"
+                                    IsChecked="{Binding !IsServerQuery}">
+                                    <TextBlock
+                                        VerticalAlignment="Center"
+                                        FontSize="16"
+                                        FontWeight="DemiBold"
+                                        Text="Облачный провайдер" />
+                                </RadioButton>
+
+                                <StackPanel Spacing="4" Tag="{Binding #ProviderButton.IsChecked}">
+                                    <Grid ColumnDefinitions="Auto,*">
+                                        <LucideIcon
+                                            Kind="KeyRound"
+                                            Size="16"
+                                            StrokeWidth="2" />
+                                        <TextBlock
+                                            Grid.Column="1"
+                                            Margin="4,0,0,0"
+                                            VerticalAlignment="Center"
+                                            FontWeight="DemiBold"
+                                            Text="API Ключ"
+                                            TextTrimming="CharacterEllipsis" />
+                                    </Grid>
+                                    <TextBox Text="{Binding ApiKey, Mode=TwoWay}"/>
+                                    <Grid Margin="0,8,0,0" ColumnDefinitions="Auto,*">
+                                        <LucideIcon
+                                            Kind="Link"
+                                            Size="16"
+                                            StrokeWidth="2" />
+                                        <TextBlock
+                                            Grid.Column="1"
+                                            Margin="4,0,0,0"
+                                            VerticalAlignment="Center"
+                                            FontWeight="DemiBold"
+                                            Text="API URL"
+                                            TextTrimming="CharacterEllipsis" />
+                                    </Grid>
+                                    <TextBox Text="{Binding ApiUrl, Mode=TwoWay}"/>
+                                    <Grid Margin="0,8,0,0" ColumnDefinitions="Auto,*">
+                                        <LucideIcon
+                                            Kind="Bot"
+                                            Size="16"
+                                            StrokeWidth="2" />
+                                        <TextBlock
+                                            Grid.Column="1"
+                                            Margin="4,0,0,0"
+                                            VerticalAlignment="Center"
+                                            FontWeight="DemiBold"
+                                            Text="Модель"
+                                            TextTrimming="CharacterEllipsis" />
+                                    </Grid>
+                                    <TextBox Text="{Binding AiModel, Mode=TwoWay}"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </ScrollViewer>
                     </Grid>
-                </Panel>
-            </Border>
-            <StackPanel
-                Grid.Column="2"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                Spacing="4"
-                IsVisible="{Binding Source={x:Static vm:SettingsVM.Instance}, Path=IsModel3DLoading}">
-                <Arc
-                    Classes="loading"
-                    Width="36" 
-                    Height="36" 
-                    Stroke="{Binding $parent[Window].Foreground}" 
-                    Opacity="0.4"
-                    StrokeThickness="2" 
-                    StrokeLineCap="Round"
-                    StartAngle="0" 
-                    SweepAngle="270">
-                    <Arc.Transitions>
-                        <Transitions>
-                            <DoubleTransition Property="RotateTransform.Angle" Duration="0:0:1" />
-                        </Transitions>
-                    </Arc.Transitions>
-                    <Arc.RenderTransform>
-                        <RotateTransform />
-                    </Arc.RenderTransform>
-                </Arc>
-            </StackPanel>
-            <wv:WebView
-                x:Name="MyWebView"
-                Grid.Column="2"
-                Address="{Binding WebAddress}" 
-                DisableBuiltinContextMenus="True"
-                IsVisible="{Binding Source={x:Static vm:SettingsVM.Instance}, Path=!IsModel3DLoading}"/>
-            <!-- RightPanel -->
-            <Border
-                Grid.Column="3"
-                x:DataType="vm:SettingsVM"
-                Background="{DynamicResource SystemChromeLowColor}"
-                BorderBrush="#bbbfcb"
-                BorderThickness="1,0,0,0"
-                DataContext="{x:Static vm:SettingsVM.Instance}"
-                IsVisible="{Binding #ModelButton.IsChecked}">
-                <Border.Styles>
-                    <Style Selector="TextBox">
-                        <Setter Property="CornerRadius" Value="5" />
-                        <Setter Property="FontFamily" Value="{StaticResource CascadiaCode}" />
-                    </Style>
-                    <Style Selector="StackPanel[Tag=False]">
-                        <Setter Property="IsEnabled" Value="False" />
-                        <Setter Property="Opacity" Value="0.5" />
-                    </Style>
-                </Border.Styles>
-                <Grid RowDefinitions="Auto,*">
-                    <Border
-                        Height="48"
-                        BorderBrush="#bbbfcb"
-                        BorderThickness="0,0,0,1">
-                        <TextBlock
-                            Margin="16,0,16,0"
-                            VerticalAlignment="Center"
-                            FontSize="18"
-                            FontWeight="Bold"
-                            Text="Источник модели"
-                            TextTrimming="CharacterEllipsis" />
-                    </Border>
-                    <ScrollViewer Grid.Row="1">
-                        <StackPanel Margin="16,8,16,16" Spacing="8">
-                            <RadioButton
-                                x:Name="ServerButton"
-                                GroupName="ModelSource"
-                                IsChecked="{Binding IsServerQuery}">
-                                <TextBlock
-                                    VerticalAlignment="Center"
-                                    FontSize="16"
-                                    FontWeight="DemiBold"
-                                    Text="Сервер"
-                                    TextTrimming="CharacterEllipsis" />
-                            </RadioButton>
-
-                            <StackPanel Spacing="4" Tag="{Binding #ServerButton.IsChecked}">
-                                <Grid ColumnDefinitions="Auto,*">
-                                    <LucideIcon
-                                        Kind="Hash"
-                                        Size="16"
-                                        StrokeWidth="2" />
-                                    <TextBlock
-                                        Grid.Column="1"
-                                        Margin="4,0,0,0"
-                                        VerticalAlignment="Center"
-                                        FontWeight="DemiBold"
-                                        Text="Порт"
-                                        TextTrimming="CharacterEllipsis" />
-                                </Grid>
-                                <TextBox Text="{Binding Port, Mode=TwoWay}"/>
-                                <Grid Margin="0,8,0,0" ColumnDefinitions="Auto,*">
-                                    <LucideIcon
-                                        Kind="Network"
-                                        Size="16"
-                                        StrokeWidth="2" />
-                                    <TextBlock
-                                        Grid.Column="1"
-                                        Margin="4,0,0,0"
-                                        VerticalAlignment="Center"
-                                        FontWeight="DemiBold"
-                                        Text="IP-адрес"
-                                        TextTrimming="CharacterEllipsis" />
-                                </Grid>
-                                <TextBox Text="{Binding IpAddress, Mode=TwoWay}"/>
-                            </StackPanel>
-
-                            <RadioButton
-                                x:Name="ProviderButton"
-                                GroupName="ModelSource"
-                                IsChecked="{Binding !IsServerQuery}">
-                                <TextBlock
-                                    VerticalAlignment="Center"
-                                    FontSize="16"
-                                    FontWeight="DemiBold"
-                                    Text="Облачный провайдер" />
-                            </RadioButton>
-
-                            <StackPanel Spacing="4" Tag="{Binding #ProviderButton.IsChecked}">
-                                <Grid ColumnDefinitions="Auto,*">
-                                    <LucideIcon
-                                        Kind="KeyRound"
-                                        Size="16"
-                                        StrokeWidth="2" />
-                                    <TextBlock
-                                        Grid.Column="1"
-                                        Margin="4,0,0,0"
-                                        VerticalAlignment="Center"
-                                        FontWeight="DemiBold"
-                                        Text="API Ключ"
-                                        TextTrimming="CharacterEllipsis" />
-                                </Grid>
-                                <TextBox Text="{Binding ApiKey, Mode=TwoWay}"/>
-                                <Grid Margin="0,8,0,0" ColumnDefinitions="Auto,*">
-                                    <LucideIcon
-                                        Kind="Link"
-                                        Size="16"
-                                        StrokeWidth="2" />
-                                    <TextBlock
-                                        Grid.Column="1"
-                                        Margin="4,0,0,0"
-                                        VerticalAlignment="Center"
-                                        FontWeight="DemiBold"
-                                        Text="API URL"
-                                        TextTrimming="CharacterEllipsis" />
-                                </Grid>
-                                <TextBox Text="{Binding ApiUrl, Mode=TwoWay}"/>
-                                <Grid Margin="0,8,0,0" ColumnDefinitions="Auto,*">
-                                    <LucideIcon
-                                        Kind="Bot"
-                                        Size="16"
-                                        StrokeWidth="2" />
-                                    <TextBlock
-                                        Grid.Column="1"
-                                        Margin="4,0,0,0"
-                                        VerticalAlignment="Center"
-                                        FontWeight="DemiBold"
-                                        Text="Модель"
-                                        TextTrimming="CharacterEllipsis" />
-                                </Grid>
-                                <TextBox Text="{Binding AiModel, Mode=TwoWay}"/>
-                            </StackPanel>
-                        </StackPanel>
-                    </ScrollViewer>
-                </Grid>
-            </Border>
-            <GridSplitter
-                Grid.Column="3"
-                Width="4"
-                HorizontalAlignment="Left"
-                Background="Transparent"
-                DragCompleted="RightThumb_OnDragCompleted" />
-            <Border
-                Grid.Column="4"
-                Background="{DynamicResource SystemChromeLowColor}"
-                BorderBrush="#bbbfcb"
-                BorderThickness="1,0,0,0">
-                <StackPanel
-                    Margin="5"
-                    HorizontalAlignment="Center"
-                    Spacing="4">
-                    <ToggleButton x:Name="ParametersButton" IsCheckedChanged="RightToggleButton_OnIsCheckedChanged">
-                        <LucideIcon Kind="Settings2" Size="20" />
-                    </ToggleButton>
-                    <ToggleButton
-                        x:Name="ModelButton"
-                        IsChecked="True"
-                        IsCheckedChanged="RightToggleButton_OnIsCheckedChanged"
-                        ToolTip.Placement="LeftEdgeAlignedTop"
-                        ToolTip.Tip="Источник модели">
-                        <LucideIcon Kind="Server" Size="20" />
-                    </ToggleButton>
-                </StackPanel>
-            </Border>
+                </Border>
+                <GridSplitter
+                    Grid.Column="3"
+                    Width="4"
+                    HorizontalAlignment="Left"
+                    Background="Transparent"
+                    DragCompleted="RightThumb_OnDragCompleted" />
+                <Border
+                    Grid.Column="4"
+                    Background="{DynamicResource SystemChromeLowColor}"
+                    BorderBrush="#bbbfcb"
+                    BorderThickness="1,0,0,0">
+                    <StackPanel
+                        Margin="5"
+                        HorizontalAlignment="Center"
+                        Spacing="4">
+                        <ToggleButton x:Name="ParametersButton" IsCheckedChanged="RightToggleButton_OnIsCheckedChanged">
+                            <LucideIcon Kind="Settings2" Size="20" />
+                        </ToggleButton>
+                        <ToggleButton
+                            x:Name="ModelButton"
+                            IsChecked="True"
+                            IsCheckedChanged="RightToggleButton_OnIsCheckedChanged"
+                            ToolTip.Placement="LeftEdgeAlignedTop"
+                            ToolTip.Tip="Источник модели">
+                            <LucideIcon Kind="Server" Size="20" />
+                        </ToggleButton>
+                    </StackPanel>
+                </Border>
+            </Grid>
         </Grid>
         <!-- Settings -->
-        <Popup
-            Grid.Row="0"
-            Grid.RowSpan="2"
-            MaxWidth="1400"
-            MaxHeight="900"
-            Width="{Binding $parent[Window].Bounds.Width, Converter={StaticResource MathConverter}, ConverterParameter=0.8}"
-            Height="{Binding $parent[Window].Bounds.Height, Converter={StaticResource MathConverter}, ConverterParameter=0.8}"
-            Placement="Center"
-            IsOpen="{Binding IsSettingsOpen, Mode=TwoWay}">
-            <Popup.Styles>
-                <Style Selector="Separator">
-                    <Setter Property="Height" Value="1"/>
-                    <Setter Property="Background" Value="{DynamicResource SystemBaseHighColor}"/>
-                    <Setter Property="Opacity" Value="0.3"/>
-                    <Setter Property="Margin" Value="0,18,0,18"/>
-                </Style>
-            </Popup.Styles>
+        <Grid IsVisible="{Binding IsSettingsOpen, Mode=TwoWay}">
+            <Grid.Background>
+                <SolidColorBrush Color="Black" Opacity="0.15"/>
+            </Grid.Background>
             <Border
+                MaxWidth="1400"
+                MaxHeight="900"
+                Margin="100"
                 CornerRadius="8"
                 Background="#eef1f5"
                 BorderThickness="1"
                 BorderBrush="#bbbfcb">
+                <Border.Styles>
+                    <Style Selector="Separator">
+                        <Setter Property="Height" Value="1"/>
+                        <Setter Property="Background" Value="{DynamicResource SystemBaseHighColor}"/>
+                        <Setter Property="Opacity" Value="0.3"/>
+                        <Setter Property="Margin" Value="0,18,0,18"/>
+                    </Style>
+                </Border.Styles>
                 <Grid ColumnDefinitions="Auto,*">
                     <ListBox
                         Background="Transparent"
@@ -1403,6 +1421,6 @@
                     </Button>
                 </Grid>
             </Border>    
-        </Popup>
-    </Grid>
+        </Grid>
+    </Grid>  
 </Window>

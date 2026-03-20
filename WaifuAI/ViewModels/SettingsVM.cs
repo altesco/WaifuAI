@@ -36,7 +36,7 @@ public partial class SettingsVM : ObservableValidator
 
     private SettingsModel SettingsModel { get; set; }
 
-    private bool _isLoading;
+    [ObservableProperty] private bool _isLoading;
 
     public async Task Load()
     {
@@ -45,7 +45,7 @@ public partial class SettingsVM : ObservableValidator
             SettingsModel = new SettingsModel();
             return;
         }
-        _isLoading = true;
+        IsLoading = true;
         var json = File.ReadAllText(FilePath);
         SettingsModel = JsonSerializer.Deserialize<SettingsModel>(json) ?? new SettingsModel();
 
@@ -81,7 +81,7 @@ public partial class SettingsVM : ObservableValidator
         // Servers
         
 
-        _isLoading = false;
+        IsLoading = false;
     }
 
     private void Save()
@@ -122,7 +122,7 @@ public partial class SettingsVM : ObservableValidator
     protected override void OnPropertyChanged(PropertyChangedEventArgs e)
     {
         base.OnPropertyChanged(e);
-        if (_isLoading)
+        if (IsLoading)
             return;
         Save();
     }
@@ -214,7 +214,7 @@ public partial class SettingsVM : ObservableValidator
 
     partial void OnSelectedVoiceModelChanged(string value)
     {
-        if (_isLoading || string.IsNullOrEmpty(value)) 
+        if (IsLoading || string.IsNullOrEmpty(value)) 
             return;
         _ = RefreshSpeakersAsync(value);
     }
