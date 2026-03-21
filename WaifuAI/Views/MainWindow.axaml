@@ -1089,7 +1089,7 @@
                                     VerticalAlignment="Center"/>
                             </Grid>
                         </ListBoxItem>
-                        <ListBoxItem x:Name="Sound" IsSelected="True">
+                        <ListBoxItem x:Name="Sound" >
                             <Grid ColumnDefinitions="Auto,*">
                                 <LucideIcon 
                                     Kind="Volume2" 
@@ -1102,7 +1102,7 @@
                                     VerticalAlignment="Center"/>
                             </Grid>
                         </ListBoxItem>
-                        <ListBoxItem x:Name="ModelAppearence" >
+                        <ListBoxItem x:Name="ModelAppearence" IsSelected="True">
                             <Grid ColumnDefinitions="Auto,*">
                                 <LucideIcon 
                                     Kind="Shirt" 
@@ -1152,7 +1152,7 @@
                                     <Setter Property="Width" Value="NaN"/>
                                     <Setter Property="Height" Value="30"/>
                                     <Setter Property="VerticalContentAlignment" Value="Center"/>
-                                    <Setter Property="Background" Value="{DynamicResource SystemBaseMediumLowColor}"/>
+                                    <Setter Property="Background" Value="{DynamicResource SystemChromeMediumColor}"/>
                                     <Setter Property="BorderBrush" Value="#bbbfcb"/>
                                     <Setter Property="BorderThickness" Value="1"/>
                                     <Setter Property="Padding" Value="12,0"/>
@@ -1171,10 +1171,10 @@
                                             Icon="{LucideIconContent SunMoon, 20}"
                                             Header="Тема" 
                                             Description="Основная тема приложения">
-                                            <ComboBox SelectedIndex="0">
-                                                <ComboBoxItem Content="Система"/>
+                                            <ComboBox SelectedIndex="{Binding SelectedTheme, Mode=TwoWay}">
                                                 <ComboBoxItem Content="Светлая"/>
                                                 <ComboBoxItem Content="Темная"/>
+                                                <ComboBoxItem Content="Система"/>
                                             </ComboBox>
                                         </views:SettingsCard>
                                         <Separator/>
@@ -1226,7 +1226,8 @@
                                             Description="Язык, на котором будет происходить общение с моделью. От этого параметра зависит список доступных голосовых моделей">
                                             <ComboBox
                                                 ItemsSource="{Binding Languages}"
-                                                SelectedItem="{Binding SelectedLanguage}">
+                                                SelectedItem="{Binding SelectedLanguage}"
+                                                IsEnabled="{Binding !IsSpeakersLoading}">
                                                 <ComboBox.ItemTemplate>
                                                     <DataTemplate>
                                                         <TextBlock Text="{Binding Converter={StaticResource StringValueConverter}}"/>
@@ -1453,13 +1454,13 @@
                                                     VerticalAlignment="Center"
                                                     MaxWidth="300"
                                                     CornerRadius="4" 
-                                                    Background="{DynamicResource SystemBaseMediumLowColor}">
+                                                    Background="{DynamicResource SystemBaseMediumColor}">
                                                     <TextBlock 
                                                         FontFamily="{StaticResource CascadiaCode}"
                                                         Text="{Binding Model3DFolder}"
                                                         TextTrimming="LeadingCharacterEllipsis"
                                                         Margin="0"
-                                                        Padding="2"/>
+                                                        Padding="4,2,4,2"/>
                                                 </Border>
                                                 <Button
                                                     Content="Изменить"

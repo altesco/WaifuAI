@@ -10,6 +10,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
+using Avalonia.Styling;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -151,6 +152,8 @@ public partial class SettingsVM : ObservableValidator
 
     #region GeneralSettings
 
+    [ObservableProperty] private int _selectedTheme;
+
     public ObservableCollection<string> AppLanguages { get; } =
     [
         "ru", "en"
@@ -162,6 +165,16 @@ public partial class SettingsVM : ObservableValidator
         "ru", "en", "de", "es", "fr"
     ];
     [ObservableProperty] private string _selectedLanguage = "ru";
+
+    partial void OnSelectedThemeChanged(int value)
+    {
+        Application.Current!.RequestedThemeVariant = value switch
+        {
+            0 => ThemeVariant.Light,
+            1 => ThemeVariant.Dark,
+            _ => ThemeVariant.Default
+        };
+    }
 
     #endregion
 
@@ -282,7 +295,8 @@ public partial class SettingsVM : ObservableValidator
         string fileName = selectedFile.Name;
         Directory.CreateDirectory(Model3DFolder);
         string targetPath = Path.Combine(Model3DFolder, fileName);
-        File.Copy(fullPath, targetPath, true);
+        if (!File.Exists(targetPath))
+            File.Copy(fullPath, targetPath);
         Models3D.Add(fileName);
     }
 
