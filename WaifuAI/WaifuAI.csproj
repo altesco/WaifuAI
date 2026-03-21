@@ -14,11 +14,11 @@
     <None Remove="App.Settings" />
   </ItemGroup>
 
-  <!-- <ItemGroup>
-    <None Update="WebAssets\**\*">
+  <ItemGroup>
+    <Content Include="venv\**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup> -->
+    </Content>
+  </ItemGroup>
 
   <ItemGroup>
     <None Remove="say.py" />

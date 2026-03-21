@@ -30,7 +30,9 @@ namespace WaifuAI.Views
         {
             InitializeComponent();
             _lastLeftBarWidth = MainGrid.ColumnDefinitions[1].Width;
-            _lastRightBarWidth = MainGrid.ColumnDefinitions[3].Width;        
+            _lastRightBarWidth = MainGrid.ColumnDefinitions[3].Width;
+            ChatButton.IsChecked = true;
+            ModelButton.IsChecked = true;            
             WeakReferenceMessenger.Default.Register<ExecuteScriptMessage>(this, (_, m) =>
             {
                 MyWebView.ExecuteScript(m.Value);

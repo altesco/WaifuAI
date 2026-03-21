@@ -177,17 +177,31 @@
                     </Setter>
                 </Style>
             <Style Selector="Arc.loading">
-                    <Style.Animations>
-                        <Animation Duration="0:0:1" IterationCount="Infinite">
-                            <KeyFrame Cue="0%">
-                                <Setter Property="RotateTransform.Angle" Value="0"/>
-                            </KeyFrame>
-                            <KeyFrame Cue="100%">
-                                <Setter Property="RotateTransform.Angle" Value="360"/>
-                            </KeyFrame>
-                        </Animation>
-                    </Style.Animations>
-                </Style>    
+                <Style.Animations>
+                    <Animation Duration="0:0:1" IterationCount="Infinite">
+                        <KeyFrame Cue="0%">
+                            <Setter Property="RotateTransform.Angle" Value="0"/>
+                        </KeyFrame>
+                        <KeyFrame Cue="100%">
+                            <Setter Property="RotateTransform.Angle" Value="360"/>
+                        </KeyFrame>
+                    </Animation>
+                    <Animation Duration="0:0:2" IterationCount="Infinite" Easing="SineEaseInOut">
+                        <KeyFrame Cue="0%">
+                            <Setter Property="SweepAngle" Value="30"/>
+                            <Setter Property="StartAngle" Value="0"/>
+                        </KeyFrame>
+                        <KeyFrame Cue="50%">
+                            <Setter Property="SweepAngle" Value="270"/>
+                            <Setter Property="StartAngle" Value="0"/> 
+                        </KeyFrame>
+                        <KeyFrame Cue="100%">
+                            <Setter Property="SweepAngle" Value="30"/>
+                            <Setter Property="StartAngle" Value="330"/>
+                        </KeyFrame>
+                    </Animation>
+                </Style.Animations>
+            </Style>    
         </Grid.Styles>
         <Grid RowDefinitions="40,*" Classes.blurred="{Binding IsSettingsOpen}">
             <Grid.Styles>
@@ -796,6 +810,20 @@
                         </Grid>
                     </Panel>
                 </Border>
+                <GridSplitter
+                    Grid.Column="1"
+                    Width="4"
+                    HorizontalAlignment="Right"
+                    Background="Transparent"
+                    DragCompleted="LeftThumb_OnDragCompleted">
+                    <GridSplitter.IsVisible>
+                        <MultiBinding Converter="{x:Static BoolConverters.Or}">
+                            <Binding ElementName="ChatButton" Path="IsChecked"/>
+                            <Binding ElementName="MemoryButton" Path="IsChecked"/> 
+                            <Binding ElementName="PersonalityButton" Path="IsChecked"/>                            
+                        </MultiBinding>    
+                    </GridSplitter.IsVisible>    
+                </GridSplitter>
                 <StackPanel
                     Grid.Column="2"
                     HorizontalAlignment="Center"
@@ -975,7 +1003,14 @@
                     Width="4"
                     HorizontalAlignment="Left"
                     Background="Transparent"
-                    DragCompleted="RightThumb_OnDragCompleted" />
+                    DragCompleted="RightThumb_OnDragCompleted">
+                    <GridSplitter.IsVisible>
+                        <MultiBinding Converter="{x:Static BoolConverters.Or}">
+                            <Binding ElementName="ModelButton" Path="IsChecked"/>
+                            <Binding ElementName="ParametersButton" Path="IsChecked"/>                            
+                        </MultiBinding>    
+                    </GridSplitter.IsVisible>    
+                </GridSplitter>
                 <Border
                     Grid.Column="4"
                     Background="{DynamicResource SystemChromeLowColor}"
@@ -1054,7 +1089,7 @@
                                     VerticalAlignment="Center"/>
                             </Grid>
                         </ListBoxItem>
-                        <ListBoxItem x:Name="Sound">
+                        <ListBoxItem x:Name="Sound" IsSelected="True">
                             <Grid ColumnDefinitions="Auto,*">
                                 <LucideIcon 
                                     Kind="Volume2" 
@@ -1067,7 +1102,7 @@
                                     VerticalAlignment="Center"/>
                             </Grid>
                         </ListBoxItem>
-                        <ListBoxItem x:Name="ModelAppearence" IsSelected="True">
+                        <ListBoxItem x:Name="ModelAppearence" >
                             <Grid ColumnDefinitions="Auto,*">
                                 <LucideIcon 
                                     Kind="Shirt" 
@@ -1212,6 +1247,7 @@
                                             Description="Выбор технологии синтеза речи">
                                             <ComboBox 
                                                 ItemsSource="{Binding Sources}"
+                                                IsEnabled="{Binding !IsSpeakersLoading}"
                                                 SelectedItem="{Binding SelectedSource}"/>
                                         </views:SettingsCard>
                                         <Separator/>
@@ -1221,6 +1257,7 @@
                                             Description="Технологическая база для генерации речи">
                                             <ComboBox 
                                                 ItemsSource="{Binding Models}"
+                                                IsEnabled="{Binding !IsSpeakersLoading}"
                                                 SelectedItem="{Binding SelectedVoiceModel}"/>
                                         </views:SettingsCard>
                                         <Separator/>
@@ -1228,10 +1265,34 @@
                                             Icon="{LucideIconContent Speech, 20}"
                                             Header="Голос" 
                                             Description="Конкретный голос и тембр, доступный в рамках выбранной модели">
-                                            <ComboBox 
-                                                ItemsSource="{Binding Speakers}"
-                                                SelectedItem="{Binding SelectedSpeaker}"
-                                                IsEnabled="{Binding !IsSpeakersLoading}"/>
+                                            <Grid>
+                                                <ComboBox 
+                                                    ItemsSource="{Binding Speakers}"
+                                                    SelectedItem="{Binding SelectedSpeaker}"
+                                                    IsVisible="{Binding !IsSpeakersLoading}">
+                                                </ComboBox>
+                                                <Arc
+                                                    Classes="loading"
+                                                    Width="24" 
+                                                    Height="24" 
+                                                    Stroke="{Binding $parent[Window].Foreground}" 
+                                                    Opacity="0.4"
+                                                    StrokeThickness="2" 
+                                                    StrokeLineCap="Round"
+                                                    StartAngle="0" 
+                                                    SweepAngle="270"
+                                                    IsVisible="{Binding IsSpeakersLoading}">
+                                                    <Arc.RenderTransform>
+                                                        <RotateTransform />
+                                                    </Arc.RenderTransform>
+                                                </Arc>
+                                                <TextBlock
+                                                    Text="Выберите модель"
+                                                    FontWeight="DemiBold"
+                                                    VerticalAlignment="Center"
+                                                    IsVisible="{Binding SelectedVoiceModel, 
+                                                    Converter={x:Static ObjectConverters.IsNull}}"/>
+                                            </Grid>
                                         </views:SettingsCard>
                                     </StackPanel>
                                 </Border>       

@@ -34,7 +34,6 @@ namespace WaifuAI.ViewModels
         private async Task InitializeAsync()
         {
             IsInitializing = true;
-            QueryService.StartHttpServer(); 
             ModelService.StartWebServer(12347, out var url);
             WebAddress = url;
             VoiceService.StartPythonServer();
@@ -42,7 +41,7 @@ namespace WaifuAI.ViewModels
             await SettingsVM.Instance.Load();
             IsInitializing = false;
         }
-
+        
         [ObservableProperty] private bool _isInitializing;
         [ObservableProperty] private string _webAddress;
         [ObservableProperty] private string _question = string.Empty;

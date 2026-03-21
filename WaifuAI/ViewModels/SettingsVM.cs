@@ -63,7 +63,8 @@ public partial class SettingsVM : ObservableValidator
 
         // Voice Settings
         SelectedSource = SettingsModel.Source;
-        SelectedVoiceModel = SettingsModel.VoiceModel;
+        SelectedVoiceModel = VoiceService.LanguageModels[SelectedLanguage].Contains(SettingsModel.VoiceModel) ?
+            SettingsModel.VoiceModel : VoiceService.LanguageModels[SelectedLanguage][0];
         await RefreshSpeakersAsync(SelectedVoiceModel, SettingsModel.Speaker);
         SelectedSpeaker = SettingsModel.Speaker;
         Volume = SettingsModel.Volume;
@@ -130,7 +131,7 @@ public partial class SettingsVM : ObservableValidator
     partial void OnSelectedLanguageChanged(string value)
     {
         Models.Clear();
-        var models = QueryService.GetModels(SelectedLanguage);
+        var models = VoiceService.LanguageModels[SelectedLanguage];
         foreach (var model in models)
             Models.Add(model);
         if (Models.Count > 0)
@@ -205,7 +206,7 @@ public partial class SettingsVM : ObservableValidator
     partial void OnSelectedSourceChanged(string value)
     {
         Models.Clear();
-        var models = QueryService.GetModels(SelectedLanguage);
+        var models = VoiceService.LanguageModels[SelectedLanguage];
         foreach (var model in models)
             Models.Add(model);
         if (Models.Count > 0)
@@ -216,29 +217,24 @@ public partial class SettingsVM : ObservableValidator
     {
         if (IsLoading || string.IsNullOrEmpty(value)) 
             return;
-        _ = RefreshSpeakersAsync(value);
+        _ = RefreshSpeakersAsync(value, SelectedSpeaker);
     }
 
-    private async Task RefreshSpeakersAsync(string modelName, string? restoreSpeaker = null)
+    private async Task RefreshSpeakersAsync(string modelName, string restoreSpeaker)
     {
         IsSpeakersLoading = true;
-        var list = await QueryService.GetSpeakers(modelName);
-        await Dispatcher.UIThread.InvokeAsync(() =>
-        {
-            Speakers.Clear();
-            foreach (var speaker in list)
-                Speakers.Add(speaker);
-            if (!string.IsNullOrEmpty(restoreSpeaker) && Speakers.Contains(restoreSpeaker))
-            {
-                SelectedSpeaker = restoreSpeaker;
-            }
-            else if (Speakers.Count > 0)
-            {
-                SelectedSpeaker = Speakers[0];
-            }
-        });
+        var list = await VoiceService.GetSpeakers(modelName);
         IsSpeakersLoading = false;
+        Speakers.Clear();
+        foreach (var speaker in list)
+            Speakers.Add(speaker);
+        if (Speakers.Count > 0 && !Speakers.Contains(restoreSpeaker))
+            SelectedSpeaker = Speakers[0];
+        else
+            SelectedSpeaker = restoreSpeaker;
     }
+
+
 
     partial void OnVolumeChanged(double value)
     {

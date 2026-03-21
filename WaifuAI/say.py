@@ -16,30 +16,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-'''
-device = torch.device('cpu')
-model, utils = torch.hub.load(repo_or_dir='snakers4/silero-models',
-                              model='silero_tts',
-                              language='ru',
-                              speaker='v5_2_ru')
-model.to(device)'''
 loaded_models = {} 
 
 def get_model(model_name):
     if model_name in loaded_models:
         print(f"DEBUG: Уже есть {model_name}...")
         return loaded_models[model_name]
-    '''print(f"Загрузка модели для спикера: {model_name}...")
-    model, _ = torch.hub.load(repo_or_dir='snakers4/silero-models',
-                              model='silero_tts',
-                              language='ru',
-                              speaker=model_name)
-    loaded_models[model_name] = model
-    return model'''
     print(f"DEBUG: Начинаю запрос к torch.hub для {model_name}...", flush=True)
-    
     try:
-        # Добавь trust_repo=True, в новых версиях torch это обязательно
         model, _ = torch.hub.load(repo_or_dir='snakers4/silero-models',
                                   model='silero_tts',
                                   language='ru',

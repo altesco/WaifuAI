@@ -4,8 +4,10 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Messaging;
 using Cyrillic.Convert;
@@ -19,30 +21,16 @@ public static class VoiceService
     public static int port = 5050;
 
     public static Process? PythonProcess;
-    
-    // public static void StartPythonServer()
-    // {
-    //     try
-    //     {
-    //         string baseDir = AppDomain.CurrentDomain.BaseDirectory;
-    //         string scriptPath = Path.Combine(baseDir, "say.py");
-    //         string venvPython = Path.Combine(baseDir, "venv", "bin", "python");
-    //         string pythonExe = File.Exists(venvPython) ? venvPython : "python";
-    //         ProcessStartInfo info = new ProcessStartInfo
-    //         {
-    //             FileName = pythonExe,
-    //             Arguments = $"\"{scriptPath}\"",
-    //             UseShellExecute = false,
-    //             CreateNoWindow = true,
-    //             WorkingDirectory = baseDir
-    //         };
-    //         Process.Start(info);
-    //     }
-    //     catch (Exception e)
-    //     {
-    //         Console.WriteLine(e + "\n" + e.Message);
-    //     }
-    // }
+
+    public static Dictionary<string, List<string>> LanguageModels { get; } = new()
+    {
+        ["ru"] = ["v5_cis_base", "v5_cis_ext", "v5_2_ru", "v5_1_ru", "v5_ru", "v4_ru", "v3_1_ru", "ru_v3"],
+        ["en"] = ["v3_en", "v3_en_indic", "lj_v2"],
+        ["de"] = ["v3_de", "thorsten_v2"],
+        ["es"] = ["v3_es", "tux_v2"],
+        ["fr"] = ["v3_fr", "gilles_v2"]
+    };
+
     public static void StartPythonServer()
     {
         try
@@ -263,4 +251,17 @@ public static class VoiceService
         }
         return sb.ToString();
     }
+    
+    public static async Task<List<string>> GetSpeakers(string model)
+    {
+        string url = $"http://127.0.0.1:5050/speakers?model_name={Uri.EscapeDataString(model)}";
+        var json = await ApiService.HttpClient.GetFromJsonAsync<SpeakerResponce>(url);
+        return json?.Speakers ?? new List<string>();
+    }
+}
+
+public class SpeakerResponce
+{
+    [JsonPropertyName("speakers")]
+    public List<string> Speakers { get; set; }
 }

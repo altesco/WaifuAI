@@ -33,8 +33,7 @@
                     BaseHigh="#4d5069"
                     BaseMediumHigh="#abafbd"
                     BaseMedium="#c8ccd7"
-                    BaseLow="#D4D6DC"
-                    BaseMediumLow="#cbcfd9"/>
+                    BaseLow="#D4D6DC"/>
                 <ColorPaletteResources x:Key="Dark" />
             </FluentTheme.Palettes>
         </FluentTheme>

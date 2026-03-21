@@ -30,6 +30,7 @@
                             Grid.Column="2"
                             Content="{TemplateBinding InnerContent}"
                             VerticalAlignment="Center"
+                            VerticalContentAlignment="Center"
                             Margin="12,0,0,0"/>
                     </Grid>
                 </Border>
