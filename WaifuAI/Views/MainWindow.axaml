@@ -192,7 +192,11 @@
                 </Style.Animations>
             </Style>    
         </Grid.Styles>
-        <Grid RowDefinitions="40,*" Classes.blurred="{Binding IsSettingsOpen}">
+        <!-- Main -->
+        <Grid 
+            RowDefinitions="40,*" 
+            Classes.blurred="{Binding IsSettingsOpen}"
+            IsVisible="{Binding !IsInitializing}">
             <Grid.Styles>
                 <Style Selector="Grid.blurred">
                     <Setter Property="Effect">
@@ -204,7 +208,6 @@
             </Grid.Styles>
             <Border
                 Background="{DynamicResource SystemChromeHighColor}"
-                
                 BorderThickness="0,0,0,1">
                 <Grid>
                     <StackPanel Orientation="Horizontal">
@@ -787,7 +790,8 @@
                                             Command="{Binding QueryCommand}"
                                             CommandParameter="{Binding #MyWebView}"
                                             IsDefault="True"
-                                            IsEnabled="{Binding Question, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                                            IsEnabled="{Binding Question, 
+                                            Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
                                             <LucideIcon Kind="SendHorizontal" Size="20" />
                                         </Button>
                                         <Button Margin="3">
@@ -843,7 +847,8 @@
                     x:Name="MyWebView"
                     Grid.Column="2"
                     Address="{Binding WebAddress}" 
-                    DisableBuiltinContextMenus="True">
+                    DisableBuiltinContextMenus="True"
+                    JavascriptContextCreated="MyWebView_JavascriptContextCreated">
                     <wv:WebView.IsVisible>
                         <MultiBinding Converter="{x:Static BoolConverters.And}">
                             <Binding Source="{x:Static vm:SettingsVM.Instance}" Path="!IsModel3DLoading"/>
@@ -1039,7 +1044,6 @@
                     <Style Selector="Separator">
                         <Setter Property="Height" Value="1"/>
                         <Setter Property="Background" Value="{DynamicResource SystemBaseLowColor}"/>
-                        <Setter Property="Opacity" Value="0.3"/>
                         <Setter Property="Margin" Value="0,18,0,18"/>
                     </Style>
                 </Border.Styles>
@@ -1477,5 +1481,20 @@
                 </Grid>
             </Border>    
         </Grid>
+        <!-- Startup -->
+        <StackPanel
+            VerticalAlignment="Center"
+            Spacing="16"
+            IsVisible="{Binding IsInitializing}">
+            <TextBlock
+                Text="{Binding InitializingMessage}"
+                HorizontalAlignment="Center"/>          
+            <ProgressBar 
+                Height="8" 
+                MaxWidth="1000" 
+                CornerRadius="3"
+                Margin="100,0"
+                IsIndeterminate="True"/>
+        </StackPanel>   
     </Grid>  
 </Window>

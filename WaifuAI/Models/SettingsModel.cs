@@ -13,6 +13,7 @@ public class SettingsModel
     public bool IsServerQuery { get; set; }
 
     // General Settings
+    public int Theme { get; set; }
     public string AppLanguage { get; set; } = string.Empty;
     public string Language { get; set; } = string.Empty;
 

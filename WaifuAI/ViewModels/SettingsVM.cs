@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
 using Avalonia.Styling;
@@ -47,7 +48,7 @@ public partial class SettingsVM : ObservableValidator
             return;
         }
         IsLoading = true;
-        var json = File.ReadAllText(FilePath);
+        var json = await File.ReadAllTextAsync(FilePath);
         SettingsModel = JsonSerializer.Deserialize<SettingsModel>(json) ?? new SettingsModel();
 
         // AI Settings
@@ -59,6 +60,7 @@ public partial class SettingsVM : ObservableValidator
         IsServerQuery = SettingsModel.IsServerQuery;
         
         // General Settings
+        SelectedTheme = SettingsModel.Theme;
         SelectedAppLanguage = SettingsModel.AppLanguage;
         SelectedLanguage = SettingsModel.Language;
 
@@ -66,7 +68,6 @@ public partial class SettingsVM : ObservableValidator
         SelectedSource = SettingsModel.Source;
         SelectedVoiceModel = VoiceService.LanguageModels[SelectedLanguage].Contains(SettingsModel.VoiceModel) ?
             SettingsModel.VoiceModel : VoiceService.LanguageModels[SelectedLanguage][0];
-        await RefreshSpeakersAsync(SelectedVoiceModel, SettingsModel.Speaker);
         SelectedSpeaker = SettingsModel.Speaker;
         Volume = SettingsModel.Volume;
         Bass = SettingsModel.Bass;
@@ -100,6 +101,7 @@ public partial class SettingsVM : ObservableValidator
         SettingsModel.IsServerQuery = IsServerQuery;
 
         // General Settings
+        SettingsModel.Theme = SelectedTheme;
         SettingsModel.AppLanguage = SelectedAppLanguage;
         SettingsModel.Language = SelectedLanguage;
 
@@ -119,6 +121,15 @@ public partial class SettingsVM : ObservableValidator
         var options = new JsonSerializerOptions { WriteIndented = true };
         var json = JsonSerializer.Serialize(SettingsModel, options);
         File.WriteAllText(FilePath, json);
+    }
+
+    public async Task InitializeSpeakers() => 
+        await RefreshSpeakersAsync(SelectedVoiceModel, SettingsModel.Speaker);
+
+    public async Task InitializeModel3D()
+    {
+        ModelService.SetBackground();
+        await ChangeModel3D(SelectedModel3D);
     }
 
     protected override void OnPropertyChanged(PropertyChangedEventArgs e)
@@ -174,6 +185,9 @@ public partial class SettingsVM : ObservableValidator
             1 => ThemeVariant.Dark,
             _ => ThemeVariant.Default
         };
+        if (IsLoading)
+            return;
+        ModelService.SetBackground();
     }
 
     #endregion
@@ -322,6 +336,13 @@ public partial class SettingsVM : ObservableValidator
 
     partial void OnSelectedModel3DChanged(string value)
     {
+        if (IsLoading)
+            return;
+        _ = ChangeModel3D(value);
+    }
+
+    private async Task ChangeModel3D(string modelFileName)
+    {
         IsModel3DLoading = true;
         Directory.CreateDirectory(BaseModel3DFolder);
         string url;
@@ -331,56 +352,53 @@ public partial class SettingsVM : ObservableValidator
             // set new temp
             var time = DateTime.Now.ToString("dd_MM_yyyy_HH_mm_ss");
             newFileName = $"temp_{time}.vrm";
-            var source = Path.Combine(Model3DFolder, value);
+            var source = Path.Combine(Model3DFolder, modelFileName);
             var target = Path.Combine(BaseModel3DFolder, newFileName);
             File.Copy(source, target, true);
             url = $"./models/{newFileName}";
         }
         else
-            url = $"./models/{value}";
+            url = $"./models/{modelFileName}";
         string script = $"window.vrmApp.changeModel('{url}')";
         WeakReferenceMessenger.Default.Send(new ExecuteScriptMessage(script));
-        _ = Task.Run(async () =>
+        while (IsModel3DLoading)
         {
-            while (IsModel3DLoading)
+            await Task.Delay(2000);
+            try
             {
-                await Task.Delay(2000);
-                try
+                var message = new EvaluateScriptMessage("return window.vrmApp.isModelLoaded");
+                await WeakReferenceMessenger.Default.Send(message);
+                var responce = await message.Response;
+                if (responce is Task<int> internalTask)
                 {
-                    var message = new EvaluateScriptMessage("return window.vrmApp.isModelLoaded");
-                    await WeakReferenceMessenger.Default.Send(message);
-                    var responce = await message.Response;
-                    if (responce is Task<int> internalTask)
+                    int status = await internalTask;
+                    if (status == 0)
+                        continue;
+                    IsModel3DLoading = false;
+                    if (Model3DFolder == BaseModel3DFolder)
+                        continue;
+                    // remove old or new temp
+                    var files = Directory.GetFiles(BaseModel3DFolder, "temp_*.vrm");
+                    if (files.Length <= 0)
+                        continue;
+                    if (status == 1)
                     {
-                        int status = await internalTask;
-                        if (status == 0)
-                            continue;
-                        IsModel3DLoading = false;
-                        if (Model3DFolder == BaseModel3DFolder)
-                            continue;
-                        // remove old or new temp
-                        var files = Directory.GetFiles(BaseModel3DFolder, "temp_*.vrm");
-                        if (files.Length <= 0)
-                            continue;
-                        if (status == 1)
-                        {
-                            foreach (var file in files)
-                                if (Path.GetFileName(file) != newFileName)
-                                    File.Delete(file); 
-                        }  
-                        else if (status == -1)
-                            foreach (var file in files)
+                        foreach (var file in files)
+                            if (Path.GetFileName(file) != newFileName)
                                 File.Delete(file); 
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Ошибка в опросе: {ex.Message}");
+                    }  
+                    else if (status == -1)
+                        foreach (var file in files)
+                            File.Delete(file); 
                 }
             }
-        });
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка в опросе: {ex.Message}");
+            }
+        }
     }
-
+    
     private void RefreshModels3D()
     {
         Models3D.Clear();

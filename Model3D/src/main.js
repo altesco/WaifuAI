@@ -362,3 +362,13 @@ window.vrmApp.changeModel = async (modelUrl) => {
     window.vrmApp.isModelLoaded = -1;
   }
 };
+
+window.vrmApp.setBackground = (hexString) => {
+  renderer.setClearColor(hexString, 1);
+  document.body.style.backgroundColor = hexString;
+  document.documentElement.style.backgroundColor = hexString;
+  const canvas = renderer.domElement;
+  if (canvas) {
+    canvas.style.backgroundColor = hexString;
+  }
+};

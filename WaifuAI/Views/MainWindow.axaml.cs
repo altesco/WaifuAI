@@ -32,7 +32,7 @@ namespace WaifuAI.Views
             _lastLeftBarWidth = MainGrid.ColumnDefinitions[1].Width;
             _lastRightBarWidth = MainGrid.ColumnDefinitions[3].Width;
             ChatButton.IsChecked = true;
-            ModelButton.IsChecked = true;            
+            ModelButton.IsChecked = true;
             WeakReferenceMessenger.Default.Register<ExecuteScriptMessage>(this, (_, m) =>
             {
                 MyWebView.ExecuteScript(m.Value);
@@ -41,13 +41,13 @@ namespace WaifuAI.Views
             {
                 var evalTask = Task.Run(async () =>
                 {
-                    try 
+                    try
                     {
                         var result = await MyWebView.EvaluateScript<int>(m.Script);
                         Console.WriteLine(result);
                         return result;
                     }
-                    catch 
+                    catch
                     {
                         return -1;
                     }
@@ -59,7 +59,7 @@ namespace WaifuAI.Views
         private GridLength _lastLeftBarWidth;
         private GridLength _lastRightBarWidth;
 
-        
+
 
         private void OnBackgroundPointerPressed(object? sender, PointerPressedEventArgs e)
         {
@@ -177,6 +177,11 @@ namespace WaifuAI.Views
                 StrokeWidth = oldIcon.StrokeWidth
             };
             btn.IsHitTestVisible = true;
+        }
+
+        private void MyWebView_JavascriptContextCreated(string frameName)
+        {
+            ModelService.SetBackground();
         }
     }
 }

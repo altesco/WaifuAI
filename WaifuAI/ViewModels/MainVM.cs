@@ -28,21 +28,27 @@ namespace WaifuAI.ViewModels
     {
         public MainVM()
         {
-            Dispatcher.UIThread.Post(() => _ = InitializeAsync());
+            _ = InitializeAsync();
         }
 
         private async Task InitializeAsync()
         {
             IsInitializing = true;
-            ModelService.StartWebServer(12347, out var url);
-            WebAddress = url;
+            InitializingMessage = "Загрузка данных...";
+            await SettingsVM.Instance.Load();
+            InitializingMessage = "Запуск веб-сервера...";
+            WebAddress = await ModelService.StartWebServer(12347);
+            await ModelService.WaitForResponce();
+            await SettingsVM.Instance.InitializeModel3D();
+            InitializingMessage = "Запуск звукового сервера...";
             VoiceService.StartPythonServer();
             await VoiceService.WaitForPythonServerAsync();
-            await SettingsVM.Instance.Load();
+            await SettingsVM.Instance.InitializeSpeakers();
             IsInitializing = false;
         }
         
         [ObservableProperty] private bool _isInitializing;
+        [ObservableProperty] private string _initializingMessage;
         [ObservableProperty] private string _webAddress;
         [ObservableProperty] private string _question = string.Empty;
         [ObservableProperty] private MessageVM? _selectedMessage;
