@@ -5,19 +5,11 @@
     xmlns:local="using:WaifuAI"
     RequestedThemeVariant="Default">
     <Application.Resources>
-        <StaticResource x:Key="ToggleButtonForegroundChecked" ResourceKey="AccentButtonBackground" />
-        <StaticResource x:Key="ToggleButtonBackgroundChecked" ResourceKey="ButtonBackgroundPointerOver"/>
-        <StaticResource x:Key="ToggleButtonBackgroundPointerOver" ResourceKey="ButtonBackgroundPointerOver"/>
-        <StaticResource x:Key="ToggleButtonBackgroundCheckedPointerOver" ResourceKey="ButtonBackgroundPointerOver"/>
-        <StaticResource x:Key="ToggleButtonForegroundCheckedPointerOver" ResourceKey="AccentButtonBackground"/>
-        <StaticResource x:Key="ToggleButtonBackgroundPressed" ResourceKey="ButtonBackgroundPointerOver"/>
-        <StaticResource x:Key="ToggleButtonBackgroundCheckedPressed" ResourceKey="ButtonBackgroundPointerOver"/>
-        <StaticResource x:Key="ToggleButtonForegroundCheckedPressed" ResourceKey="AccentButtonBackground"/>
-        <StaticResource x:Key="ButtonBackgroundPressed" ResourceKey="ButtonBackgroundPointerOver"/>
         <SolidColorBrush x:Key="ButtonBackgroundDisabled" Color="Transparent"/>
+        <SolidColorBrush x:Key="ListBoxBorderThemeBrush" Color="{DynamicResource SystemBaseLowColor}"/>
         <FontFamily x:Key="CascadiaCode">avares://WaifuAI/Assets/Fonts/#Cascadia Code</FontFamily>
         <FontFamily x:Key="JetBrainsMono">avares://WaifuAI/Assets/Fonts/#JetBrains Mono</FontFamily>
-        <StaticResource x:Key="ComboBoxDropDownBackground" ResourceKey="SystemChromeLowColor"/>
+        <SolidColorBrush x:Key="ComboBoxDropDownBackground" Color="{DynamicResource SystemChromeHighColor}"/>
     </Application.Resources>
     <Application.DataTemplates>
         <local:ViewLocator/>
@@ -28,13 +20,25 @@
                 <ColorPaletteResources 
                     x:Key="Light" 
                     RegionColor="#eef1f5"
-                    ChromeLow="#e5e8ee"
-                    ChromeMedium="#dbdfe7"
+                    ChromeLow="#eef1f5"
+                    ChromeMedium="#e5e8ee"
+                    ChromeHigh="#dbdfe7"
                     BaseHigh="#4d5069"
-                    BaseMediumHigh="#abafbd"
-                    BaseMedium="#c8ccd7"
-                    BaseLow="#D4D6DC"/>
-                <ColorPaletteResources x:Key="Dark" />
+                    BaseMediumHigh="#696c82"
+                    BaseMedium="#84889a"
+                    BaseMediumLow="#a0a4b3"
+                    BaseLow="#bbbfcb"/>
+                <ColorPaletteResources 
+                    x:Key="Dark" 
+                    RegionColor="#232332"
+                    ChromeLow="#232332"
+                    ChromeMedium="#1e1e2a"
+                    ChromeHigh="#181821"
+                    BaseHigh="#c5cff5"
+                    BaseMediumHigh="#a1a9ca"
+                    BaseMedium="#7d829e"
+                    BaseMediumLow="#595c72"
+                    BaseLow="#343546"/>
             </FluentTheme.Palettes>
         </FluentTheme>
         <StyleInclude Source="/Views/SettingsCard.axaml" />

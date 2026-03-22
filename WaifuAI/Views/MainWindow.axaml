@@ -4,12 +4,10 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:actipro="http://schemas.actiprosoftware.com/avaloniaui"
     xmlns:vm="using:WaifuAI.ViewModels"
     xmlns:wv="clr-namespace:WebViewControl;assembly=WebViewControl.Avalonia"
     xmlns:views="using:WaifuAI.Views"
     xmlns:conv="using:WaifuAI.Converters"
-    xmlns:li="using:LoadingIndicators.Avalonia"
     Title="WaifuAI"
     d:DesignHeight="720"
     d:DesignWidth="1024"
@@ -21,144 +19,135 @@
     <Window.Resources>
         <conv:MathConverter x:Key="MathConverter"/>
         <conv:StringValueConverter x:Key="StringValueConverter"/>
-        <ControlTheme x:Key="RadioButtonWithIcon" TargetType="RadioButton">
-            <Setter Property="Width" Value="28" />
-            <Setter Property="Height" Value="28" />
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="Padding" Value="0" />
-            <Setter Property="CornerRadius" Value="5" />
-            <Setter Property="Cursor" Value="Hand" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="RadioButton">
-                        <ContentPresenter
-                            Name="PART_Content"
-                            Width="{TemplateBinding Width}"
-                            Height="{TemplateBinding Height}"
-                            Padding="{TemplateBinding Padding}"
-                            Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}"
-                            Content="{TemplateBinding Content}"
-                            CornerRadius="{TemplateBinding CornerRadius}"
-                            Foreground="{TemplateBinding Foreground}" />
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-            <Style Selector="^:pointerover /template/ ContentPresenter#PART_Content">
-                <Setter Property="Background" Value="{DynamicResource ButtonBackgroundPointerOver}" />
-            </Style>
-            <Style Selector="^:checked /template/ ContentPresenter#PART_Content">
-                <Setter Property="Background" Value="{DynamicResource ButtonBackgroundPointerOver}" />
-                <Setter Property="Foreground" Value="{DynamicResource AccentButtonBackground}" />
-            </Style>
-            <Style Selector="^:pressed">
-                <Setter Property="RenderTransform" Value="scale(0.97)" />
-            </Style>
-            <Setter Property="Transitions">
-                <Transitions>
-                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.05" />
-                </Transitions>
-            </Setter>
-        </ControlTheme>
     </Window.Resources>
     <Grid 
         x:Name="RootPanel" 
         PointerPressed="OnBackgroundPointerPressed" 
         Focusable="True">
         <Grid.Styles>
+            <Style Selector="TextBlock:disabled">
+                <Setter Property="Foreground" Value="{DynamicResource SystemBaseMediumLowColor}"/>
+            </Style>
+            <Style Selector="Border">
+                <Setter Property="BorderBrush" Value="{DynamicResource SystemBaseLowColor}"/>
+            </Style>
+            <Style Selector="ListBox">
+                <Setter Property="BorderBrush" Value="{DynamicResource SystemBaseLowColor}"/>
+            </Style>
             <Style Selector="Button">
-                    <Setter Property="Width" Value="28" />
-                    <Setter Property="Height" Value="28" />
-                    <Setter Property="Background" Value="Transparent" />
-                    <Setter Property="Padding" Value="0" />
-                    <Setter Property="CornerRadius" Value="5" />
-                    <Setter Property="Cursor" Value="Hand" />
+                <Setter Property="Width" Value="28" />
+                <Setter Property="Height" Value="28" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="CornerRadius" Value="5" />
+                <Setter Property="Cursor" Value="Hand" />
+                <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
+                    <Setter Property="Background" Value="{DynamicResource ButtonBackgroundPointerOver}"/>
                 </Style>
+            </Style>
             <Style Selector="ToggleButton">
-                    <Setter Property="Width" Value="28" />
-                    <Setter Property="Height" Value="28" />
-                    <Setter Property="Background" Value="Transparent" />
-                    <Setter Property="Padding" Value="0" />
-                    <Setter Property="CornerRadius" Value="5" />
-                    <Setter Property="Cursor" Value="Hand" />
+                <Setter Property="Width" Value="28" />
+                <Setter Property="Height" Value="28" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="CornerRadius" Value="5" />
+                <Setter Property="Cursor" Value="Hand" />
+                <Style Selector="^:checked:pressed /template/ ContentPresenter#PART_ContentPresenter">
+                    <Setter Property="Background" Value="{DynamicResource ButtonBackgroundPointerOver}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource AccentButtonBackground}"/>
                 </Style>
+                <Style Selector="^:checked:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                    <Setter Property="Background" Value="{DynamicResource ButtonBackgroundPointerOver}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource AccentButtonBackground}"/>
+                </Style>
+                <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
+                    <Setter Property="Background" Value="{DynamicResource ButtonBackgroundPointerOver}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource ButtonForegroundPointerOver}"/>
+                </Style>
+                <Style Selector="^:checked  /template/ ContentPresenter#PART_ContentPresenter">
+                    <Setter Property="Background" Value="{DynamicResource ButtonBackgroundPointerOver}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource AccentButtonBackground}"/>
+                </Style>
+            </Style>
             <Style Selector="ContextMenu">
-                    <Setter Property="CornerRadius" Value="7" />
-                    <Setter Property="Background" Value="{DynamicResource SystemChromeLowColor}" />
-                    <Setter Property="Padding" Value="6,1,6,1" />
-                    <Setter Property="Cursor" Value="Arrow" />
-                </Style>
+                <Setter Property="CornerRadius" Value="7" />
+                <Setter Property="Background" Value="{DynamicResource SystemChromeMediumColor}" />
+                <Setter Property="Padding" Value="6,1,6,1" />
+                <Setter Property="Cursor" Value="Arrow" />
+            </Style>
             <Style Selector="MenuItem">
-                    <Setter Property="CornerRadius" Value="4" />
-                    <Setter Property="FontSize" Value="13" />
-                </Style>
-            <Style Selector="MenuItem:pointerover /template/ Border#PART_LayoutRoot,                   MenuItem:selected /template/ Border#PART_LayoutRoot">
-                    <Setter Property="Background" Value="{DynamicResource ButtonBackgroundPointerOver}" />
-                </Style>
+                <Setter Property="CornerRadius" Value="4" />
+                <Setter Property="FontSize" Value="13" />
+            </Style>
+            <Style Selector="MenuItem:pointerover /template/ Border#PART_LayoutRoot, MenuItem:selected /template/ Border#PART_LayoutRoot">
+                <Setter Property="Background" Value="{DynamicResource ButtonBackgroundPointerOver}" />
+            </Style>
             <Style Selector="LucideIcon:disabled">
                     <Setter Property="Opacity" Value="0.5" />
                 </Style>
             <Style Selector="TextBox">
-                    <Setter Property="CornerRadius" Value="5" />
-                    <Setter Property="FontFamily" Value="{StaticResource CascadiaCode}" />
-                    <Setter Property="Height" Value="30"/>
-                    <Setter Property="MinHeight" Value="0"/>
-                    <Setter Property="MinWidth" Value="0"/>
-                    <Setter Property="ContextMenu">
-                        <Setter.Value>
-                            <ContextMenu>
-                                <MenuItem
-                                    Command="{Binding $parent[TextBox].Copy}"
-                                    Header="Копировать"
-                                    IsEnabled="{Binding $parent[TextBox].CanCopy}">
-                                    <MenuItem.Icon>
-                                        <LucideIcon Kind="Copy" Size="20" />
-                                    </MenuItem.Icon>
-                                </MenuItem>
-                                <MenuItem
-                                    Command="{Binding ManualCut}"
-                                    CommandParameter="{Binding $parent[TextBox]}"
-                                    Header="Вырезать"
-                                    IsEnabled="{Binding $parent[TextBox].CanCut}">
-                                    <MenuItem.Icon>
-                                        <LucideIcon Kind="Scissors" Size="20" />
-                                    </MenuItem.Icon>
-                                </MenuItem>
-                                <MenuItem
-                                    Command="{Binding $parent[TextBox].Paste}"
-                                    Header="Вставить"
-                                    IsEnabled="{Binding $parent[TextBox].CanPaste}">
-                                    <MenuItem.Icon>
-                                        <LucideIcon Kind="ClipboardPaste" Size="20" />
-                                    </MenuItem.Icon>
-                                </MenuItem>
-                                <MenuItem Command="{Binding $parent[TextBox].SelectAll}" Header="Выделить все">
-                                    <MenuItem.Icon>
-                                        <LucideIcon Kind="SquareDashed" Size="20" />
-                                    </MenuItem.Icon>
-                                </MenuItem>
-                            </ContextMenu>
-                        </Setter.Value>
-                    </Setter>
+                <Setter Property="CornerRadius" Value="5" />
+                <Setter Property="FontFamily" Value="{StaticResource CascadiaCode}" />
+                <Setter Property="Height" Value="30"/>
+                <Setter Property="MinHeight" Value="0"/>
+                <Setter Property="MinWidth" Value="0"/>
+                <Setter Property="ContextMenu">
+                    <Setter.Value>
+                        <ContextMenu>
+                            <MenuItem
+                                Command="{Binding $parent[TextBox].Copy}"
+                                Header="Копировать"
+                                IsEnabled="{Binding $parent[TextBox].CanCopy}">
+                                <MenuItem.Icon>
+                                    <LucideIcon Kind="Copy" Size="20" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem
+                                Command="{Binding ManualCut}"
+                                CommandParameter="{Binding $parent[TextBox]}"
+                                Header="Вырезать"
+                                IsEnabled="{Binding $parent[TextBox].CanCut}">
+                                <MenuItem.Icon>
+                                    <LucideIcon Kind="Scissors" Size="20" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem
+                                Command="{Binding $parent[TextBox].Paste}"
+                                Header="Вставить"
+                                IsEnabled="{Binding $parent[TextBox].CanPaste}">
+                                <MenuItem.Icon>
+                                    <LucideIcon Kind="ClipboardPaste" Size="20" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem Command="{Binding $parent[TextBox].SelectAll}" Header="Выделить все">
+                                <MenuItem.Icon>
+                                    <LucideIcon Kind="SquareDashed" Size="20" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                        </ContextMenu>
+                    </Setter.Value>
+                </Setter>
+                <Style Selector="^:disabled">
+                    <Setter Property="Foreground" Value="{DynamicResource SystemBaseMediumLowColor}"/>
                 </Style>
+            </Style>
             <Style Selector="Slider /template/ Thumb">
-                    <Setter Property="Template">
-                        <ControlTemplate>
-                            <Border 
-                                Background="{Binding $parent[Window].Background}"
-                                Height="20"
-                                Width="20"
-                                CornerRadius="10"
-                                BorderBrush="#bbbfcb" 
-                                BorderThickness="1"/> 
-                        </ControlTemplate>
-                    </Setter>
-                </Style>
+                <Setter Property="Template">
+                    <ControlTemplate>
+                        <Border 
+                            Background="{Binding $parent[Window].Background}"
+                            Height="20"
+                            Width="20"
+                            CornerRadius="10"
+                             
+                            BorderThickness="1"/> 
+                    </ControlTemplate>
+                </Setter>
+            </Style>
             <Style Selector="ComboBox">
-                    <Setter Property="CornerRadius" Value="5"/>
-                    <Setter Property="Height" Value="30"/>
-                </Style>
+                <Setter Property="CornerRadius" Value="5"/>
+                <Setter Property="Height" Value="30"/>
+            </Style>
             <Style Selector="DataValidationErrors">
                     <Setter Property="Template">
                         <Setter.Value>
@@ -214,8 +203,8 @@
                 </Style>
             </Grid.Styles>
             <Border
-                Background="{DynamicResource SystemChromeMediumColor}"
-                BorderBrush="#bbbfcb"
+                Background="{DynamicResource SystemChromeHighColor}"
+                
                 BorderThickness="0,0,0,1">
                 <Grid>
                     <StackPanel Orientation="Horizontal">
@@ -253,8 +242,8 @@
                     <ColumnDefinition Width="40" />
                 </Grid.ColumnDefinitions>
                 <Border
-                    Background="{DynamicResource SystemChromeLowColor}"
-                    BorderBrush="#bbbfcb"
+                    Background="{DynamicResource SystemChromeMediumColor}"
+                    
                     BorderThickness="0,0,1,0">
                     <StackPanel
                         Margin="5"
@@ -277,15 +266,15 @@
                 <Border
                     x:Name="ChatPanel"
                     Grid.Column="1"
-                    Background="{DynamicResource SystemChromeLowColor}"
-                    BorderBrush="#bbbfcb"
+                    Background="{DynamicResource SystemChromeMediumColor}"
+                    
                     BorderThickness="0,0,1,0">
                     <Panel>
                         <!--  Chat  -->
                         <Grid IsVisible="{Binding #ChatButton.IsChecked}" RowDefinitions="Auto,*,Auto">
                             <Border
                                 Height="48"
-                                BorderBrush="#bbbfcb"
+                                
                                 BorderThickness="0,0,0,1">
                                 <TextBlock
                                     Margin="16,0,16,0"
@@ -299,7 +288,7 @@
                                 x:Name="MessageList"
                                 Grid.Row="1"
                                 Padding="6"
-                                Background="{DynamicResource SystemChromeLowColor}"
+                                Background="{DynamicResource SystemChromeMediumColor}"
                                 ItemsSource="{Binding Chat}"
                                 SelectedItem="{Binding SelectedMessage, Mode=TwoWay}">
                                 <ListBox.Styles>
@@ -678,8 +667,8 @@
                             <Border
                                 Grid.Row="2"
                                 MaxWidth="720"
-                                Background="{DynamicResource SystemChromeMediumColor}"
-                                BorderBrush="#bbbfcb"
+                                Background="{DynamicResource SystemChromeHighColor}"
+                                
                                 Tag="{Binding $self.Bounds.Width}">
                                 <Border.Styles>
                                     <Style Selector="Border">
@@ -753,7 +742,7 @@
                                         Margin="12,0,0,0"
                                         VerticalAlignment="Center"
                                         IsVisible="{Binding #TextBox.Text, Converter={x:Static StringConverters.IsNullOrEmpty}}"
-                                        Opacity="0.5"
+                                        Foreground="{DynamicResource SystemBaseMediumColor}"
                                         Text="Сообщение..." />
                                     <TextBox
                                         x:Name="TextBox"
@@ -866,8 +855,8 @@
                 <Border
                     Grid.Column="3"
                     x:DataType="vm:SettingsVM"
-                    Background="{DynamicResource SystemChromeLowColor}"
-                    BorderBrush="#bbbfcb"
+                    Background="{DynamicResource SystemChromeMediumColor}"
+                    
                     BorderThickness="1,0,0,0"
                     DataContext="{x:Static vm:SettingsVM.Instance}"
                     IsVisible="{Binding #ModelButton.IsChecked}">
@@ -878,13 +867,12 @@
                         </Style>
                         <Style Selector="StackPanel[Tag=False]">
                             <Setter Property="IsEnabled" Value="False" />
-                            <Setter Property="Opacity" Value="0.5" />
                         </Style>
                     </Border.Styles>
                     <Grid RowDefinitions="Auto,*">
                         <Border
                             Height="48"
-                            BorderBrush="#bbbfcb"
+                            
                             BorderThickness="0,0,0,1">
                             <TextBlock
                                 Margin="16,0,16,0"
@@ -1013,8 +1001,8 @@
                 </GridSplitter>
                 <Border
                     Grid.Column="4"
-                    Background="{DynamicResource SystemChromeLowColor}"
-                    BorderBrush="#bbbfcb"
+                    Background="{DynamicResource SystemChromeMediumColor}"
+                    
                     BorderThickness="1,0,0,0">
                     <StackPanel
                         Margin="5"
@@ -1043,15 +1031,14 @@
             <Border
                 MaxWidth="1400"
                 MaxHeight="900"
-                Margin="100"
+                Margin="52"
                 CornerRadius="8"
-                Background="#eef1f5"
-                BorderThickness="1"
-                BorderBrush="#bbbfcb">
+                Background="{DynamicResource SystemChromeLowColor}"
+                BorderThickness="1">
                 <Border.Styles>
                     <Style Selector="Separator">
                         <Setter Property="Height" Value="1"/>
-                        <Setter Property="Background" Value="{DynamicResource SystemBaseHighColor}"/>
+                        <Setter Property="Background" Value="{DynamicResource SystemBaseLowColor}"/>
                         <Setter Property="Opacity" Value="0.3"/>
                         <Setter Property="Margin" Value="0,18,0,18"/>
                     </Style>
@@ -1062,7 +1049,7 @@
                         Grid.Column="0"
                         Padding="10"
                         BorderThickness="0,0,1,0"
-                        BorderBrush="#bbbfcb">
+                        >
                         <ListBox.Styles>
                             <Style Selector="ListBoxItem">
                                 <Setter Property="CornerRadius" Value="4"/>
@@ -1070,10 +1057,10 @@
                                 <Setter Property="Margin" Value="1"/>
                             </Style>
                             <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-                                <Setter Property="Background" Value="{DynamicResource ToggleButtonBackgroundChecked}"/>
+                                <Setter Property="Background" Value="{DynamicResource ButtonBackgroundPointerOver}"/>
                             </Style>
                             <Style Selector="ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
-                                <Setter Property="Background" Value="{DynamicResource ToggleButtonBackgroundChecked}"/>
+                                <Setter Property="Background" Value="{DynamicResource ButtonBackgroundPointerOver}"/>
                             </Style>
                         </ListBox.Styles>
                         <ListBoxItem x:Name="General">
@@ -1139,7 +1126,7 @@
                                     <Setter Property="Margin" Value="12"/>
                                     <Setter Property="CornerRadius" Value="12"/>
                                     <Setter Property="Padding" Value="18"/>
-                                    <Setter Property="Background" Value="{DynamicResource SystemChromeLowColor}"/>
+                                    <Setter Property="Background" Value="{DynamicResource SystemChromeMediumColor}"/>
                                 </ControlTheme>
                             </Grid.Resources>
                             <Grid.Styles>
@@ -1152,15 +1139,18 @@
                                     <Setter Property="Width" Value="NaN"/>
                                     <Setter Property="Height" Value="30"/>
                                     <Setter Property="VerticalContentAlignment" Value="Center"/>
-                                    <Setter Property="Background" Value="{DynamicResource SystemChromeMediumColor}"/>
-                                    <Setter Property="BorderBrush" Value="#bbbfcb"/>
+                                    <Setter Property="BorderBrush" Value="{DynamicResource SystemBaseLowColor}"/>
+                                    <Setter Property="Background" Value="{DynamicResource SystemChromeHighColor}"/>
                                     <Setter Property="BorderThickness" Value="1"/>
                                     <Setter Property="Padding" Value="12,0"/>
-                                </Style>
-                                <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-                                    <Setter Property="Background" Value="{DynamicResource SystemBaseMediumColor}"/>
-                                    <Setter Property="BorderBrush" Value="#bbbfcb"/>
-                                    <Setter Property="BorderThickness" Value="1"/>    
+                                    <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                                        <Setter Property="BorderBrush" Value="{DynamicResource SystemBaseMediumLowColor}"/>
+                                        <Setter Property="BorderThickness" Value="1"/>    
+                                    </Style>
+                                    <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
+                                        <Setter Property="BorderBrush" Value="{DynamicResource SystemBaseMediumLowColor}"/>
+                                        <Setter Property="BorderThickness" Value="1"/>    
+                                    </Style>
                                 </Style>
                             </Grid.Styles>
                             <StackPanel Margin="24,12" IsVisible="{Binding #General.IsSelected}">
@@ -1429,13 +1419,15 @@
                                                     <Setter Property="Margin" Value="3"/>
                                                     <Setter Property="CornerRadius" Value="15"/>
                                                     <Setter Property="Background" Value="{DynamicResource SystemAccentColorLight3}"/>
+                                                    <Setter Property="Foreground" Value="{DynamicResource SystemAccentColorDark2}"/>
                                                 </Style>
                                                 <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
                                                     <Setter Property="Background" Value="{DynamicResource SystemAccentColorLight2}"/>
+                                                    <Setter Property="Foreground" Value="{DynamicResource SystemAccentColorDark3}"/>
                                                 </Style>
                                                 <Style Selector="ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
-                                                    <Setter Property="Background" Value="{DynamicResource SystemAccentColorLight1}"/>
-                                                    <Setter Property="Foreground" Value="AliceBlue"/>
+                                                    <Setter Property="Background" Value="{DynamicResource SystemAccentColorDark1}"/>
+                                                    <Setter Property="Foreground" Value="{DynamicResource SystemAccentColorLight3}"/>
                                                 </Style>
                                             </ListBox.Styles>
                                             <ListBox.ItemsPanel>
@@ -1452,15 +1444,16 @@
                                             <StackPanel Orientation="Horizontal" Spacing="10">
                                                 <Border 
                                                     VerticalAlignment="Center"
-                                                    MaxWidth="300"
+                                                    MaxWidth="260"
                                                     CornerRadius="4" 
-                                                    Background="{DynamicResource SystemBaseMediumColor}">
+                                                    Background="{DynamicResource SystemAccentColorLight2}">
                                                     <TextBlock 
                                                         FontFamily="{StaticResource CascadiaCode}"
                                                         Text="{Binding Model3DFolder}"
                                                         TextTrimming="LeadingCharacterEllipsis"
                                                         Margin="0"
-                                                        Padding="4,2,4,2"/>
+                                                        Foreground="{DynamicResource SystemAccentColorDark2}"
+                                                        Padding="6,2,6,2"/>
                                                 </Border>
                                                 <Button
                                                     Content="Изменить"
