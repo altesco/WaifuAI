@@ -14,6 +14,7 @@ using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
 using Avalonia.Styling;
+using Avalonia.Themes.Fluent;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -108,6 +109,7 @@ public partial class SettingsVM : ObservableValidator
 
         // General Settings
         SettingsModel.Theme = SelectedTheme;
+        SettingsModel.AccentColor = SelectedColor;
         SettingsModel.Font = SelectedFont;
         SettingsModel.MonospaceFont = SelectedMonoFont;
         SettingsModel.AppLanguage = SelectedAppLanguage;
@@ -172,7 +174,26 @@ public partial class SettingsVM : ObservableValidator
     #region GeneralSettings
     
     [ObservableProperty] private int _selectedTheme;
-    [ObservableProperty] private string _selectedColor;
+
+    [ObservableProperty] 
+    [NotifyDataErrorInfo]
+    [RegularExpression("^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})$")]
+    private string _selectedColor;
+
+    partial void OnSelectedColorChanged(string value)
+    {
+        var theme = Application.Current?.Styles.OfType<FluentTheme>().FirstOrDefault();
+        Console.WriteLine("зашел");
+        if (HasErrors || theme is null || !Color.TryParse(value, out var color))
+            return;
+        Console.WriteLine("ошибок нет, тема не налл, значение распарсил");
+        if (theme.Palettes.TryGetValue(ThemeVariant.Light, out var lightPalette) &&
+            lightPalette is { } light)
+            light.Accent = color;
+        if (theme.Palettes.TryGetValue(ThemeVariant.Dark, out var darkPalette) &&
+            darkPalette is { } dark)
+            dark.Accent = color;
+    }
 
     public ObservableCollection<string> Fonts { get; } = [];
 

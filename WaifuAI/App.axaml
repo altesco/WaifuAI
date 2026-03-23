@@ -5,20 +5,34 @@
     xmlns:local="using:WaifuAI"
     RequestedThemeVariant="Default">
     <Application.Resources>
-        <SolidColorBrush x:Key="ButtonBackgroundDisabled" Color="Transparent"/>
-        <SolidColorBrush x:Key="ListBoxBorderThemeBrush" Color="{DynamicResource SystemBaseLowColor}"/>
-        <FontFamily x:Key="CascadiaCode">avares://WaifuAI/Assets/Fonts/#Cascadia Code</FontFamily>
-        <FontFamily x:Key="JetBrainsMono">avares://WaifuAI/Assets/Fonts/#JetBrains Mono</FontFamily>
-        <SolidColorBrush x:Key="ComboBoxDropDownBackground" Color="{DynamicResource SystemChromeHighColor}"/>
-        <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="{DynamicResource SystemChromeHighColor}"/>
-        <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="{DynamicResource SystemBaseMediumColor}"/>
-        <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="{DynamicResource SystemChromeHighColor}"/>
-        <SolidColorBrush x:Key="ComboBoxBackground" Color="{DynamicResource SystemChromeHighColor}"/>
-        <SolidColorBrush x:Key="ComboBoxBackgroundPointerOver" Color="{DynamicResource SystemChromeHighColor}"/>
-        <SolidColorBrush x:Key="ComboBoxBackgroundPressed" Color="{DynamicResource SystemChromeHighColor}"/>
-        <SolidColorBrush x:Key="ComboBoxBorderBrush" Color="{DynamicResource SystemBaseMediumLowColor}"/>
-        <SolidColorBrush x:Key="ComboBoxBorderBrushPointerOver" Color="{DynamicResource SystemBaseMediumColor}"/>
-        <SolidColorBrush x:Key="ComboBoxBorderBrushPressed" Color="{DynamicResource SystemBaseMediumColor}"/>
+        <ResourceDictionary>
+            <SolidColorBrush x:Key="ButtonBackgroundDisabled" Color="Transparent"/>
+            <SolidColorBrush x:Key="ListBoxBorderThemeBrush" Color="{DynamicResource SystemBaseLowColor}"/>
+            <FontFamily x:Key="CascadiaCode">avares://WaifuAI/Assets/Fonts/#Cascadia Code</FontFamily>
+            <FontFamily x:Key="JetBrainsMono">avares://WaifuAI/Assets/Fonts/#JetBrains Mono</FontFamily>
+            <SolidColorBrush x:Key="ComboBoxDropDownBackground" Color="{DynamicResource SystemChromeHighColor}"/>
+            <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="{DynamicResource SystemChromeHighColor}"/>
+            <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="{DynamicResource SystemBaseMediumColor}"/>
+            <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="{DynamicResource SystemChromeHighColor}"/>
+            <SolidColorBrush x:Key="ComboBoxBackground" Color="{DynamicResource SystemChromeHighColor}"/>
+            <SolidColorBrush x:Key="ComboBoxBackgroundPointerOver" Color="{DynamicResource SystemChromeHighColor}"/>
+            <SolidColorBrush x:Key="ComboBoxBackgroundPressed" Color="{DynamicResource SystemChromeHighColor}"/>
+            <SolidColorBrush x:Key="ComboBoxBorderBrush" Color="{DynamicResource SystemBaseMediumLowColor}"/>
+            <SolidColorBrush x:Key="ComboBoxBorderBrushPointerOver" Color="{DynamicResource SystemBaseMediumColor}"/>
+            <SolidColorBrush x:Key="ComboBoxBorderBrushPressed" Color="{DynamicResource SystemBaseMediumColor}"/>
+            <SolidColorBrush x:Key="TextControlPlaceholderForeground" Color="{DynamicResource SystemBaseMediumColor}"/>
+            <SolidColorBrush x:Key="TextControlPlaceholderForegroundPointerOver" Color="{DynamicResource SystemBaseMediumColor}"/>
+            <SolidColorBrush x:Key="TextControlPlaceholderForegroundFocused" Color="{DynamicResource SystemBaseMediumColor}"/>
+            <SolidColorBrush x:Key="TextControlPlaceholderForegroundDisabled" Color="{DynamicResource SystemBaseLowColor}"/>
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Light">
+                    <SolidColorBrush x:Key="TextControlSelectionHighlightColor" Color="{DynamicResource SystemAccentColorLight1}" />
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Dark">
+                    <SolidColorBrush x:Key="TextControlSelectionHighlightColor" Color="{DynamicResource SystemAccentColorDark1}" />
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+        </ResourceDictionary>
     </Application.Resources>
     <Application.DataTemplates>
         <local:ViewLocator/>

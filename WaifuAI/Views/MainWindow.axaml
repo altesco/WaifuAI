@@ -94,7 +94,7 @@
                 <Setter Property="Height" Value="30"/>
                 <Setter Property="MinHeight" Value="0"/>
                 <Setter Property="MinWidth" Value="0"/>
-                <Setter Property="Padding" Value="6,0,6,0"/>
+                <Setter Property="Padding" Value="10,0,10,0"/>
                 <Setter Property="VerticalContentAlignment" Value="Center"/>
                 <Setter Property="ContextMenu">
                     <Setter.Value>
@@ -693,6 +693,9 @@
                                     </Style>
                                 </Border.Styles>
                                 <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
+                                    <Grid.Resources>
+                                        
+                                    </Grid.Resources>
                                     <Grid
                                         Grid.ColumnSpan="2"
                                         ColumnDefinitions="Auto,*,Auto"
@@ -748,14 +751,6 @@
                                             <LucideIcon Kind="X" />
                                         </Button>
                                     </Grid>
-                                    <TextBlock
-                                        Grid.Row="1"
-                                        Grid.Column="0"
-                                        Margin="12,0,0,0"
-                                        VerticalAlignment="Center"
-                                        IsVisible="{Binding #TextBox.Text, Converter={x:Static StringConverters.IsNullOrEmpty}}"
-                                        Foreground="{DynamicResource SystemBaseMediumColor}"
-                                        Text="Сообщение..." />
                                     <TextBox
                                         x:Name="TextBox"
                                         Grid.Row="1"
@@ -763,29 +758,25 @@
                                         MinHeight="40"
                                         MaxHeight="300"
                                         Height="NaN"
-                                        Margin="2,-1,0,0"
                                         VerticalContentAlignment="Center"
                                         Background="Transparent"
                                         BorderThickness="0"
+                                        BorderBrush="Transparent"
+                                        Margin="5,-1,0,0"
+                                        Padding="7,6,12,6"
+                                        Watermark="Сообщение..."
                                         ScrollViewer.VerticalScrollBarVisibility="Hidden"
                                         Text="{Binding Question, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                         TextWrapping="Wrap"
                                         FontFamily="{Binding SelectedFontFamily, Source={x:Static vm:SettingsVM.Instance}}">
                                         <TextBox.Resources>
-                                            <Thickness x:Key="TextControlBorderThemeThicknessFocused">0</Thickness>
+                                            <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="Transparent"/>
+                                            <SolidColorBrush x:Key="TextControlBorderBrush" Color="Transparent"/>
+                                            <SolidColorBrush x:Key="TextControlBorderBrushDisabled" Color="Transparent"/>
+                                            <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="Transparent"/>
                                             <SolidColorBrush x:Key="TextControlBackgroundFocused">Transparent</SolidColorBrush>
                                             <SolidColorBrush x:Key="TextControlBackgroundPointerOver">Transparent</SolidColorBrush>
                                         </TextBox.Resources>
-                                        <TextBox.Styles>
-                                            <Style Selector="TextBox:focus /template/ Border#PART_Border">
-                                                <Setter Property="BorderThickness" Value="0" />
-                                                <Setter Property="Background" Value="Transparent" />
-                                            </Style>
-                                            <Style Selector="TextBox:pointerover /template/ Border#PART_Border">
-                                                <Setter Property="BorderThickness" Value="0" />
-                                                <Setter Property="Background" Value="Transparent" />
-                                            </Style>
-                                        </TextBox.Styles>
                                     </TextBox>
                                     <StackPanel
                                         Grid.Row="1"
@@ -1189,8 +1180,10 @@
                                                 <TextBox
                                                     Padding="6,0,6,0"
                                                     VerticalContentAlignment="Center"
-                                                    Width="86"/>
-                                                <Button 
+                                                    Width="90"
+                                                    Watermark="#RRGGBB"
+                                                    Text="{Binding SelectedColor, Mode=TwoWay}"/>
+                                                <Border 
                                                     Height="24" 
                                                     Width="24" 
                                                     CornerRadius="12" 
@@ -1459,16 +1452,17 @@
                                                     <Setter Property="VerticalContentAlignment" Value="Center"/>
                                                     <Setter Property="Margin" Value="3"/>
                                                     <Setter Property="CornerRadius" Value="15"/>
-                                                    <Setter Property="Background" Value="{DynamicResource SystemAccentColorLight3}"/>
+                                                    <Setter Property="Background" Value="{DynamicResource SystemAccentColorLight2}"/>
                                                     <Setter Property="Foreground" Value="{DynamicResource SystemAccentColorDark2}"/>
                                                 </Style>
                                                 <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                                                    <Setter Property="Opacity" Value="0.8"/>
                                                     <Setter Property="Background" Value="{DynamicResource SystemAccentColorLight2}"/>
                                                     <Setter Property="Foreground" Value="{DynamicResource SystemAccentColorDark3}"/>
                                                 </Style>
                                                 <Style Selector="ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
                                                     <Setter Property="Background" Value="{DynamicResource SystemAccentColorDark1}"/>
-                                                    <Setter Property="Foreground" Value="{DynamicResource SystemAccentColorLight3}"/>
+                                                    <Setter Property="Foreground" Value="{DynamicResource SystemAccentColorLight2}"/>
                                                 </Style>
                                             </ListBox.Styles>
                                             <ListBox.ItemsPanel>
