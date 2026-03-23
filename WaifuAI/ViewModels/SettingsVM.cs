@@ -2,7 +2,9 @@ using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Avalonia;
@@ -16,6 +18,7 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using SkiaSharp;
 using WaifuAI.Models;
 using WaifuAI.Services;
 using WebViewControl;
@@ -61,6 +64,9 @@ public partial class SettingsVM : ObservableValidator
         
         // General Settings
         SelectedTheme = SettingsModel.Theme;
+        SelectedColor = SettingsModel.AccentColor;
+        RefreshFonts();
+        RefreshMonoFonts();
         SelectedAppLanguage = SettingsModel.AppLanguage;
         SelectedLanguage = SettingsModel.Language;
 
@@ -102,6 +108,8 @@ public partial class SettingsVM : ObservableValidator
 
         // General Settings
         SettingsModel.Theme = SelectedTheme;
+        SettingsModel.Font = SelectedFont;
+        SettingsModel.MonospaceFont = SelectedMonoFont;
         SettingsModel.AppLanguage = SelectedAppLanguage;
         SettingsModel.Language = SelectedLanguage;
 
@@ -162,8 +170,25 @@ public partial class SettingsVM : ObservableValidator
     #endregion
 
     #region GeneralSettings
-
+    
     [ObservableProperty] private int _selectedTheme;
+    [ObservableProperty] private string _selectedColor;
+
+    public ObservableCollection<string> Fonts { get; } = [];
+
+    [ObservableProperty] 
+    [NotifyPropertyChangedFor(nameof(SelectedFontFamily))]
+    private string _selectedFont;
+
+    public FontFamily SelectedFontFamily => new FontFamily(SelectedFont);
+
+    public ObservableCollection<string> MonospaceFonts { get; } = [];
+    
+    [ObservableProperty] 
+    [NotifyPropertyChangedFor(nameof(SelectedMonoFontFamily))]
+    private string _selectedMonoFont;
+
+    public FontFamily SelectedMonoFontFamily => new FontFamily(SelectedMonoFont);
 
     public ObservableCollection<string> AppLanguages { get; } =
     [
@@ -188,6 +213,43 @@ public partial class SettingsVM : ObservableValidator
         if (IsLoading)
             return;
         ModelService.SetBackground();
+    }
+
+    [RelayCommand]
+    private void RefreshFonts()
+    {
+        var allFonts = FontManager.Current.SystemFonts
+            .Select(f => f.Name)
+            .OrderBy(name => name)
+            .ToList();
+        var currentFont = SettingsModel.Font;
+        Fonts.Clear();
+        foreach (var font in allFonts)
+            Fonts.Add(font);
+        var defaultFontName = FontManager.Current.DefaultFontFamily.Name;
+        SelectedFont = allFonts.Contains(currentFont) ? currentFont : defaultFontName;
+    }
+
+    [RelayCommand]
+    private void RefreshMonoFonts()
+    {
+        var stopwatch = Stopwatch.StartNew(); 
+        var allFonts = FontManager.Current.SystemFonts
+            .Select(f => f.Name)
+            .Where(name => name.Contains("Mono", StringComparison.OrdinalIgnoreCase) || 
+                name.Contains("Code", StringComparison.OrdinalIgnoreCase) ||
+                name.Contains("Console", StringComparison.OrdinalIgnoreCase))
+            .OrderBy(name => name)
+            .ToList();
+        if (allFonts.Count <= 0)
+            return;
+        var currentFont = SettingsModel.MonospaceFont;
+        MonospaceFonts.Clear();
+        foreach (var font in allFonts)
+            MonospaceFonts.Add(font);
+        SelectedMonoFont = allFonts.Contains(currentFont) ? currentFont : allFonts[0];
+        stopwatch.Stop();
+        Console.WriteLine(stopwatch.ElapsedMilliseconds);
     }
 
     #endregion

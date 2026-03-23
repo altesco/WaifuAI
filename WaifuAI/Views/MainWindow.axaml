@@ -15,7 +15,8 @@
     Icon="/Assets/avalonia-logo.ico"
     Loaded="Window_OnLoaded"
     Closed="Window_Closed"
-    mc:Ignorable="d">
+    mc:Ignorable="d"
+    FontFamily="{Binding SelectedFontFamily, Source={x:Static vm:SettingsVM.Instance}}">
     <Window.Resources>
         <conv:MathConverter x:Key="MathConverter"/>
         <conv:StringValueConverter x:Key="StringValueConverter"/>
@@ -86,11 +87,15 @@
                     <Setter Property="Opacity" Value="0.5" />
                 </Style>
             <Style Selector="TextBox">
+                <Setter Property="Background" Value="{DynamicResource SystemChromeHighColor}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource SystemBaseMediumLowColor}"/>
                 <Setter Property="CornerRadius" Value="5" />
-                <Setter Property="FontFamily" Value="{StaticResource CascadiaCode}" />
+                <Setter Property="FontFamily" Value="{Binding SelectedMonoFontFamily, Source={x:Static vm:SettingsVM.Instance}}" />
                 <Setter Property="Height" Value="30"/>
                 <Setter Property="MinHeight" Value="0"/>
                 <Setter Property="MinWidth" Value="0"/>
+                <Setter Property="Padding" Value="6,0,6,0"/>
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
                 <Setter Property="ContextMenu">
                     <Setter.Value>
                         <ContextMenu>
@@ -147,6 +152,10 @@
             <Style Selector="ComboBox">
                 <Setter Property="CornerRadius" Value="5"/>
                 <Setter Property="Height" Value="30"/>
+                <Style Selector="^:dropdownopen /template/ Border#Background">
+                    <Setter Property="BorderBrush" Value="{DynamicResource SystemAccentColor}" />
+                    <Setter Property="BorderThickness" Value="2" />
+                </Style>
             </Style>
             <Style Selector="DataValidationErrors">
                     <Setter Property="Template">
@@ -761,7 +770,7 @@
                                         ScrollViewer.VerticalScrollBarVisibility="Hidden"
                                         Text="{Binding Question, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                         TextWrapping="Wrap"
-                                        FontFamily="Inter">
+                                        FontFamily="{Binding SelectedFontFamily, Source={x:Static vm:SettingsVM.Instance}}">
                                         <TextBox.Resources>
                                             <Thickness x:Key="TextControlBorderThemeThicknessFocused">0</Thickness>
                                             <SolidColorBrush x:Key="TextControlBackgroundFocused">Transparent</SolidColorBrush>
@@ -861,14 +870,13 @@
                     Grid.Column="3"
                     x:DataType="vm:SettingsVM"
                     Background="{DynamicResource SystemChromeMediumColor}"
-                    
                     BorderThickness="1,0,0,0"
                     DataContext="{x:Static vm:SettingsVM.Instance}"
                     IsVisible="{Binding #ModelButton.IsChecked}">
                     <Border.Styles>
                         <Style Selector="TextBox">
                             <Setter Property="CornerRadius" Value="5" />
-                            <Setter Property="FontFamily" Value="{StaticResource CascadiaCode}" />
+                            <Setter Property="FontFamily" Value="{Binding SelectedMonoFontFamily, Source={x:Static vm:SettingsVM.Instance}}" />
                         </Style>
                         <Style Selector="StackPanel[Tag=False]">
                             <Setter Property="IsEnabled" Value="False" />
@@ -1067,7 +1075,7 @@
                                 <Setter Property="Background" Value="{DynamicResource ButtonBackgroundPointerOver}"/>
                             </Style>
                         </ListBox.Styles>
-                        <ListBoxItem x:Name="General">
+                        <ListBoxItem x:Name="General" IsSelected="True">
                             <Grid ColumnDefinitions="Auto,*">
                                 <LucideIcon 
                                     Kind="Wrench" 
@@ -1093,7 +1101,7 @@
                                     VerticalAlignment="Center"/>
                             </Grid>
                         </ListBoxItem>
-                        <ListBoxItem x:Name="ModelAppearence" IsSelected="True">
+                        <ListBoxItem x:Name="ModelAppearence">
                             <Grid ColumnDefinitions="Auto,*">
                                 <LucideIcon 
                                     Kind="Shirt" 
@@ -1176,22 +1184,51 @@
                                             Icon="{LucideIconContent Pipette, 20}"
                                             Header="Акцентный цвет" 
                                             Description="Выбор акцентного цвета приложения">
-                                            <Border Height="24" Width="24" CornerRadius="12" Background="{DynamicResource SystemAccentColor}"/>
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <TextBlock Text="HEX:" VerticalAlignment="Center"/>
+                                                <TextBox
+                                                    Padding="6,0,6,0"
+                                                    VerticalContentAlignment="Center"
+                                                    Width="86"/>
+                                                <Button 
+                                                    Height="24" 
+                                                    Width="24" 
+                                                    CornerRadius="12" 
+                                                    BorderThickness="1"
+                                                    BorderBrush="{DynamicResource SystemAccentColorDark1}"
+                                                    Background="{DynamicResource SystemAccentColor}"/>
+                                            </StackPanel>
                                         </views:SettingsCard>
                                         <Separator/>
                                         <views:SettingsCard 
                                             Icon="{LucideIconContent Type, 20}"
                                             Header="Шрифт" 
                                             Description="Выбор шрифта интерфейса приложения">
-                                            <ComboBox>
+                                            <ComboBox
+                                                ItemsSource="{Binding Fonts}"
+                                                SelectedItem="{Binding SelectedFont, Mode=TwoWay}">
+                                                <Interaction.Behaviors>
+                                                    <EventTriggerBehavior EventName="DropDownOpened">
+                                                        <InvokeCommandAction
+                                                            Command="{Binding RefreshFontsCommand}"/>    
+                                                    </EventTriggerBehavior>    
+                                                </Interaction.Behaviors>    
                                             </ComboBox>
                                         </views:SettingsCard>
                                         <Separator/>
                                         <views:SettingsCard 
                                             Icon="{LucideIconContent SquareTerminal, 20}"
-                                            Header="Моноширинный рифт" 
+                                            Header="Моноширинный шрифт" 
                                             Description="Выбор используемого в приложении моноширинного шрифта">
-                                            <ComboBox>
+                                            <ComboBox
+                                                ItemsSource="{Binding MonospaceFonts}"
+                                                SelectedItem="{Binding SelectedMonoFont, Mode=TwoWay}">
+                                                <Interaction.Behaviors>
+                                                    <EventTriggerBehavior EventName="DropDownOpened">
+                                                        <InvokeCommandAction
+                                                            Command="{Binding RefreshMonoFontsCommand}"/>    
+                                                    </EventTriggerBehavior>    
+                                                </Interaction.Behaviors>    
                                             </ComboBox>
                                         </views:SettingsCard>
                                     </StackPanel>
@@ -1452,7 +1489,7 @@
                                                     CornerRadius="4" 
                                                     Background="{DynamicResource SystemAccentColorLight2}">
                                                     <TextBlock 
-                                                        FontFamily="{StaticResource CascadiaCode}"
+                                                        FontFamily="{Binding SelectedMonoFontFamily, Source={x:Static vm:SettingsVM.Instance}}"
                                                         Text="{Binding Model3DFolder}"
                                                         TextTrimming="LeadingCharacterEllipsis"
                                                         Margin="0"
@@ -1494,7 +1531,8 @@
                 MaxWidth="1000" 
                 CornerRadius="3"
                 Margin="100,0"
-                IsIndeterminate="True"/>
+                IsVisible="{Binding IsInitializing}"
+                IsIndeterminate="{Binding IsInitializing}"/>
         </StackPanel>   
     </Grid>  
 </Window>

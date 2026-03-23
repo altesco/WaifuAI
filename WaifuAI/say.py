@@ -47,8 +47,7 @@ class TimingRequest(BaseModel):
 async def generate_timings(data: TimingRequest):
     timings = []
     for em in data.emotions:
-        time_ms = int(em.pos * 35)
-        timings.append({"expression": em.name, "time_ms": time_ms})
+        timings.append({"expression": em.name, "time_ms": em.pos})
     return timings
 
 @app.get("/speakers")

@@ -46,7 +46,7 @@ namespace WaifuAI.ViewModels
             await SettingsVM.Instance.InitializeSpeakers();
             IsInitializing = false;
         }
-        
+
         [ObservableProperty] private bool _isInitializing;
         [ObservableProperty] private string _initializingMessage;
         [ObservableProperty] private string _webAddress;

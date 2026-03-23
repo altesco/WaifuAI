@@ -10,6 +10,15 @@
         <FontFamily x:Key="CascadiaCode">avares://WaifuAI/Assets/Fonts/#Cascadia Code</FontFamily>
         <FontFamily x:Key="JetBrainsMono">avares://WaifuAI/Assets/Fonts/#JetBrains Mono</FontFamily>
         <SolidColorBrush x:Key="ComboBoxDropDownBackground" Color="{DynamicResource SystemChromeHighColor}"/>
+        <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="{DynamicResource SystemChromeHighColor}"/>
+        <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="{DynamicResource SystemBaseMediumColor}"/>
+        <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="{DynamicResource SystemChromeHighColor}"/>
+        <SolidColorBrush x:Key="ComboBoxBackground" Color="{DynamicResource SystemChromeHighColor}"/>
+        <SolidColorBrush x:Key="ComboBoxBackgroundPointerOver" Color="{DynamicResource SystemChromeHighColor}"/>
+        <SolidColorBrush x:Key="ComboBoxBackgroundPressed" Color="{DynamicResource SystemChromeHighColor}"/>
+        <SolidColorBrush x:Key="ComboBoxBorderBrush" Color="{DynamicResource SystemBaseMediumLowColor}"/>
+        <SolidColorBrush x:Key="ComboBoxBorderBrushPointerOver" Color="{DynamicResource SystemBaseMediumColor}"/>
+        <SolidColorBrush x:Key="ComboBoxBorderBrushPressed" Color="{DynamicResource SystemBaseMediumColor}"/>
     </Application.Resources>
     <Application.DataTemplates>
         <local:ViewLocator/>
@@ -34,6 +43,7 @@
                     ChromeLow="#232332"
                     ChromeMedium="#1e1e2a"
                     ChromeHigh="#181821"
+                    ChromeBlackHigh="#181821"
                     BaseHigh="#c5cff5"
                     BaseMediumHigh="#a1a9ca"
                     BaseMedium="#7d829e"

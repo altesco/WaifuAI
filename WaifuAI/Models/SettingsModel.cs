@@ -14,6 +14,9 @@ public class SettingsModel
 
     // General Settings
     public int Theme { get; set; }
+    public string AccentColor { get; set; }
+    public string Font { get; set; } = string.Empty;
+    public string MonospaceFont { get; set; } = string.Empty;
     public string AppLanguage { get; set; } = string.Empty;
     public string Language { get; set; } = string.Empty;
 
