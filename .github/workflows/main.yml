@@ -34,6 +34,7 @@ jobs:
           source venv/bin/activate
           pip install --upgrade pip
           pip install -r requirements.txt
+          rm -rf venv/lib64
 
       - name: Run code check
         run: |
