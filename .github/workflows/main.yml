@@ -26,7 +26,8 @@ jobs:
           
       - name: Install Dependencies to Runtime
         run: |
-          ./python_runtime/python.exe -m pip install -r requirements.txt --target ./python_runtime/Lib/site-packages --no-cache-dir
+          ./python_runtime/python.exe -m pip install setuptools wheel --target ./python_runtime/Lib/site-packages --no-cache-dir
+          ./python_runtime/python.exe -m pip install -r requirements.txt --target ./python_runtime/Lib/site-packages --no-cache-dir --no-build-isolation
 
       - name: Cleanup Runtime
         run: |
