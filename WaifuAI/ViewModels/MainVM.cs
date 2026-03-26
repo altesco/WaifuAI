@@ -47,6 +47,8 @@ namespace WaifuAI.ViewModels
             IsInitializing = false;
         }
 
+        public bool IsWindows => OperatingSystem.IsWindows();
+
         [ObservableProperty] private bool _isInitializing;
         [ObservableProperty] private string _initializingMessage;
         [ObservableProperty] private string _webAddress;
@@ -113,7 +115,8 @@ namespace WaifuAI.ViewModels
                 VoiceService.Say(
                     resultMessage.MessageModel.Content, 
                     SettingsVM.Instance.SelectedSource, 
-                    SettingsVM.Instance.SelectedVoiceModel, 
+                    SettingsVM.Instance.SelectedVoiceModel,
+                    SettingsVM.Instance.SelectedLanguage,                    
                     SettingsVM.Instance.SelectedSpeaker, 
                     SettingsVM.Instance.Volume, 
                     SettingsVM.Instance.Pitch,

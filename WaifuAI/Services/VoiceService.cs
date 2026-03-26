@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Messaging;
+using WaifuAI.ViewModels;
 
 namespace WaifuAI.Services;
 
@@ -28,44 +28,59 @@ public static class VoiceService
         ["fr"] = ["v3_fr", "gilles_v2"]
     };
 
+    public static Dictionary<string, string> ModelsUrls { get; } = new()
+    {
+        ["v5_cis_base"] = "https://models.silero.ai/models/tts/ru/v5_cis_base.pt",
+        ["v5_cis_ext"] = "https://models.silero.ai/models/tts/ru/v5_cis_ext.pt",
+        ["v5_2_ru"] = "https://models.silero.ai/models/tts/ru/v5_2_ru.pt",
+        ["v5_1_ru"] = "https://models.silero.ai/models/tts/ru/v5_1_ru.pt",
+        ["v5_ru"] = "https://models.silero.ai/models/tts/ru/v5_ru.pt",
+        ["v4_ru"] = "https://models.silero.ai/models/tts/ru/v4_ru.pt",
+        ["v3_1_ru"] = "https://models.silero.ai/models/tts/ru/v3_1_ru.pt",
+        ["ru_v3"] = "https://models.silero.ai/models/tts/ru/ru_v3.pt",
+        ["v3_en"] = "https://models.silero.ai/models/tts/en/v3_en.pt",
+        ["v3_en_indic"] = "https://models.silero.ai/models/tts/en/v3_en_indic.pt",
+        ["lj_v2"] = "https://models.silero.ai/models/tts/en/v2_lj.pt",
+        ["v3_de"] = "https://models.silero.ai/models/tts/de/v3_de.pt",
+        ["thorsten_v2"] = "https://models.silero.ai/models/tts/de/v2_thorsten.pt",
+        ["v3_es"] = "https://models.silero.ai/models/tts/es/v3_es.pt",
+        ["tux_v2"] = "https://models.silero.ai/models/tts/es/v2_tux.pt",
+        ["v3_fr"] = "https://models.silero.ai/models/tts/fr/v3_fr.pt",
+        ["gilles_v2"] = "https://models.silero.ai/models/tts/fr/v2_gilles.pt"
+    };
+
     public static void StartPythonServer()
     {
         try
         {
             string baseDir = AppDomain.CurrentDomain.BaseDirectory;
             string scriptPath = Path.Combine(baseDir, "say.py");
-            string venvPython = Path.Combine(baseDir, "venv", "bin", "python");
-            string pythonExe = File.Exists(venvPython) ? venvPython : "python";
+            string pythonExe = OperatingSystem.IsWindows()
+                ? Path.Combine(baseDir, "python_runtime", "python.exe")
+                : Path.Combine(baseDir, "venv", "bin", "python");
 
             ProcessStartInfo info = new ProcessStartInfo
             {
                 FileName = pythonExe,
-                Arguments = $"-u \"{scriptPath}\"", // Добавлен флаг -u для мгновенного вывода
+                Arguments = $"-u \"{scriptPath}\"", // флаг -u для мгновенного вывода
                 UseShellExecute = false,
                 RedirectStandardOutput = true, // Перехватываем вывод
                 RedirectStandardError = true,  // Перехватываем ошибки
                 CreateNoWindow = true,
                 WorkingDirectory = baseDir
             };
-
             PythonProcess = new Process { StartInfo = info, EnableRaisingEvents = true };
-
-            // Подписываемся на события вывода
             PythonProcess.OutputDataReceived += (sender, e) =>
             {
                 if (!string.IsNullOrEmpty(e.Data))
                     Console.WriteLine($"[Python]: {e.Data}");
             };
-
             PythonProcess.ErrorDataReceived += (sender, e) =>
             {
                 if (!string.IsNullOrEmpty(e.Data))
                     Console.Error.WriteLine($"[Python ERROR]: {e.Data}");
             };
-
             PythonProcess.Start();
-
-            // Начинаем асинхронное чтение
             PythonProcess.BeginOutputReadLine();
             PythonProcess.BeginErrorReadLine();
         }
@@ -77,13 +92,12 @@ public static class VoiceService
 
     public static async Task WaitForPythonServerAsync(int timeoutSeconds = 20)
     {
-        using var client = new HttpClient();
         var startTime = DateTime.Now;
         while ((DateTime.Now - startTime).TotalSeconds < timeoutSeconds)
         {
             try 
             {
-                var response = await client.GetAsync("http://127.0.0.1:5050/speakers?model_name=v5_2_ru");
+                var response = await ApiService.HttpClient.GetAsync("http://127.0.0.1:5050/health");
                 if (response.IsSuccessStatusCode) 
                     return;
             }
@@ -95,7 +109,8 @@ public static class VoiceService
     public static void Say(
         string text, 
         string service, 
-        string model, 
+        string modelName, 
+        string language,
         string speaker, 
         double volume, 
         double pitch,
@@ -116,7 +131,8 @@ public static class VoiceService
             }).ToList()
         };
         string jsonParams = JsonSerializer.Serialize(dialogueData);
-        string jsCall = $"window.say({jsonParams}, {pitch}, {port}, '{service}', '{model}', '{speaker}', {volume}, {bass}, {treble});";
+        var modelPath = Path.Combine(SettingsVM.VoiceModelFolder, $"{modelName}.pt");
+        string jsCall = $"window.say({jsonParams}, {pitch}, {port}, '{service}', '{modelPath}', '{language}', '{speaker}', {volume}, {bass}, {treble});";
         WeakReferenceMessenger.Default.Send(new ExecuteScriptMessage(jsCall));
     }
 
@@ -249,9 +265,11 @@ public static class VoiceService
         return sb.ToString();
     }
     
-    public static async Task<List<string>> GetSpeakers(string model)
+    public static async Task<List<string>> GetSpeakers(string modelPath, string language)
     {
-        string url = $"http://127.0.0.1:5050/speakers?model_name={Uri.EscapeDataString(model)}";
+        modelPath = Uri.EscapeDataString(modelPath);
+        language = Uri.EscapeDataString(language);
+        string url = $"http://127.0.0.1:5050/speakers?model_path={modelPath}&language={language}";
         var json = await ApiService.HttpClient.GetFromJsonAsync<SpeakerResponce>(url);
         return json?.Speakers ?? new List<string>();
     }

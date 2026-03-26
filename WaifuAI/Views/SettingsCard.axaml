@@ -16,12 +16,13 @@
                         <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
                             <TextBlock 
                                 Text="{TemplateBinding Header}"  
-                                FontSize="14" 
-                                FontWeight="Medium"/>
+                                FontSize="15" 
+                                FontWeight="Medium"
+                                TextTrimming="CharacterEllipsis"/>
                             <TextBlock 
                                 Text="{TemplateBinding Description}" 
                                 FontSize="12" 
-                                Opacity="0.7"
+                                Foreground="{DynamicResource SystemBaseMediumColor}"
                                 IsVisible="{TemplateBinding Description, 
                                 Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
                                 TextWrapping="Wrap"/>

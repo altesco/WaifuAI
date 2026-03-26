@@ -3,9 +3,12 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
@@ -56,30 +59,31 @@ public partial class SettingsVM : ObservableValidator
         SettingsModel = JsonSerializer.Deserialize<SettingsModel>(json) ?? new SettingsModel();
 
         // AI Settings
-        Port = SettingsModel.Port;
-        IpAddress = SettingsModel.IpAddress;
-        ApiKey = SettingsModel.ApiKey;
-        ApiUrl = SettingsModel.ApiUrl;
-        AiModel = SettingsModel.AIModel;
-        IsServerQuery = SettingsModel.IsServerQuery;
+        Port = SettingsModel.Port; Console.WriteLine("порт есть");
+        IpAddress = SettingsModel.IpAddress; Console.WriteLine("ip есть");
+        ApiKey = SettingsModel.ApiKey; Console.WriteLine("апи ключ есть");
+        ApiUrl = SettingsModel.ApiUrl; Console.WriteLine("апи урл есть");
+        AiModel = SettingsModel.AIModel; Console.WriteLine("модель ии есть");
+        IsServerQuery = SettingsModel.IsServerQuery; Console.WriteLine("бул есть");
         
         // General Settings
-        SelectedTheme = SettingsModel.Theme;
-        SelectedColor = SettingsModel.AccentColor;
-        RefreshFonts();
-        RefreshMonoFonts();
-        SelectedAppLanguage = SettingsModel.AppLanguage;
-        SelectedLanguage = SettingsModel.Language;
+        SelectedTheme = SettingsModel.Theme; Console.WriteLine("тема есть");
+        SelectedColor = SettingsModel.AccentColor; Console.WriteLine("цвет есть");
+        RefreshFonts(); Console.WriteLine("шрифт есть");
+        RefreshMonoFonts(); Console.WriteLine("моношрифт есть");
+        SelectedAppLanguage = SettingsModel.AppLanguage; Console.WriteLine("язык приложения есть");
+        SelectedLanguage = SettingsModel.Language; Console.WriteLine("язык ии есть");
 
         // Voice Settings
-        SelectedSource = SettingsModel.Source;
+        SelectedSource = SettingsModel.Source; Console.WriteLine("источник звука есть");
         SelectedVoiceModel = VoiceService.LanguageModels[SelectedLanguage].Contains(SettingsModel.VoiceModel) ?
             SettingsModel.VoiceModel : VoiceService.LanguageModels[SelectedLanguage][0];
-        SelectedSpeaker = SettingsModel.Speaker;
-        Volume = SettingsModel.Volume;
-        Bass = SettingsModel.Bass;
-        Treble = SettingsModel.Treble;
-        Pitch = SettingsModel.Pitch;
+        Console.WriteLine("модель звука есть");
+        SelectedSpeaker = SettingsModel.Speaker; Console.WriteLine("спикер есть");
+        Volume = SettingsModel.Volume; Console.WriteLine("звук есть");
+        Bass = SettingsModel.Bass; Console.WriteLine("бас есть");
+        Treble = SettingsModel.Treble; Console.WriteLine("требл есть");
+        Pitch = SettingsModel.Pitch; Console.WriteLine("питч есть");
 
         // 3D Model Settings
         if (Directory.Exists(SettingsModel.Model3DFolder))
@@ -87,6 +91,7 @@ public partial class SettingsVM : ObservableValidator
         else
             Directory.CreateDirectory(Model3DFolder);
         RefreshModels3D();
+        Console.WriteLine("модель 3д есть");
 
         // Servers
         
@@ -100,32 +105,32 @@ public partial class SettingsVM : ObservableValidator
             Directory.CreateDirectory(AppDirectory);
         
         // AI Settings
-        SettingsModel.Port = Port;
-        SettingsModel.IpAddress = IpAddress;
-        SettingsModel.ApiKey = ApiKey;
-        SettingsModel.ApiUrl = ApiUrl;
-        SettingsModel.AIModel = AiModel;
-        SettingsModel.IsServerQuery = IsServerQuery;
+        SettingsModel.Port = Port; 
+        SettingsModel.IpAddress = IpAddress;       
+        SettingsModel.ApiKey = ApiKey;       
+        SettingsModel.ApiUrl = ApiUrl;       
+        SettingsModel.AIModel = AiModel;      
+        SettingsModel.IsServerQuery = IsServerQuery;       
 
         // General Settings
-        SettingsModel.Theme = SelectedTheme;
-        SettingsModel.AccentColor = SelectedColor;
-        SettingsModel.Font = SelectedFont;
-        SettingsModel.MonospaceFont = SelectedMonoFont;
-        SettingsModel.AppLanguage = SelectedAppLanguage;
-        SettingsModel.Language = SelectedLanguage;
+        SettingsModel.Theme = SelectedTheme;       
+        SettingsModel.AccentColor = SelectedColor;       
+        SettingsModel.Font = SelectedFont;       
+        SettingsModel.MonospaceFont = SelectedMonoFont;       
+        SettingsModel.AppLanguage = SelectedAppLanguage;       
+        SettingsModel.Language = SelectedLanguage;       
 
         // Voice Settings
-        SettingsModel.Source = SelectedSource;
-        SettingsModel.VoiceModel = SelectedVoiceModel;
-        SettingsModel.Speaker = SelectedSpeaker;
-        SettingsModel.Volume = Volume;
-        SettingsModel.Bass = Bass;
-        SettingsModel.Treble = Treble;
-        SettingsModel.Pitch = Pitch;
+        SettingsModel.Source = SelectedSource;       
+        SettingsModel.VoiceModel = SelectedVoiceModel;       
+        SettingsModel.Speaker = SelectedSpeaker;       
+        SettingsModel.Volume = Volume;      
+        SettingsModel.Bass = Bass;       
+        SettingsModel.Treble = Treble;       
+        SettingsModel.Pitch = Pitch;       
 
         // 3D Model Settings
-        SettingsModel.SelectedModel3D = SelectedModel3D;
+        SettingsModel.SelectedModel3D = SelectedModel3D;       
         SettingsModel.Model3DFolder = Model3DFolder;
 
         var options = new JsonSerializerOptions { WriteIndented = true };
@@ -140,6 +145,7 @@ public partial class SettingsVM : ObservableValidator
     {
         ModelService.SetBackground();
         await ChangeModel3D(SelectedModel3D);
+        await RefreshVoiceModelInfo();
     }
 
     protected override void OnPropertyChanged(PropertyChangedEventArgs e)
@@ -152,8 +158,16 @@ public partial class SettingsVM : ObservableValidator
 
     partial void OnSelectedLanguageChanged(string value)
     {
+        if (!VoiceService.LanguageModels.ContainsKey(value))
+        {
+            var systemLanguage = CultureInfo.CurrentCulture.TwoLetterISOLanguageName.ToLower();
+            SelectedLanguage = systemLanguage is "ru" or "en" or "de" or "es" or "fr"
+                    ? systemLanguage
+                    : "en";
+            return;
+        }
         Models.Clear();
-        var models = VoiceService.LanguageModels[SelectedLanguage];
+        var models = VoiceService.LanguageModels[value];
         foreach (var model in models)
             Models.Add(model);
         if (Models.Count > 0)
@@ -182,9 +196,10 @@ public partial class SettingsVM : ObservableValidator
 
     partial void OnSelectedColorChanged(string value)
     {
-        var theme = Application.Current?.Styles.OfType<FluentTheme>().FirstOrDefault();
+        var app = Application.Current;
+        var theme = app?.Styles.OfType<FluentTheme>().FirstOrDefault();
         Console.WriteLine("зашел");
-        if (HasErrors || theme is null || !Color.TryParse(value, out var color))
+        if (HasErrors || app is null || theme is null || !Color.TryParse(value, out var color))
             return;
         Console.WriteLine("ошибок нет, тема не налл, значение распарсил");
         if (theme.Palettes.TryGetValue(ThemeVariant.Light, out var lightPalette) &&
@@ -193,6 +208,20 @@ public partial class SettingsVM : ObservableValidator
         if (theme.Palettes.TryGetValue(ThemeVariant.Dark, out var darkPalette) &&
             darkPalette is { } dark)
             dark.Accent = color;
+        app.Resources["SystemAccentColorDark1"] = CreateLighterColor(color, -0.1);
+        app.Resources["SystemAccentColorDark2"] = CreateLighterColor(color, -0.2);
+        app.Resources["SystemAccentColorDark3"] = CreateLighterColor(color, -0.3);
+        app.Resources["SystemAccentColorLight1"] = CreateLighterColor(color, 0.1);
+        app.Resources["SystemAccentColorLight2"] = CreateLighterColor(color, 0.2);
+        app.Resources["SystemAccentColorLight3"] = CreateLighterColor(color, 0.3);
+    }
+
+    private Color CreateLighterColor(Color baseColor, double factor)
+    {
+        return Color.FromArgb(baseColor.A,
+            (byte)Math.Clamp(baseColor.R + (255 * factor), 0, 255),
+            (byte)Math.Clamp(baseColor.G + (255 * factor), 0, 255),
+            (byte)Math.Clamp(baseColor.B + (255 * factor), 0, 255));
     }
 
     public ObservableCollection<string> Fonts { get; } = [];
@@ -277,6 +306,19 @@ public partial class SettingsVM : ObservableValidator
 
     #region VoiceSettings
 
+    public static readonly string HomePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+
+    public static readonly string VoiceModelFolder = Path.Combine(
+        HomePath, 
+        ".cache", 
+        "torch", 
+        "hub", 
+        "snakers4_silero-models_master", 
+        "src", 
+        "silero", 
+        "model"
+    );
+
     public ObservableCollection<string> Sources { get; } =
     [
         "silero_tts"
@@ -284,7 +326,11 @@ public partial class SettingsVM : ObservableValidator
     [ObservableProperty] private string _selectedSource;
 
     public ObservableCollection<string> Models { get; set; } = [];
-    [ObservableProperty] private string _selectedVoiceModel;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsSelectedVoiceModelLoaded))]
+    private string _selectedVoiceModel;
+
+    public bool IsSelectedVoiceModelLoaded => File.Exists(Path.Combine(VoiceModelFolder, $"{SelectedVoiceModel}.pt"));
 
     public ObservableCollection<string> Speakers { get; set; } = [];
     [ObservableProperty] private string _selectedSpeaker;
@@ -312,6 +358,11 @@ public partial class SettingsVM : ObservableValidator
     [ObservableProperty] [Range(-10, 10)] private double _bass;
     [ObservableProperty] [Range(0, 2)] private double _pitch;
     [ObservableProperty] private bool _isSpeakersLoading;
+    [ObservableProperty] private long _voiceModelSize;
+    [ObservableProperty] private bool _isDownloading;
+    private CancellationTokenSource? _downloadCts;
+    [ObservableProperty] private double _downloadProgress;
+    [ObservableProperty] private double _downloadSpeed;
 
     partial void OnSelectedSourceChanged(string value)
     {
@@ -325,31 +376,115 @@ public partial class SettingsVM : ObservableValidator
 
     partial void OnSelectedVoiceModelChanged(string value)
     {
-        if (IsLoading || string.IsNullOrEmpty(value)) 
+        if (IsLoading || string.IsNullOrEmpty(value))
             return;
+        _ = RefreshVoiceModelInfo();
         _ = RefreshSpeakersAsync(value, SelectedSpeaker);
     }
 
     private async Task RefreshSpeakersAsync(string modelName, string restoreSpeaker)
     {
+        if (!IsSelectedVoiceModelLoaded)
+            return;
         IsSpeakersLoading = true;
-        var list = await VoiceService.GetSpeakers(modelName);
+        var modelPath = Path.Combine(VoiceModelFolder, $"{modelName}.pt");
+        var list = await VoiceService.GetSpeakers(modelPath, SelectedLanguage);
         IsSpeakersLoading = false;
         Speakers.Clear();
         foreach (var speaker in list)
             Speakers.Add(speaker);
-        if (Speakers.Count > 0 && !Speakers.Contains(restoreSpeaker))
-            SelectedSpeaker = Speakers[0];
-        else
-            SelectedSpeaker = restoreSpeaker;
+        if (list.Count <= 0)
+            return;
+        System.Console.WriteLine(Speakers.IndexOf(restoreSpeaker));
+        foreach (var speaker in Speakers)
+        {
+            Console.WriteLine(speaker);
+        }
+        SelectedSpeaker = Speakers.Contains(restoreSpeaker)
+            ? Speakers[Speakers.IndexOf(restoreSpeaker)]
+            : Speakers[0];
     }
-
-
 
     partial void OnVolumeChanged(double value)
     {
         ValidateProperty(value, nameof(Volume));
     }
+
+    private async Task RefreshVoiceModelInfo()
+    {
+        var url = VoiceService.ModelsUrls[SelectedVoiceModel];
+        var request = new HttpRequestMessage(HttpMethod.Head, url);
+        var responce = await ApiService.HttpClient.SendAsync(request);
+        responce.EnsureSuccessStatusCode();
+        var size = responce.Content.Headers.ContentLength;
+        if (size != null)
+            VoiceModelSize = (long)size;
+    }
+    
+    [RelayCommand]
+    private async Task DownloadVoiceModel()
+    {
+        _downloadCts = new CancellationTokenSource();
+        var token = _downloadCts.Token;
+        var url = VoiceService.ModelsUrls[SelectedVoiceModel];
+        var fullPath = Path.Combine(VoiceModelFolder, $"{SelectedVoiceModel}.pt");
+        try
+        {
+            IsDownloading = true;
+            Directory.CreateDirectory(VoiceModelFolder);
+            using var response =
+                await ApiService.HttpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, token);
+            response.EnsureSuccessStatusCode();
+            await using var contentStream = await response.Content.ReadAsStreamAsync(token);
+            await using var fileStream = new FileStream(fullPath, FileMode.Create, FileAccess.Write, FileShare.None);
+            var buffer = new byte[1024 * 1024];
+            long totalRead = 0;
+            long lastRead = 0;
+            var sw = Stopwatch.StartNew();
+            int read;
+            while ((read = await contentStream.ReadAsync(buffer, 0, buffer.Length, token)) > 0)
+            {
+                await fileStream.WriteAsync(buffer, 0, read, token);
+                totalRead += read;
+                DownloadProgress = Math.Round((double)totalRead / VoiceModelSize * 100);
+                if (sw.ElapsedMilliseconds < 1000)
+                    continue;
+                DownloadSpeed = Math.Round((double)(totalRead - lastRead) / 1024 / 1024, 2);
+                lastRead = totalRead;
+                sw.Restart();
+            }
+            sw.Stop();
+            // for speakers refresh and notify about download status
+            OnPropertyChanged(nameof(IsSelectedVoiceModelLoaded));
+            await RefreshSpeakersAsync(SelectedVoiceModel, SelectedSpeaker);
+            SelectedSpeaker = Speakers[0]; // because idk why but it is not refresh in the method above
+        }
+        catch (OperationCanceledException)
+        {
+            if (File.Exists(fullPath))
+            {
+                try
+                {
+                    File.Delete(fullPath);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+            }
+        }
+        finally
+        {
+            IsDownloading = false;
+            _downloadCts.Dispose();
+            _downloadCts = null;
+            DownloadProgress = 0;
+            DownloadSpeed = 0;
+        }
+    }
+
+    [RelayCommand]
+    private void CancelDownload() => _downloadCts?.Cancel();
 
     #endregion
 
