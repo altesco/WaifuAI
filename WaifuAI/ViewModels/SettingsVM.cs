@@ -49,14 +49,14 @@ public partial class SettingsVM : ObservableValidator
 
     public async Task Load()
     {
-        if (!File.Exists(FilePath))
-        {
-            SettingsModel = new SettingsModel();
-            return;
-        }
         IsLoading = true;
-        var json = await File.ReadAllTextAsync(FilePath);
-        SettingsModel = JsonSerializer.Deserialize<SettingsModel>(json) ?? new SettingsModel();
+        if (File.Exists(FilePath))
+        {
+            var json = await File.ReadAllTextAsync(FilePath);
+            SettingsModel = JsonSerializer.Deserialize<SettingsModel>(json) ?? new SettingsModel();
+        }
+        else
+            SettingsModel = new SettingsModel();
 
         // AI Settings
         Port = SettingsModel.Port; Console.WriteLine("порт есть");
@@ -145,7 +145,7 @@ public partial class SettingsVM : ObservableValidator
     {
         ModelService.SetBackground();
         await ChangeModel3D(SelectedModel3D);
-        await RefreshVoiceModelInfo();
+        _ = RefreshVoiceModelInfo();
     }
 
     protected override void OnPropertyChanged(PropertyChangedEventArgs e)
@@ -395,11 +395,6 @@ public partial class SettingsVM : ObservableValidator
             Speakers.Add(speaker);
         if (list.Count <= 0)
             return;
-        System.Console.WriteLine(Speakers.IndexOf(restoreSpeaker));
-        foreach (var speaker in Speakers)
-        {
-            Console.WriteLine(speaker);
-        }
         SelectedSpeaker = Speakers.Contains(restoreSpeaker)
             ? Speakers[Speakers.IndexOf(restoreSpeaker)]
             : Speakers[0];
@@ -436,7 +431,7 @@ public partial class SettingsVM : ObservableValidator
                 await ApiService.HttpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, token);
             response.EnsureSuccessStatusCode();
             await using var contentStream = await response.Content.ReadAsStreamAsync(token);
-            await using var fileStream = new FileStream(fullPath, FileMode.Create, FileAccess.Write, FileShare.None);
+            await using var fileStream = new FileStream(fullPath, FileMode.Create, FileAccess.Write, FileShare.Read);
             var buffer = new byte[1024 * 1024];
             long totalRead = 0;
             long lastRead = 0;

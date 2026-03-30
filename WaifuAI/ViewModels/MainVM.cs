@@ -21,6 +21,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Text;
 using Avalonia.Media.Imaging;
 using System.Text.Json;
+using CommunityToolkit.Mvvm.Messaging;
 
 namespace WaifuAI.ViewModels
 {
@@ -29,6 +30,7 @@ namespace WaifuAI.ViewModels
         public MainVM()
         {
             _ = InitializeAsync();
+            OnPropertyChanged(nameof(IsWindows));
         }
 
         private async Task InitializeAsync()
@@ -205,5 +207,7 @@ namespace WaifuAI.ViewModels
         {
             IsSettingsOpen = !IsSettingsOpen;
         }
+
+        [ObservableProperty] private bool _isMaximized;
     }
 }

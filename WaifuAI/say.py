@@ -27,11 +27,18 @@ def get_model(model_path, language):
         print(f"ERROR: Файл не найден: {model_path}")
         return None
     print(f"DEBUG: Попытка загрузки через torch.package: {model_path}")
-    importer = torch.package.PackageImporter(model_path)
-    model = importer.load_pickle("tts_models", "model")
-    loaded_models[model_path] = model
-    model.to(torch.device('cpu'))
-    return model
+    for _ in range(5):
+        try:
+            importer = torch.package.PackageImporter(model_path)
+            model = importer.load_pickle("tts_models", "model")
+            loaded_models[model_path] = model
+            model.to(torch.device('cpu'))
+            return model
+        except RuntimeError as e:
+            if "Permission denied" in str(e):
+                time.sleep(0.3)
+                continue
+            raise e
 
 class EmotionItem(BaseModel):
     name: str

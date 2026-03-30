@@ -37,7 +37,7 @@ namespace WaifuAI.Views
             {
                 MyWebView.ExecuteScript(m.Value);
             });
-            WeakReferenceMessenger.Default.Register<MainWindow, EvaluateScriptMessage>(this, (r, m) =>
+            WeakReferenceMessenger.Default.Register<MainWindow, EvaluateScriptMessage>(this, (_, m) =>
             {
                 var evalTask = Task.Run(async () =>
                 {
@@ -54,6 +54,30 @@ namespace WaifuAI.Views
                 });
                 m.Reply(evalTask);
             });
+            AddHandler(Button.ClickEvent, (_, e) =>
+            {
+                if (e.Source is not Button btn || string.IsNullOrEmpty(btn.Name))
+                    return;
+                switch (btn.Name)
+                {
+                    case "PART_CloseButton":
+                        Close();
+                        e.Handled = true;
+                        break;
+                    case "PART_MinimizeButton":
+                        WindowState = WindowState.Minimized;
+                        e.Handled = true;
+                        break;
+                    case "PART_RestoreButton":
+                        WindowState = WindowState == WindowState.Maximized
+                            ? WindowState.Normal
+                            : WindowState.Maximized;
+                        (DataContext as MainVM).IsMaximized = WindowState == WindowState.Maximized;
+                        Console.WriteLine((DataContext as MainVM).IsMaximized);
+                        e.Handled = true;
+                        break;
+                }
+            }, RoutingStrategies.Bubble, handledEventsToo: true);
         }
 
         private GridLength _lastLeftBarWidth;
@@ -182,6 +206,21 @@ namespace WaifuAI.Views
         private void MyWebView_JavascriptContextCreated(string frameName)
         {
             ModelService.SetBackground();
+        }
+
+        private void Border_PointerPressed(object? sender, PointerPressedEventArgs e)
+        {
+            var point = e.GetCurrentPoint(this);
+            if (!point.Properties.IsLeftButtonPressed)
+                return;
+            BeginMoveDrag(e);
+        }
+
+        private void Border_DoubleTapped(object? sender, TappedEventArgs e)
+        {
+            WindowState = WindowState == WindowState.Maximized
+                ? WindowState.Normal
+                : WindowState.Maximized;
         }
     }
 }

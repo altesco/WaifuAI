@@ -276,7 +276,7 @@ animate();
 
 // --- Speech & Emotions ---
 window.say = async (data, pitch, port, service, model, language, speaker, volume, bass, treble) => {
-  const response = await fetch(`http://127.0.0.1:${port}/${service}?text=${encodeURIComponent(data.cleanText)}&model_path=${model}&language=${language}&speaker=${speaker}`);
+  const response = await fetch(`http://127.0.0.1:${port}/${service}?text=${encodeURIComponent(data.cleanText)}&model_path=${encodeURIComponent(model)}&language=${language}&speaker=${speaker}`);
   const audioBuffer = await audioContext.decodeAudioData(await response.arrayBuffer());
   const sourceNode = audioContext.createBufferSource();
   sourceNode.buffer = audioBuffer;

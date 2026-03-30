@@ -131,7 +131,7 @@ public static class VoiceService
             }).ToList()
         };
         string jsonParams = JsonSerializer.Serialize(dialogueData);
-        var modelPath = Path.Combine(SettingsVM.VoiceModelFolder, $"{modelName}.pt");
+        var modelPath = Path.Combine(SettingsVM.VoiceModelFolder, $"{modelName}.pt").Replace("\\", "/");
         string jsCall = $"window.say({jsonParams}, {pitch}, {port}, '{service}', '{modelPath}', '{language}', '{speaker}', {volume}, {bass}, {treble});";
         WeakReferenceMessenger.Default.Send(new ExecuteScriptMessage(jsCall));
     }
