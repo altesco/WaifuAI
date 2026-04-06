@@ -21,7 +21,7 @@ public static class VoiceService
 
     public static Dictionary<string, List<string>> LanguageModels { get; } = new()
     {
-        ["ru"] = ["v5_cis_base", "v5_cis_ext", "v5_2_ru", "v5_1_ru", "v5_ru", "v4_ru", "v3_1_ru", "ru_v3"],
+        ["ru"] = ["v5_cis_base", "v5_cis_ext", "v5_4_ru", "v5_3_ru", "v5_2_ru", "v5_1_ru", "v5_ru", "v4_ru", "v3_1_ru", "ru_v3"],
         ["en"] = ["v3_en", "v3_en_indic", "lj_v2"],
         ["de"] = ["v3_de", "thorsten_v2"],
         ["es"] = ["v3_es", "tux_v2"],
@@ -32,6 +32,8 @@ public static class VoiceService
     {
         ["v5_cis_base"] = "https://models.silero.ai/models/tts/ru/v5_cis_base.pt",
         ["v5_cis_ext"] = "https://models.silero.ai/models/tts/ru/v5_cis_ext.pt",
+        ["v5_4_ru"] = "https://models.silero.ai/models/tts/ru/v5_4_ru.pt",
+        ["v5_3_ru"] = "https://models.silero.ai/models/tts/ru/v5_3_ru.pt",
         ["v5_2_ru"] = "https://models.silero.ai/models/tts/ru/v5_2_ru.pt",
         ["v5_1_ru"] = "https://models.silero.ai/models/tts/ru/v5_1_ru.pt",
         ["v5_ru"] = "https://models.silero.ai/models/tts/ru/v5_ru.pt",
@@ -117,7 +119,7 @@ public static class VoiceService
         double bass, 
         double treble)
     {
-        var parsedResult = EmotionParser.ParseTextForEmotions(text);
+        var parsedResult = MessageParser.ParseTextForEmotions(text);
         parsedResult.CleanText = parsedResult.CleanText.ToPhoneticCyrillic();
         Console.WriteLine(text);
         Console.WriteLine(parsedResult.CleanText);

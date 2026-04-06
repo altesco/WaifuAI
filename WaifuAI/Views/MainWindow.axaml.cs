@@ -132,7 +132,7 @@ namespace WaifuAI.Views
                     foreach (var child in panel.Children)
                         if (child is ToggleButton toggleButton && toggleButton != btn)
                             toggleButton.IsChecked = false;
-                    MainGrid.ColumnDefinitions[1].MinWidth = 256;
+                    MainGrid.ColumnDefinitions[1].MinWidth = 400;
                     MainGrid.ColumnDefinitions[1].Width = _lastLeftBarWidth;
                     break;
                 case false:

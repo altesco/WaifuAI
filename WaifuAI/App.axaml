@@ -44,9 +44,13 @@
                 <ColorPaletteResources 
                     x:Key="Light" 
                     RegionColor="#eef1f5"
+                    ListLow="#ced4de"
                     ChromeLow="#eef1f5"
+                    ListMedium="#bfc7d4"
+                    ChromeMediumLow="#eaedf2"
                     ChromeMedium="#e5e8ee"
                     ChromeHigh="#dbdfe7"
+                    ChromeBlackHigh="#dbdfe7"
                     BaseHigh="#4d5069"
                     BaseMediumHigh="#696c82"
                     BaseMedium="#84889a"
@@ -55,7 +59,10 @@
                 <ColorPaletteResources 
                     x:Key="Dark" 
                     RegionColor="#232332"
+                    ListLow="#2a2a3d"
+                    ListMedium="#32324a"
                     ChromeLow="#232332"
+                    ChromeMediumLow="#21212e"
                     ChromeMedium="#1e1e2a"
                     ChromeHigh="#181821"
                     ChromeBlackHigh="#181821"
@@ -66,6 +73,8 @@
                     BaseLow="#343546"/>
             </FluentTheme.Palettes>
         </FluentTheme>
+        <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml"/>
         <StyleInclude Source="/Views/SettingsCard.axaml" />
+        <StyleInclude Source="/Views/SidePanel.axaml"/>
     </Application.Styles>
 </Application>

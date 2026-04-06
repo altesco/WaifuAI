@@ -2,26 +2,21 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Input;
-using Avalonia.Input.Platform;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using WaifuAI.Models;
 using WaifuAI.Services;
-using Xilium.CefGlue;
-using System.ComponentModel.DataAnnotations;
-using System.Text;
-using Avalonia.Media.Imaging;
 using System.Text.Json;
-using CommunityToolkit.Mvvm.Messaging;
+using System.Text.Encodings.Web;
+using System.Text.Unicode;
+using ElBruno.LocalEmbeddings;
+using ElBruno.LocalEmbeddings.Extensions;
 
 namespace WaifuAI.ViewModels
 {
@@ -46,8 +41,19 @@ namespace WaifuAI.ViewModels
             VoiceService.StartPythonServer();
             await VoiceService.WaitForPythonServerAsync();
             await SettingsVM.Instance.InitializeSpeakers();
+            InitializingMessage = "Создание векторного генератора...";
+            await MessageParser.CreateVectorGenerator();
+            InitializingMessage = "Загрузка базы знаний...";
+            await DatabaseService.InitializeDatabase(KnowledgeBasePath);
+            var records = await DatabaseService.GetRecordsAsync();
+            foreach (var record in records)
+                 KnowledgeBase.Add(record);
             IsInitializing = false;
+            KnowledgeBase.CollectionChanged += OnKnowledgeBaseChanged;
         }
+
+        private static readonly string KnowledgeBasePath =
+            Path.Combine(SettingsVM.AppDirectory, "knowledge_base.json");
 
         public bool IsWindows => OperatingSystem.IsWindows();
 
@@ -58,11 +64,20 @@ namespace WaifuAI.ViewModels
         [ObservableProperty] private MessageVM? _selectedMessage;
         [ObservableProperty] private string? _error;
         [ObservableProperty] private MessageVM? _replyMessage;
-
-
         [ObservableProperty] private bool _isSettingsOpen;
 
         public ObservableCollection<MessageVM> Chat { get; } = [];
+        public ObservableCollection<KnowledgeRecord> KnowledgeBase { get; } = [];
+
+        private void OnKnowledgeBaseChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.NewItems != null)
+                foreach (KnowledgeRecord record in e.NewItems)
+                    DatabaseService.SaveRecordAsync(record);
+            if (e.OldItems != null)
+                foreach (KnowledgeRecord record in e.OldItems)
+                    DatabaseService.RemoveRecordAsync(record);
+        }
 
         private readonly List<Message> _history = [
             new Message 
@@ -70,6 +85,36 @@ namespace WaifuAI.ViewModels
                 Role = "system",
                 Content = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "prompt.txt"))
             }];
+
+        private async Task<Message> GetSystemPrompt()
+        {
+            if (_history.Count <= 0)
+                return new Message();
+            var text = _history[0].Content;
+            var message = new Message
+            {
+                Role = "system",
+                Content = text
+            };
+            var header = "[Knowledge Records]";
+            var embedding = 
+                await MessageParser.VectorGenerator.GenerateEmbeddingAsync(Question);
+            var recordsToAdd = KnowledgeBase
+                .Select(r => new { 
+                    Record = r, 
+                    Score = embedding.Vector.CosineSimilarity(r.Vector) 
+                })
+                .OrderByDescending(x => x.Score)
+                .Take(5)
+                .Select(x => x.Record)
+                .ToList();
+            if (recordsToAdd.Count <= 0)
+                return message;
+            message.Content += $"\n{header}\n";
+            foreach (var record in recordsToAdd)
+                message.Content += $"{record.Key}: {record.Value}\n";
+            return message;
+        }
 
         [RelayCommand]
         private async Task Query()
@@ -84,7 +129,9 @@ namespace WaifuAI.ViewModels
                     Time = DateTime.Now.ToString("HH:mm")
                 };
                 _history.Add(message.MessageModel);
-                query.Messages.AddRange(_history);
+                var systemPrompt = await GetSystemPrompt();
+                query.Messages.Add(systemPrompt);
+                query.Messages.AddRange(_history.Skip(1));
                 Chat.Add(message);
                 message.ReplyMessage = ReplyMessage;
                 ReplyMessage = null;
@@ -109,13 +156,14 @@ namespace WaifuAI.ViewModels
                     _history.Remove(_history.Last());
                     return;
                 }
+                var messageText = resultMessage.MessageModel.Content;
                 _history.Add(new Message
                 {
                     Role = resultMessage.MessageModel.Role,
-                    Content = resultMessage.MessageModel.Content
+                    Content = messageText
                 });
                 VoiceService.Say(
-                    resultMessage.MessageModel.Content, 
+                    messageText, 
                     SettingsVM.Instance.SelectedSource, 
                     SettingsVM.Instance.SelectedVoiceModel,
                     SettingsVM.Instance.SelectedLanguage,                    
@@ -124,9 +172,10 @@ namespace WaifuAI.ViewModels
                     SettingsVM.Instance.Pitch,
                     SettingsVM.Instance.Bass, 
                     SettingsVM.Instance.Treble);
-                resultMessage.MessageModel.Content = EmotionParser.CleanText(resultMessage.MessageModel.Content);
+                resultMessage.MessageModel.Content = MessageParser.GetCleanText(messageText);
                 resultMessage.Time = DateTime.Now.ToString("HH:mm");
                 Chat.Add(resultMessage);
+                await MessageParser.ParseTextForKnowledgeUpdates(messageText, KnowledgeBase);
             }
             catch (Exception e)
             {
@@ -206,6 +255,14 @@ namespace WaifuAI.ViewModels
         private void Settings()
         {
             IsSettingsOpen = !IsSettingsOpen;
+        }
+
+        [RelayCommand]
+        private async Task ToggleFavoriteFact(object? args)
+        {
+            if (args is not KnowledgeRecord record)
+                return;
+            await DatabaseService.UpdateFavoriteAsync(record.Id, record.IsFavorite);
         }
 
         [ObservableProperty] private bool _isMaximized;
