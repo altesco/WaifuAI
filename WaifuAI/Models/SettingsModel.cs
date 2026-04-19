@@ -32,4 +32,7 @@ public class SettingsModel
     // 3D Model Settings
     public string SelectedModel3D { get; set; } = string.Empty;
     public string Model3DFolder { get; set; } = string.Empty;
+
+    // Personality Settings
+    public string SelectedArchetype { get; set; } = string.Empty;
 }

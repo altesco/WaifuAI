@@ -21,6 +21,7 @@ using System.Diagnostics;
 using WaifuAI.Services;
 using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.Messaging;
+using System.IO;
 
 namespace WaifuAI.Views
 {
@@ -53,6 +54,38 @@ namespace WaifuAI.Views
                     }
                 });
                 m.Reply(evalTask);
+            });
+            WeakReferenceMessenger.Default.Register<MainWindow, SnapshotMessage>(this, (_, m) =>
+            {
+                Task.Run(async () =>
+                {
+                    try
+                    {
+                        MyWebView.ExecuteScript("window.vrmApp.takePrintscreen()");
+                        string jsCode = @"return window.vrmApp.printscreen";
+                        string base64Data = string.Empty;
+                        int attempts = 0;
+                        while (string.IsNullOrEmpty(base64Data) && attempts < 200)
+                        {
+                            base64Data = await MyWebView.EvaluateScript<string>(jsCode);
+                            await Task.Delay(10);
+                            attempts++;
+                        }
+                        string base64 = base64Data.Contains(",") 
+                            ? base64Data.Substring(base64Data.IndexOf(',') + 1) 
+                            : base64Data;
+                        byte[] bytes = Convert.FromBase64String(base64);
+                        Dispatcher.UIThread.Post(() => 
+                        {
+                            using var ms = new MemoryStream(bytes);
+                            WebViewSnapshot.Source = new Bitmap(ms);
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"Snapshot failed: {ex.Message}");
+                    }
+                });
             });
             AddHandler(Button.ClickEvent, (_, e) =>
             {

@@ -15,6 +15,7 @@ using WaifuAI.Services;
 using System.Text.Json;
 using System.Text.Encodings.Web;
 using System.Text.Unicode;
+using CommunityToolkit.Mvvm.Messaging;
 using ElBruno.LocalEmbeddings;
 using ElBruno.LocalEmbeddings.Extensions;
 
@@ -65,6 +66,7 @@ namespace WaifuAI.ViewModels
         [ObservableProperty] private string? _error;
         [ObservableProperty] private MessageVM? _replyMessage;
         [ObservableProperty] private bool _isSettingsOpen;
+        [ObservableProperty] private bool _isPromptEditorOpen;
 
         public ObservableCollection<MessageVM> Chat { get; } = [];
         public ObservableCollection<KnowledgeRecord> KnowledgeBase { get; } = [];
@@ -90,7 +92,8 @@ namespace WaifuAI.ViewModels
         {
             if (_history.Count <= 0)
                 return new Message();
-            var text = _history[0].Content;
+            var archetypePrompt = SettingsVM.Instance.SelectedArchetype.Prompt;
+            var text = $"{archetypePrompt}\n\n{_history[0].Content}";
             var message = new Message
             {
                 Role = "system",
@@ -179,7 +182,7 @@ namespace WaifuAI.ViewModels
             }
             catch (Exception e)
             {
-                Debug.WriteLine("Ошибка в Query: " + e.Message);
+                Console.WriteLine("Ошибка в Query: " + e.Message);
             }
         }
 
@@ -254,9 +257,36 @@ namespace WaifuAI.ViewModels
         [RelayCommand]
         private void Settings()
         {
+            WeakReferenceMessenger.Default.Send(new SnapshotMessage(!IsSettingsOpen));
             IsSettingsOpen = !IsSettingsOpen;
         }
 
+        private string? _oldPrompt;
+
+        [RelayCommand]
+        private void PromptEditor()
+        {
+            if (!IsPromptEditorOpen)
+                _oldPrompt = SettingsVM.Instance.SelectedArchetype.Prompt;
+            else if (_oldPrompt != null)
+            {
+                SettingsVM.Instance.SelectedArchetype.Prompt = _oldPrompt;
+                _oldPrompt = null;
+            }
+            WeakReferenceMessenger.Default.Send(new SnapshotMessage(!IsPromptEditorOpen));
+            IsPromptEditorOpen = !IsPromptEditorOpen;
+        }
+
+        [RelayCommand]
+        private async Task SavePrompt()
+        {
+            var selectedArchetype = SettingsVM.Instance.SelectedArchetype;
+            var promptPath = Path.Combine(SettingsVM.PromptsPath, $"{selectedArchetype.Name}.txt");
+            await File.WriteAllTextAsync(promptPath, selectedArchetype.Prompt);
+            WeakReferenceMessenger.Default.Send(new SnapshotMessage(!IsPromptEditorOpen));
+            IsPromptEditorOpen = false;
+        }
+        
         [RelayCommand]
         private async Task ToggleFavoriteFact(object? args)
         {

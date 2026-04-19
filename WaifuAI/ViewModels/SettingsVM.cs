@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -42,6 +43,8 @@ public partial class SettingsVM : ObservableValidator
     );
 
     private static readonly string FilePath = Path.Combine(AppDirectory, "settings.json");
+
+    public static readonly string PromptsPath = Path.Combine(AppDirectory, "Prompts");
 
     private SettingsModel SettingsModel { get; set; }
 
@@ -93,6 +96,23 @@ public partial class SettingsVM : ObservableValidator
         RefreshModels3D();
         Console.WriteLine("модель 3д есть");
 
+        // Personality
+        SelectedArchetype = 
+            Archetypes.Find(x => x.Name == SettingsModel.SelectedArchetype) ?? 
+            Archetypes[0];
+
+        // Prompts
+        Directory.CreateDirectory(PromptsPath);
+        foreach (var archetype in Archetypes)
+        {
+            var promptPath = Path.Combine(PromptsPath, $"{archetype.Name}.txt");
+            if (!File.Exists(promptPath))
+                File.Create(promptPath);
+            else
+                archetype.Prompt = 
+                    await File.ReadAllTextAsync(promptPath);
+        }
+
         // Servers
         
 
@@ -133,19 +153,12 @@ public partial class SettingsVM : ObservableValidator
         SettingsModel.SelectedModel3D = SelectedModel3D;       
         SettingsModel.Model3DFolder = Model3DFolder;
 
+        // Personality Settings
+        SettingsModel.SelectedArchetype = SelectedArchetype.Name;
+
         var options = new JsonSerializerOptions { WriteIndented = true };
         var json = JsonSerializer.Serialize(SettingsModel, options);
         File.WriteAllText(FilePath, json);
-    }
-
-    public async Task InitializeSpeakers() => 
-        await RefreshSpeakersAsync(SelectedVoiceModel, SettingsModel.Speaker);
-
-    public async Task InitializeModel3D()
-    {
-        ModelService.SetBackground();
-        await ChangeModel3D(SelectedModel3D);
-        _ = RefreshVoiceModelInfo();
     }
 
     protected override void OnPropertyChanged(PropertyChangedEventArgs e)
@@ -154,24 +167,6 @@ public partial class SettingsVM : ObservableValidator
         if (IsLoading)
             return;
         Save();
-    }
-
-    partial void OnSelectedLanguageChanged(string value)
-    {
-        if (!VoiceService.LanguageModels.ContainsKey(value))
-        {
-            var systemLanguage = CultureInfo.CurrentCulture.TwoLetterISOLanguageName.ToLower();
-            SelectedLanguage = systemLanguage is "ru" or "en" or "de" or "es" or "fr"
-                    ? systemLanguage
-                    : "en";
-            return;
-        }
-        Models.Clear();
-        var models = VoiceService.LanguageModels[value];
-        foreach (var model in models)
-            Models.Add(model);
-        if (Models.Count > 0)
-            SelectedVoiceModel = Models[0];
     }
 
     #region AISettings
@@ -252,6 +247,24 @@ public partial class SettingsVM : ObservableValidator
     ];
     [ObservableProperty] private string _selectedLanguage = "ru";
 
+    partial void OnSelectedLanguageChanged(string value)
+    {
+        if (!VoiceService.LanguageModels.ContainsKey(value))
+        {
+            var systemLanguage = CultureInfo.CurrentCulture.TwoLetterISOLanguageName.ToLower();
+            SelectedLanguage = systemLanguage is "ru" or "en" or "de" or "es" or "fr"
+                    ? systemLanguage
+                    : "en";
+            return;
+        }
+        Models.Clear();
+        var models = VoiceService.LanguageModels[value];
+        foreach (var model in models)
+            Models.Add(model);
+        if (Models.Count > 0)
+            SelectedVoiceModel = Models[0];
+    }
+
     partial void OnSelectedThemeChanged(int value)
     {
         Application.Current!.RequestedThemeVariant = value switch
@@ -305,6 +318,9 @@ public partial class SettingsVM : ObservableValidator
     #endregion
 
     #region VoiceSettings
+
+    public async Task InitializeSpeakers() => 
+        await RefreshSpeakersAsync(SelectedVoiceModel, SettingsModel.Speaker);
 
     public static readonly string HomePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
@@ -485,6 +501,13 @@ public partial class SettingsVM : ObservableValidator
 
     #region Model3D
 
+    public async Task InitializeModel3D()
+    {
+        ModelService.SetBackground();
+        await ChangeModel3D(SelectedModel3D);
+        _ = RefreshVoiceModelInfo();
+    }
+
     private static readonly string WebAssets = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "WebAssets");
 
     private static readonly string BaseModel3DFolder = 
@@ -626,5 +649,103 @@ public partial class SettingsVM : ObservableValidator
 
     #endregion
 
-    
+    #region PersonalitySettings
+
+    public List<ArchetypeVM> Archetypes { get; } =
+    [
+        new() 
+        { 
+            Name = "tsundere", 
+            Description = "Колючая снаружи, но мягкая и заботливая внутри. Проявляет симпатию через напускную грубость.", 
+            Emoji = "🔥", 
+            Color = Color.Parse("#ff5c5c")
+        },
+        new() 
+        { 
+            Name = "kuudere", 
+            Description = "Хладнокровная, молчаливая и внешне безэмоциональная. Скрывает глубокие чувства за маской апатии.", 
+            Emoji = "🧊", 
+            Color = Color.Parse("#0008ff")
+        },
+        new() 
+        { 
+            Name = "dandere", 
+            Description = "Крайне стеснительная и молчаливая личность. Раскрывается только в узком кругу тех, кому доверяет.", 
+            Emoji = "😳", 
+            Color = Color.Parse("#544dc2")
+        },
+        new() 
+        { 
+            Name = "deredere", 
+            Description = "Воплощение чистой любви и оптимизма. Всегда искренняя, теплая и энергично заботится об окружающих.", 
+            Emoji = "💓", 
+            Color = Color.Parse("#ff4b8a")
+        },
+        new() 
+        { 
+            Name = "genki", 
+            Description = "Неиссякаемый источник энергии. Жизнерадостная, активная и всегда готова вдохновлять на подвиги.", 
+            Emoji = "🌞", 
+            Color = Color.Parse("#dfa017")
+        },
+        new() 
+        { 
+            Name = "yandere", 
+            Description = "Одержимая и пугающе преданная. Готова на любые крайности ради того, чтобы объект любви принадлежал только ей.", 
+            Emoji = "🔪", 
+            Color = Color.Parse("#cb0e0e")
+        },
+        new() 
+        { 
+            Name = "teasedere", 
+            Description = "Мастер подколов и легкого кокетства. Обожает смущать собеседника и проявляет чувства через дразнилки.", 
+            Emoji = "❤️‍🔥", 
+            Color = Color.Parse("#ff9431")
+        },
+        new() 
+        { 
+            Name = "dorodere", 
+            Description = "Милая и добрая на первый взгляд, но хранит внутри затаенную обиду или жестокую сторону.", 
+            Emoji = "⚫", 
+            Color = Colors.SlateGray
+        },
+        new() 
+        { 
+            Name = "utsudere", 
+            Description = "Меланхоличная личность, склонная к грусти и депрессивным настроениям из-за тяжелого прошлого.", 
+            Emoji = "💧", 
+            Color = Color.Parse("#0876d6")
+        },
+        new() 
+        { 
+            Name = "bakadere", 
+            Description = "Наивная, неуклюжая и очень открытая. Не умеет скрывать чувства и часто попадает в неловкие ситуации.", 
+            Emoji = "🐔", 
+            Color = Colors.Brown
+        },
+        new() 
+        { 
+            Name = "darudere", 
+            Description = "Ленивая и слегка отстраненная. Предпочитает покой и отдых любым активным действиям.", 
+            Emoji = "💤", 
+            Color = Color.Parse("#1d6bc5")
+        },
+        new() 
+        { 
+            Name = "hinedere", 
+            Description = "Циничная и высокомерная снаружи, но способна измениться, если найдет кого-то достойного доверия.", 
+            Emoji = "🚬", 
+            Color = Color.Parse("#318eb0")
+        },
+        new() 
+        { 
+            Name = "sadodere", 
+            Description = "Любит доминировать и манипулировать чувствами других. Получает удовольствие, дразня свою цель.", 
+            Emoji = "🩸", 
+            Color = Color.Parse("#be2edd")
+        }
+    ];
+    [ObservableProperty] private ArchetypeVM _selectedArchetype;
+
+    #endregion
 }

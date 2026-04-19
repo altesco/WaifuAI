@@ -7,7 +7,11 @@ import * as TWEEN from 'three/addons/libs/tween.module.js';
 import { LipSync } from './LipSync.js';
 
 // --- Renderer ---
-const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+const renderer = new THREE.WebGLRenderer({
+  antialias: true,
+  powerPreference: "high-performance",
+  preserveDrawingBuffer: true
+});
 renderer.setClearColor(0xeef1f5, 1);
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(window.devicePixelRatio, 2);
@@ -59,7 +63,14 @@ const ANIMATION_URLS = [
   'Thinking', 
   'Threatening', 
   'WeightShift', 
-  'Yawn'
+  'Yawn',
+  'EvilPlotting',
+  'Talking',
+  'Happy',
+  'Loser',
+  'CrazyGesture',
+  'StandingGreeting',
+  'Excited'
 ];
 const animationCache = new Map();
 
@@ -94,17 +105,35 @@ async function loadFBX(animationUrl, isLooped = false) {
   const newAction = currentMixer.clipAction(clip);
   const oldAction = currentAction;
 
-  if (newAction === oldAction && newAction.isRunning()) return;
+  // 1. Фикс бага, когда анимация пытается смениться сама на себя
+  if (oldAction === newAction) {
+    if (newAction.isRunning()) return; // Уже играет - ничего не делаем
+
+    // Если она закончилась, просто перезапускаем без кроссфейда
+    newAction.reset();
+    newAction.play();
+    return;
+  }
 
   // Настройка новой анимации
   newAction.enabled = true;
   newAction.setEffectiveTimeScale(1);
-  newAction.setEffectiveWeight(1); 
+  newAction.setEffectiveWeight(1);
   newAction.reset();
   newAction.setLoop(isLooped ? THREE.LoopRepeat : THREE.LoopOnce);
   newAction.clampWhenFinished = true;
 
   if (oldAction) {
+    // 2. Фикс Т-позы при смене с уже завершенной анимации
+    if (!oldAction.isRunning()) {
+      // Воскрешаем старую анимацию, чтобы кроссфейд отработал корректно, 
+      // заморозив ее на последнем кадре (timeScale = 0)
+      oldAction.paused = false;
+      oldAction.setEffectiveTimeScale(0);
+      oldAction.enabled = true;
+      oldAction.play();
+    }
+
     newAction.play();
     oldAction.crossFadeTo(newAction, 0.4, true);
   } else {
@@ -136,6 +165,7 @@ function loadVRM(modelUrl) {
           }
 
           currentVrm = vrm;
+          window.vrm = vrm;
 
           // Настройка поз
           const leftUpperArm = vrm.humanoid.getRawBoneNode('leftUpperArm');
@@ -181,22 +211,58 @@ function loadVRM(modelUrl) {
 // --- Blink Logic ---
 function updateBlink(deltaTime) {
   if (!currentVrm) return;
+  const happyVal = currentVrm.expressionManager.getValue('happy') ||
+    currentVrm.expressionManager.getValue('Happy') ||
+    currentVrm.expressionManager.getValue('joy') || 0;
+  if (happyVal > 0.5) {
+    blinkTimer = 0;
+    return;
+  }
   blinkTimer += deltaTime;
   if (blinkTimer >= nextBlinkTime) {
     blinkTimer = 0;
     nextBlinkTime = Math.random() * 4 + 2;
-    new TWEEN.Tween({ val: 0 }).to({ val: 1 }, 100).onUpdate((o) => currentVrm.expressionManager.setValue('blink', o.val))
+    new TWEEN.Tween({ val: 0 })
+      .to({ val: 1 }, 100)
+      .onUpdate((o) => currentVrm.expressionManager.setValue('blink', o.val))
       .onComplete(() => {
-        new TWEEN.Tween({ val: 1 }).to({ val: 0 }, 100).onUpdate((o) => currentVrm.expressionManager.setValue('blink', o.val)).start();
-      }).start();
+        new TWEEN.Tween({ val: 1 })
+          .to({ val: 0 }, 100)
+          .onUpdate((o) => currentVrm.expressionManager.setValue('blink', o.val))
+          .start();
+      })
+      .start();
   }
 }
 
 // --- Render Loop ---
+let vState = { aa: 0, ee: 0, oh: 0 };
+let debugTimer = 0;
+let smoothedVowels = { aa: 0, ee: 0, oh: 0 };
+
 function animate() {
   requestAnimationFrame(animate);
   const deltaTime = clock.getDelta();
-  const { volume } = lipSync.update();
+  debugTimer += deltaTime;
+  if (debugTimer > 0.1) { // Вывод каждые 100мс
+    const sync = lipSync.update();
+    if (sync.volume > 0.05) { // Выводим только когда есть хоть какой-то звук
+      console.log(
+        `%c[TTS Debug]%c Vol: ${sync.volume.toFixed(2)} | ` +
+        `AA (Mid): ${sync.vowels.aa.toFixed(2)} | ` +
+        `EE (High): ${sync.vowels.ee.toFixed(2)} | ` +
+        `OH (Low): ${sync.vowels.oh.toFixed(2)}`,
+        "color: #00ff00; font-weight: bold;", "color: default;"
+      );
+    }
+    debugTimer = 0;
+  }
+
+  // 1. Получаем данные ОДИН раз за кадр
+  const syncData = lipSync.update();
+  const volume = syncData.volume;
+  const vowels = syncData.vowels;
+
   TWEEN.update();
 
   if (currentMixer) {
@@ -206,11 +272,8 @@ function animate() {
   if (currentVrm) {
     currentVrm.update(deltaTime);
 
-    // Логика плавного перехода (Anti-Shock)
+    // --- Логика Sway/Breathing (твой код) ---
     const isStationary = currentAction && !currentAction.isRunning();
-
-    // Плавно меняем вес процедурной анимации (0.0 <-> 1.0)
-    // 1.0 * deltaTime означает, что полный переход займет 1 секунду
     if (isStationary) {
       proceduralWeight = THREE.MathUtils.lerp(proceduralWeight, 1, 2.0 * deltaTime);
     } else {
@@ -219,54 +282,81 @@ function animate() {
 
     if (proceduralWeight > 0.001) {
       const time = Date.now() * 0.001;
-
-      // Вычисляем базовые значения
       const swayZ = Math.sin(time * 0.5) * 0.012;
       const swayX = Math.cos(time * 0.4) * 0.012;
-
-      // Применяем их, умножая на proceduralWeight для мягкого входа
       currentVrm.scene.rotation.z = swayZ * proceduralWeight;
       currentVrm.scene.rotation.x = swayX * proceduralWeight;
       currentVrm.scene.position.y = (-Math.abs(swayZ) * 0.2) * proceduralWeight;
 
-      // Балансировка Spine
       const spine = currentVrm.humanoid.getRawBoneNode('spine');
       if (spine) {
         spine.rotation.z += (-swayZ * 1.2) * proceduralWeight;
         spine.rotation.x += (-swayX * 0.8) * proceduralWeight;
       }
 
-      // Дыхание грудью
-      const chest = currentVrm.humanoid.getRawBoneNode('upperChest') || currentVrm.humanoid.getRawBoneNode('chest');
-      if (chest) {
-        const breathing = (Math.sin(time * 1.4) * 0.03) * proceduralWeight;
-        chest.rotation.x += breathing;
-      }
-
-      // Голова
       const head = currentVrm.humanoid.getRawBoneNode('head');
       if (head) {
         head.rotation.z += (-swayZ * 0.6) * proceduralWeight;
         head.rotation.x += (-swayX * 0.6) * proceduralWeight;
-        head.rotation.y += (Math.sin(time * 0.6) * 0.04) * proceduralWeight;
       }
     }
 
-    // Если мы выходим из состояния покоя, плавно сбрасываем ротацию сцены в 0
-    if (!isStationary) {
-      currentVrm.scene.rotation.z = THREE.MathUtils.lerp(currentVrm.scene.rotation.z, 0, 0.1);
-      currentVrm.scene.rotation.x = THREE.MathUtils.lerp(currentVrm.scene.rotation.x, 0, 0.1);
-      currentVrm.scene.position.y = THREE.MathUtils.lerp(currentVrm.scene.position.y, 0, 0.1);
+    // --- ОБНОВЛЕННЫЙ ЛИПСИНК ---
+    const minThreshold = 0.18;
+    if (volume > minThreshold && vowels) {
+      // 1. Усиливаем разницу между гласными (контрастный душ)
+      const boost = 5.0;
+
+      // Вычисляем "чистые" значения, вычитая шум других каналов
+      // Если OH и AA высокие одновременно, они гасят друг друга, заставляя рот прикрыться
+      let pureAA = Math.max(0, vowels.aa - (vowels.oh + vowels.ee) * 0.5);
+      let pureEE = Math.max(0, vowels.ee - (vowels.aa + vowels.oh) * 0.5);
+      let pureOH = Math.max(0, vowels.oh - (vowels.aa + vowels.ee) * 0.5);
+
+      // 2. Амплитудная огибающая (Envelope)
+      // Делаем зависимость от громкости более крутой (квадрат), чтобы на спадах звука рот закрывался резко
+      const volumeSq = Math.pow(volume, 2) * 2.0;
+
+      const targetAA = pureAA * volumeSq;
+      const targetEE = pureEE * volumeSq;
+      const targetOH = pureOH * volumeSq;
+
+      // 3. Асимметричный сглаживатель
+      // Открываем чуть медленнее, закрываем ОЧЕНЬ быстро
+      const openSpeed = 10.0;
+      const closeSpeed = 40.0;
+
+      const lerpVowel = (current, target, dt) => {
+        const speed = (target * boost > current) ? openSpeed : closeSpeed;
+        return THREE.MathUtils.lerp(current, target * boost, Math.min(dt * speed, 1.0));
+      };
+
+      smoothedVowels.aa = lerpVowel(smoothedVowels.aa, targetAA, deltaTime);
+      smoothedVowels.ee = lerpVowel(smoothedVowels.ee, targetEE, deltaTime);
+      smoothedVowels.oh = lerpVowel(smoothedVowels.oh, targetOH, deltaTime);
+
+      // 4. Ограничение суммарного открытия (Normalization)
+      // Это критично: если сумма весов > 1.0, меш не должен "выворачиваться"
+      const totalSum = smoothedVowels.aa + smoothedVowels.ee + smoothedVowels.oh + 0.01;
+      const limit = totalSum > 1.0 ? 1.0 / totalSum : 1.0;
+
+      currentVrm.expressionManager.setValue('aa', smoothedVowels.aa * limit);
+      currentVrm.expressionManager.setValue('ee', smoothedVowels.ee * limit);
+      currentVrm.expressionManager.setValue('oh', smoothedVowels.oh * limit);
+
+    } else {
+      // Быстрое захлопывание при тишине
+      const fallSpeed = 35.0 * deltaTime;
+      smoothedVowels.aa = Math.max(0, smoothedVowels.aa - fallSpeed);
+      smoothedVowels.ee = Math.max(0, smoothedVowels.ee - fallSpeed);
+      smoothedVowels.oh = Math.max(0, smoothedVowels.oh - fallSpeed);
+
+      currentVrm.expressionManager.setValue('aa', smoothedVowels.aa);
+      currentVrm.expressionManager.setValue('ee', smoothedVowels.ee);
+      currentVrm.expressionManager.setValue('oh', smoothedVowels.oh);
     }
 
     updateBlink(deltaTime);
-
-    // LipSync (без изменений)
-    const minThreshold = 0.20;
-    let shapedVolume = volume > minThreshold ? (volume - minThreshold) * 3.0 : 0;
-    shapedVolume = Math.min(shapedVolume, 1.0);
-    smoothedVolume += (shapedVolume - smoothedVolume) * 0.2;
-    currentVrm.expressionManager.setValue('aa', smoothedVolume);
     currentVrm.expressionManager.update();
   }
 
@@ -324,17 +414,23 @@ async function setEmotions(data, charSpeed) {
         });
 
         // Включение новой
-        new TWEEN.Tween({ w: vrm.expressionManager.getValue(emotionName) || 0 })
-          .to({ w: 1.0 }, 400)
-          .onUpdate(o => {
-            vrm.expressionManager.setValue(emotionName, o.w)
-            if (emotionName === 'surprised') {
-              vrm.expressionManager.setValue('ih', 0);
-              vrm.expressionManager.setValue('oh', 0);
-              vrm.expressionManager.setValue('aa', 0);
-            }
-          })
-          .start();
+        const lowerName = emotionName.toLowerCase();
+        if (lowerName === 'surprised') {
+          new TWEEN.Tween({ w: vrm.expressionManager.getValue(emotionName) || 0 })
+            .to({ w: 0.3 }, 400)
+            .onUpdate(o => {
+              vrm.expressionManager.setValue(emotionName, o.w)
+            })
+            .start();
+        }
+        else {
+          new TWEEN.Tween({ w: vrm.expressionManager.getValue(emotionName) || 0 })
+            .to({ w: 1.0 }, 400)
+            .onUpdate(o => {
+              vrm.expressionManager.setValue(emotionName, o.w)
+            })
+            .start();
+        }
       }
     }, delay);
   });
@@ -370,5 +466,26 @@ window.vrmApp.setBackground = (hexString) => {
   const canvas = renderer.domElement;
   if (canvas) {
     canvas.style.backgroundColor = hexString;
+  }
+};
+
+window.vrmApp.printscreen = "";
+
+window.vrmApp.takePrintscreen = () => {
+  try {
+    const canvas = document.querySelector('canvas');
+    if (!canvas) return "null";
+
+    const tempCanvas = document.createElement('canvas');
+    const scale = 0.5;
+    tempCanvas.width = canvas.width * scale;
+    tempCanvas.height = canvas.height * scale;
+
+    const ctx = tempCanvas.getContext('2d');
+    ctx.drawImage(canvas, 0, 0, tempCanvas.width, tempCanvas.height);
+
+    window.vrmApp.printscreen = tempCanvas.toDataURL('image/jpeg', 0.8);
+  } catch (e) {
+    window.vrmApp.printscreen = e.toString();
   }
 };
