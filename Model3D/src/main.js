@@ -364,75 +364,94 @@ function animate() {
 }
 animate();
 
+let audioStartTime = 0;
+let currentAudioSource = null;
+
 // --- Speech & Emotions ---
 window.say = async (data, pitch, port, service, model, language, speaker, volume, bass, treble) => {
   const response = await fetch(`http://127.0.0.1:${port}/${service}?text=${encodeURIComponent(data.cleanText)}&model_path=${encodeURIComponent(model)}&language=${language}&speaker=${speaker}`);
   const audioBuffer = await audioContext.decodeAudioData(await response.arrayBuffer());
+  
+  if (currentAudioSource) {
+    try { currentAudioSource.stop(); } catch (e) { }
+  }
+  
   const sourceNode = audioContext.createBufferSource();
   sourceNode.buffer = audioBuffer;
   sourceNode.playbackRate.value = pitch;
+  currentAudioSource = sourceNode;
 
   const gainNode = audioContext.createGain();
   gainNode.gain.value = volume;
   sourceNode.connect(lipSync.analyser);
   sourceNode.connect(gainNode);
   gainNode.connect(audioContext.destination);
-  sourceNode.start();
+  audioStartTime = audioContext.currentTime;
+  sourceNode.start(audioStartTime);
 
-  const realCharSpeed = (audioBuffer.duration / data.cleanText.length) * 1000;
-  setEmotions(data, realCharSpeed);
+  setEmotions(data, audioBuffer.duration);
 };
 
-async function setEmotions(data, charSpeed) {
-  if (!data.emotions) return;
+async function setEmotions(data, duration) {
+  if (!data.emotions || !currentVrm) return;
+  const vrm = currentVrm;
+  const realCharSpeed = (duration / data.cleanText.length);
 
   data.emotions.forEach((item) => {
-    const delay = item.pos * charSpeed;
+    const emotionTimeOffset = item.pos * realCharSpeed;
+    const exactStartTime = audioStartTime + (emotionTimeOffset / currentAudioSource.playbackRate.value);
+    const now = audioContext.currentTime;
+    const timeToWait = (exactStartTime - now) * 1000;
 
     setTimeout(() => {
-      const vrm = currentVrm;
-      if (!vrm) return;
+      if (!vrm || currentAudioSource?.playbackRate.value === 0) return;
 
-      console.log(`[Event] Сработал ${item.name} через ${delay}ms`);
-
+      // 1. Обработка MOTION
       if (item.name.startsWith('motion:')) {
         const animName = item.name.replace('motion:', '');
         loadFBX(`/animations/${animName}.fbx`, false);
       }
-      else if (item.name.startsWith('mood:')) {
-        const emotionName = item.name.replace('mood:', '');
 
-        // Плавный сброс всех КРОМЕ текущей
+      // 2. Обработка MOOD
+      else if (item.name.startsWith('mood:')) {
+        const rawName = item.name.replace('mood:', '').toLowerCase();
+
+        // Маппинг подмены
+        let emotionName = (rawName === 'happy') ? 'relaxed' : rawName;
+        if (emotionName === 'surprised') {
+          emotionName = 'Surprised';
+        }
+
+        console.log(`[Mood Event] Активация: ${emotionName}`);
+
+        // Сброс старых
         vrm.expressionManager.expressions.forEach((ex) => {
-          if (ex.expressionName !== emotionName && !['aa', 'ee', 'ih', 'oh', 'ou', 'blink'].includes(ex.expressionName)) {
-            const val = vrm.expressionManager.getValue(ex.expressionName);
-            if (val > 0) {
-              new TWEEN.Tween({ v: val }).to({ v: 0 }, 500)
-                .onUpdate(o => vrm.expressionManager.setValue(ex.expressionName, o.v)).start();
+          const name = ex.expressionName.toLowerCase();
+          if (name !== emotionName && !['aa', 'ee', 'ih', 'oh', 'ou', 'blink'].includes(name)) {
+            const currentVal = vrm.expressionManager.getValue(ex.expressionName);
+            if (currentVal > 0) {
+              new TWEEN.Tween({ v: currentVal })
+                .to({ v: 0 }, 500)
+                .onUpdate(o => vrm.expressionManager.setValue(ex.expressionName, o.v))
+                .start();
             }
           }
         });
 
         // Включение новой
-        const lowerName = emotionName.toLowerCase();
-        if (lowerName === 'surprised') {
-          new TWEEN.Tween({ w: vrm.expressionManager.getValue(emotionName) || 0 })
-            .to({ w: 0.3 }, 400)
-            .onUpdate(o => {
-              vrm.expressionManager.setValue(emotionName, o.w)
-            })
-            .start();
-        }
-        else {
-          new TWEEN.Tween({ w: vrm.expressionManager.getValue(emotionName) || 0 })
-            .to({ w: 1.0 }, 400)
-            .onUpdate(o => {
-              vrm.expressionManager.setValue(emotionName, o.w)
-            })
-            .start();
-        }
+        const targetVal = (emotionName === 'Surprised') ? 0.3 : 1.0;
+        const currentVal = vrm.expressionManager.getValue(emotionName) || 0;
+
+        new TWEEN.Tween({ w: currentVal })
+          .to({ w: targetVal }, 400)
+          .onUpdate(o => {
+            vrm.expressionManager.setValue(emotionName, o.w);
+            // Принудительно заставляем VRM пересчитать меш
+            vrm.expressionManager.update();
+          })
+          .start();
       }
-    }, delay);
+    }, Math.max(0, timeToWait));
   });
 }
 

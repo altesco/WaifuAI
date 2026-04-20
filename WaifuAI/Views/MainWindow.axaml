@@ -1400,12 +1400,17 @@
                         <Setter Property="Margin" Value="0,18,0,18" />
                     </Style>
                 </Border.Styles>
-                <Grid ColumnDefinitions="Auto,*">
+                <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,*">
+                    <TextBlock
+                        Margin="16,12"
+                        FontSize="22"
+                        FontWeight="DemiBold"
+                        Text="Настройки" />
                     <ListBox
                         Grid.Column="0"
-                        Padding="10"
-                        Background="Transparent"
-                        BorderThickness="0,0,1,0">
+                        Grid.Row="1"
+                        Padding="10,0,10,10"
+                        Background="Transparent">
                         <ListBox.Styles>
                             <Style Selector="ListBoxItem">
                                 <Setter Property="CornerRadius" Value="4" />
@@ -1473,9 +1478,13 @@
                         </ListBoxItem>
                     </ListBox>
                     <ScrollViewer
+                        Grid.Row="0"
                         Grid.Column="1"
+                        Grid.RowSpan="2"
                         x:DataType="vm:SettingsVM"
-                        DataContext="{x:Static vm:SettingsVM.Instance}">
+                        DataContext="{x:Static vm:SettingsVM.Instance}"
+                        BorderThickness="1,0,0,0"
+                        BorderBrush="{DynamicResource SystemBaseLowColor}">
                         <Grid>
                             <Grid.Resources>
                                 <ControlTheme x:Key="SettingsGroup" TargetType="Border">
@@ -1909,6 +1918,12 @@
                                                     <Setter Property="Background" Value="{DynamicResource SystemAccentColorDark3}" />
                                                     <Setter Property="Foreground" Value="{DynamicResource SystemAccentColorLight3}" />
                                                 </Style>
+                                                <Style Selector="ListBoxItem:disabled /template/ ContentPresenter#PART_ContentPresenter">
+                                                    <Setter Property="Background" Value="{DynamicResource SystemListLowColor}"/>
+                                                </Style>
+                                                <Style Selector="ListBoxItem:disabled:selected /template/ ContentPresenter#PART_ContentPresenter">
+                                                    <Setter Property="Background" Value="{DynamicResource SystemListMediumColor}"/>
+                                                </Style>
                                             </ListBox.Styles>
                                             <ListBox.ItemsPanel>
                                                 <ItemsPanelTemplate>
@@ -1948,8 +1963,10 @@
                         </Grid>
                     </ScrollViewer>
                     <Button
+                        Grid.Row="0"
                         Grid.Column="0"
                         Grid.ColumnSpan="2"
+                        Grid.RowSpan="2"
                         Margin="6"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Top"

@@ -2,6 +2,7 @@ using System;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -10,6 +11,9 @@ using Avalonia.Data.Core.Plugins;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using Avalonia.Threading;
+using CommunityToolkit.Mvvm.Messaging;
+using WaifuAI.Services;
 using WaifuAI.ViewModels;
 using WaifuAI.Views;
 using WebViewControl;
@@ -39,6 +43,17 @@ namespace WaifuAI
                     typeof(TextBox), 
                     GlobalCutHandler, 
                     RoutingStrategies.Tunnel);
+                ActualThemeVariantChanged += (_, _) => 
+                {
+                    if (SettingsVM.Instance.IsLoading)
+                        return;
+                    ModelService.SetBackground();
+                    Dispatcher.UIThread.InvokeAsync(async () =>
+                    {
+                        await Task.Delay(10);
+                        WeakReferenceMessenger.Default.Send(new SnapshotMessage(true));
+                    });
+                };
             }
 
             var culture = new CultureInfo("en-US");

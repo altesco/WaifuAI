@@ -273,9 +273,6 @@ public partial class SettingsVM : ObservableValidator
             1 => ThemeVariant.Dark,
             _ => ThemeVariant.Default
         };
-        if (IsLoading)
-            return;
-        ModelService.SetBackground();
     }
 
     [RelayCommand]
