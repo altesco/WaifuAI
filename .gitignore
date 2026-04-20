@@ -67,3 +67,4 @@ Model3D/build/
 Model3D/out/
 Model3D/.eslintcache
 Model3D/.cache/
+Model3D/public/models/*.vrm
