@@ -7,6 +7,7 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Messaging;
 using WaifuAI.ViewModels;
@@ -55,16 +56,16 @@ public static class VoiceService
     {
         try
         {
+            KillOldProcess();
             string baseDir = AppDomain.CurrentDomain.BaseDirectory;
             string scriptPath = Path.Combine(baseDir, "say.py");
             string pythonExe = OperatingSystem.IsWindows()
                 ? Path.Combine(baseDir, "python_runtime", "python.exe")
                 : Path.Combine(baseDir, "venv", "bin", "python");
-
             ProcessStartInfo info = new ProcessStartInfo
             {
                 FileName = pythonExe,
-                Arguments = $"-u \"{scriptPath}\"", // флаг -u для мгновенного вывода
+                Arguments = $"-u \"{scriptPath}\"",
                 UseShellExecute = false,
                 RedirectStandardOutput = true, // Перехватываем вывод
                 RedirectStandardError = true,  // Перехватываем ошибки
@@ -89,6 +90,45 @@ public static class VoiceService
         catch (Exception e)
         {
             Console.WriteLine(e + "\n" + e.Message);
+        }
+    }
+
+    private static void KillOldProcess()
+    {
+        if (OperatingSystem.IsWindows())
+        {
+            Process startInfo = new Process();
+            startInfo.StartInfo.FileName = "netstat.exe";
+            startInfo.StartInfo.Arguments = $"-a -n -o";
+            startInfo.StartInfo.RedirectStandardOutput = true;
+            startInfo.StartInfo.UseShellExecute = false;
+            startInfo.StartInfo.CreateNoWindow = true;
+            startInfo.Start();
+
+            string output = startInfo.StandardOutput.ReadToEnd();
+            var lines = output.Split('\n');
+            foreach (var line in lines)
+            {
+                if (line.Contains($":{port}") && line.Contains("LISTENING"))
+                {
+                    var match = Regex.Match(line, @"(\d+)\s*$");
+                    if (match.Success)
+                    {
+                        int pid = int.Parse(match.Groups[1].Value);
+                        if (pid != 0) Process.GetProcessById(pid).Kill(true);
+                    }
+                }
+            }
+        }
+        else if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS())
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "fuser",
+                Arguments = $"-k {port}/tcp",
+                CreateNoWindow = true,
+                UseShellExecute = false
+            })?.WaitForExit();
         }
     }
 

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using CommunityToolkit.Mvvm.ComponentModel;
 using WaifuAI.Models;
 
@@ -14,6 +15,7 @@ public partial class MessageVM : ObservableObject
     [ObservableProperty] private string? _quote;
     [ObservableProperty] private int _quoteStart;
     [ObservableProperty] private int _quoteEnd;
-    [ObservableProperty] private bool? _isReplied; // or quoted BY OTHER MESSAGE, else nothing (null)
-    [ObservableProperty] private MessageVM? _replyMessage;
+    [ObservableProperty] private bool? _isReplied; // or else - quoted BY OTHER MESSAGE, else nothing (null)
+    [ObservableProperty] private MessageVM? _replyMessage; // сообщение, на которое отвечает this
+    public List<MessageVM> ReplyingMessages { get; } = []; // сообщения, которое отвечает на this
 }

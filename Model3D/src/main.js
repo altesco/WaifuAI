@@ -51,26 +51,26 @@ let nextBlinkTime = Math.random() * 3 + 2;
 
 // animation cache
 const ANIMATION_URLS = [
-  'Angry', 
-  'Bashful', 
-  'HeadNodYes', 
-  'LookAround', 
-  'SarcasticHeadNod', 
-  'ShakingHeadNo', 
-  'StandingIdle', 
-  'TalkingAskQuestion', 
-  'Thankful', 
-  'Thinking', 
-  'Threatening', 
-  'WeightShift', 
-  'Yawn',
-  'EvilPlotting',
-  'Talking',
-  'Happy',
-  'Loser',
-  'CrazyGesture',
-  'StandingGreeting',
-  'Excited'
+  'angry', 
+  'bashful', 
+  'head_nod_yes', 
+  'look_around', 
+  'sarcastic_head_nod', 
+  'shaking_head_no', 
+  'standing_idle', 
+  'talking_ask_question', 
+  'thankful', 
+  'thinking', 
+  'threatening', 
+  'weight_shift', 
+  'yawn',
+  'evil_plotting',
+  'talking',
+  'happy',
+  'loser',
+  'crazy_gesture',
+  'standing_greeting',
+  'excited'
 ];
 const animationCache = new Map();
 
@@ -181,7 +181,7 @@ function loadVRM(modelUrl) {
           await preloadAnimations(vrm);
 
           // Запуск Idle
-          const idleUrl = '/animations/StandingIdle.fbx';
+          const idleUrl = '/animations/standing_idle.fbx';
           if (animationCache.has(idleUrl)) {
             idleAction = currentMixer.clipAction(animationCache.get(idleUrl));
             idleAction.play();

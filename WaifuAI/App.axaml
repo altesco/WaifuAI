@@ -25,6 +25,8 @@
             <SolidColorBrush x:Key="TextControlPlaceholderForegroundFocused" Color="{DynamicResource SystemBaseMediumColor}"/>
             <SolidColorBrush x:Key="TextControlPlaceholderForegroundDisabled" Color="{DynamicResource SystemBaseLowColor}"/>
             <SolidColorBrush x:Key="TextControlBackgroundDisabled" Color="{DynamicResource SystemChromeHighColor}"/>
+            <SolidColorBrush x:Key="ErrorColor" Color="#FF848A"/>
+            <SolidColorBrush x:Key="ErrorLowColor" Color="#FF979C"/>
             <ResourceDictionary.ThemeDictionaries>
                 <ResourceDictionary x:Key="Light">
                     <SolidColorBrush x:Key="TextControlSelectionHighlightColor" Color="{DynamicResource SystemAccentColorLight2}" />
@@ -43,6 +45,7 @@
             <FluentTheme.Palettes>
                 <ColorPaletteResources 
                     x:Key="Light" 
+                    ErrorText="#842426"
                     RegionColor="#eef1f5"
                     ListLow="#ced4de"
                     ChromeLow="#eef1f5"
@@ -58,6 +61,7 @@
                     BaseLow="#bbbfcb"/>
                 <ColorPaletteResources 
                     x:Key="Dark" 
+                    ErrorText="#842426"
                     RegionColor="#232332"
                     ListLow="#2a2a3d"
                     ListMedium="#32324a"

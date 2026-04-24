@@ -5,7 +5,6 @@
     xmlns:conv="using:WaifuAI.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:models="using:WaifuAI.Models"
     xmlns:views="using:WaifuAI.Views"
     xmlns:vm="using:WaifuAI.ViewModels"
     xmlns:wv="clr-namespace:WebViewControl;assembly=WebViewControl.Avalonia"
@@ -24,6 +23,22 @@
     <Window.Resources>
         <conv:MathConverter x:Key="MathConverter" />
         <conv:StringValueConverter x:Key="StringValueConverter" />
+        <ControlTheme x:Key="{x:Type AdornerLayer}" TargetType="AdornerLayer">
+            <Setter Property="DefaultFocusAdorner">
+                <FocusAdornerTemplate>
+                    <Border
+                        Margin="{DynamicResource SystemControlFocusVisualMargin}"
+                        BorderBrush="{DynamicResource SystemControlFocusVisualPrimaryBrush}"
+                        BorderThickness="3"
+                        CornerRadius="4">
+                        <Border
+                            BorderBrush="{DynamicResource SystemBaseLowColor}"
+                            BorderThickness="0"
+                            CornerRadius="4" />
+                    </Border>
+                </FocusAdornerTemplate>
+            </Setter>
+        </ControlTheme>
     </Window.Resources>
     <Grid
         x:Name="RootPanel"
@@ -61,11 +76,11 @@
                 <Setter Property="CornerRadius" Value="5" />
                 <Setter Property="Padding" Value="12,0" />
                 <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-                    <Setter Property="BorderBrush" Value="{DynamicResource SystemBaseMediumLowColor}" />
+                    <Setter Property="BorderBrush" Value="{DynamicResource SystemBaseColor}" />
                     <Setter Property="BorderThickness" Value="1" />
                 </Style>
                 <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
-                    <Setter Property="BorderBrush" Value="{DynamicResource SystemBaseMediumLowColor}" />
+                    <Setter Property="BorderBrush" Value="{DynamicResource SystemBaseColor}" />
                     <Setter Property="BorderThickness" Value="1" />
                 </Style>
             </Style>
@@ -258,6 +273,7 @@
                 <MultiBinding Converter="{x:Static BoolConverters.Or}">
                     <Binding Path="IsSettingsOpen" />
                     <Binding Path="IsPromptEditorOpen" />
+                    <Binding Path="IsDeletingDialogOpen" />
                 </MultiBinding>
             </Classes.blurred>
             <Grid.Styles>
@@ -418,27 +434,81 @@
                             <Grid RowDefinitions="*,Auto">
                                 <ListBox
                                     x:Name="MessageList"
-                                    Padding="6"
                                     Background="{DynamicResource SystemChromeMediumColor}"
                                     ItemsSource="{Binding Chat}"
-                                    SelectedItem="{Binding SelectedMessage, Mode=TwoWay}">
+                                    SelectedItem="{Binding SelectedMessage, Mode=TwoWay}"
+                                    SelectedItems="{Binding SelectedMessages}"
+                                    SelectionMode="Multiple,Toggle"
+                                    Tag="{Binding IsMultiSelect}" >
                                     <ListBox.Styles>
                                         <Style Selector="ListBox /template/ ItemsPresenter">
                                             <Setter Property="MaxWidth" Value="720" />
                                         </Style>
                                     </ListBox.Styles>
                                     <ListBox.ItemContainerTheme>
-                                        <ControlTheme TargetType="ListBoxItem">
-                                            <Setter Property="Padding" Value="6" />
+                                        <ControlTheme x:DataType="vm:MessageVM" TargetType="ListBoxItem">
                                             <Setter Property="Background" Value="Transparent" />
+                                            <Setter Property="IsHitTestVisible" Value="{Binding MessageModel.Role, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter=temp}" />
                                         </ControlTheme>
                                     </ListBox.ItemContainerTheme>
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
                                             <Grid ColumnDefinitions="Auto,*,Auto">
                                                 <Border
+                                                    Grid.Column="0"
+                                                    Grid.ColumnSpan="3"
+                                                    x:DataType="vm:MainVM"
+                                                    DataContext="{Binding $parent[ListBox].DataContext}">
+                                                    <!-- <Interaction.Behaviors>
+                                                        <EventTriggerBehavior EventName="DoubleTapped">
+                                                            <InvokeCommandAction x:DataType="vm:MainVM" Command="{Binding MakeReplyCommand}"/>
+                                                        </EventTriggerBehavior>
+                                                    </Interaction.Behaviors>-->
+                                                    <Border.Tag>
+                                                        <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                                            <Binding Path="$parent[ListBoxItem].IsSelected" />
+                                                            <Binding Path="$parent[ListBox].Tag" />
+                                                        </MultiBinding>
+                                                    </Border.Tag>
+                                                    <Border.Styles>
+                                                        <Style Selector="Border[Tag=True]">
+                                                            <Setter Property="Background" Value="{DynamicResource SystemAccentColor}" />
+                                                            <Setter Property="Opacity" Value="0.4" />
+                                                        </Style>
+                                                        <Style Selector="Border[Tag=False]">
+                                                            <Setter Property="Background" Value="Transparent" />
+                                                            <Setter Property="Opacity" Value="1" />
+                                                        </Style>
+                                                    </Border.Styles>
+                                                    <Border.ContextMenu>
+                                                        <ContextMenu>
+                                                            <MenuItem
+                                                                x:DataType="vm:MainVM"
+                                                                Command="{Binding ToggleMultiSelectCommand}"
+                                                                DataContext="{Binding $parent[ListBox].DataContext}"
+                                                                Header="Выбрать"
+                                                                IsVisible="{Binding !$parent[ListBox].Tag}">
+                                                                <MenuItem.Icon>
+                                                                    <LucideIcon Kind="CircleCheck" Size="20" />
+                                                                </MenuItem.Icon>
+                                                            </MenuItem>
+                                                            <MenuItem
+                                                                x:DataType="vm:MainVM"
+                                                                Command="{Binding ToggleMultiSelectCommand}"
+                                                                DataContext="{Binding $parent[ListBox].DataContext}"
+                                                                Header="Отменить выбор"
+                                                                IsVisible="{Binding $parent[ListBox].Tag}">
+                                                                <MenuItem.Icon>
+                                                                    <LucideIcon Kind="CircleX" Size="20" />
+                                                                </MenuItem.Icon>
+                                                            </MenuItem>
+                                                        </ContextMenu>
+                                                    </Border.ContextMenu>
+                                                </Border>
+                                                <Border
                                                     MinHeight="32"
                                                     MaxWidth="360"
+                                                    Margin="16,6,16,6"
                                                     Padding="12,6,12,6"
                                                     Background="{DynamicResource SystemListLowColor}"
                                                     Tag="{Binding MessageModel.Role}">
@@ -468,10 +538,47 @@
                                                                                 <LucideIcon Kind="MessageSquareReply" Size="20" />
                                                                             </MenuItem.Icon>
                                                                         </MenuItem>
-                                                                        <MenuItem Header="Удалить">
+                                                                        <MenuItem
+                                                                            x:DataType="vm:MainVM"
+                                                                            Command="{Binding ToggleMultiSelectCommand}"
+                                                                            DataContext="{Binding $parent[ListBox].DataContext}"
+                                                                            Header="Выбрать"
+                                                                            IsVisible="{Binding !IsMultiSelect}">
+                                                                            <MenuItem.Icon>
+                                                                                <LucideIcon Kind="CircleCheck" Size="20" />
+                                                                            </MenuItem.Icon>
+                                                                        </MenuItem>
+                                                                        <MenuItem
+                                                                            x:DataType="vm:MainVM"
+                                                                            Command="{Binding ToggleMultiSelectCommand}"
+                                                                            DataContext="{Binding $parent[ListBox].DataContext}"
+                                                                            Header="Отменить выбор"
+                                                                            IsVisible="{Binding IsMultiSelect}">
+                                                                            <MenuItem.Icon>
+                                                                                <LucideIcon Kind="CircleX" Size="20" />
+                                                                            </MenuItem.Icon>
+                                                                        </MenuItem>
+                                                                        <MenuItem
+                                                                            x:DataType="vm:MainVM"
+                                                                            Command="{Binding DeletingDialogCommand}"
+                                                                            DataContext="{Binding $parent[ListBox].DataContext}"
+                                                                            Header="Удалить">
                                                                             <MenuItem.Icon>
                                                                                 <LucideIcon Kind="Trash2" Size="20" />
                                                                             </MenuItem.Icon>
+                                                                            <MenuItem.Styles>
+                                                                                <Style Selector="MenuItem">
+                                                                                    <Setter Property="Foreground" Value="Red" />
+                                                                                </Style>
+                                                                                <Style Selector="MenuItem:pointerover /template/ ContentPresenter#PART_HeaderPresenter, MenuItem:selected /template/ ContentPresenter#PART_HeaderPresenter">
+                                                                                    <Setter Property="Foreground" Value="Red" />
+                                                                                </Style>
+                                                                                <Style Selector="MenuItem:pointerover /template/ Border#PART_LayoutRoot, MenuItem:selected /template/ Border#PART_LayoutRoot">
+                                                                                    <Setter Property="Background">
+                                                                                        <SolidColorBrush Opacity="0.15" Color="Red" />
+                                                                                    </Setter>
+                                                                                </Style>
+                                                                            </MenuItem.Styles>
                                                                         </MenuItem>
                                                                     </ContextMenu>
                                                                 </Setter.Value>
@@ -502,10 +609,47 @@
                                                                                 <LucideIcon Kind="MessageSquareReply" Size="20" />
                                                                             </MenuItem.Icon>
                                                                         </MenuItem>
-                                                                        <MenuItem Header="Удалить">
+                                                                        <MenuItem
+                                                                            x:DataType="vm:MainVM"
+                                                                            Command="{Binding ToggleMultiSelectCommand}"
+                                                                            DataContext="{Binding $parent[ListBox].DataContext}"
+                                                                            Header="Выбрать"
+                                                                            IsVisible="{Binding !IsMultiSelect}">
+                                                                            <MenuItem.Icon>
+                                                                                <LucideIcon Kind="CircleCheck" Size="20" />
+                                                                            </MenuItem.Icon>
+                                                                        </MenuItem>
+                                                                        <MenuItem
+                                                                            x:DataType="vm:MainVM"
+                                                                            Command="{Binding ToggleMultiSelectCommand}"
+                                                                            DataContext="{Binding $parent[ListBox].DataContext}"
+                                                                            Header="Отменить выбор"
+                                                                            IsVisible="{Binding IsMultiSelect}">
+                                                                            <MenuItem.Icon>
+                                                                                <LucideIcon Kind="CircleX" Size="20" />
+                                                                            </MenuItem.Icon>
+                                                                        </MenuItem>
+                                                                        <MenuItem
+                                                                            x:DataType="vm:MainVM"
+                                                                            Command="{Binding DeletingDialogCommand}"
+                                                                            DataContext="{Binding $parent[ListBox].DataContext}"
+                                                                            Header="Удалить">
                                                                             <MenuItem.Icon>
                                                                                 <LucideIcon Kind="Trash2" Size="20" />
                                                                             </MenuItem.Icon>
+                                                                            <MenuItem.Styles>
+                                                                                <Style Selector="MenuItem">
+                                                                                    <Setter Property="Foreground" Value="Red" />
+                                                                                </Style>
+                                                                                <Style Selector="MenuItem:pointerover /template/ ContentPresenter#PART_HeaderPresenter, MenuItem:selected /template/ ContentPresenter#PART_HeaderPresenter">
+                                                                                    <Setter Property="Foreground" Value="Red" />
+                                                                                </Style>
+                                                                                <Style Selector="MenuItem:pointerover /template/ Border#PART_LayoutRoot, MenuItem:selected /template/ Border#PART_LayoutRoot">
+                                                                                    <Setter Property="Background">
+                                                                                        <SolidColorBrush Opacity="0.15" Color="Red" />
+                                                                                    </Setter>
+                                                                                </Style>
+                                                                            </MenuItem.Styles>
                                                                         </MenuItem>
                                                                     </ContextMenu>
                                                                 </Setter.Value>
@@ -562,7 +706,9 @@
                                                                 x:Name="PART_SelectableTextBlock"
                                                                 HorizontalAlignment="Left"
                                                                 VerticalAlignment="Center"
+                                                                Background="Transparent"
                                                                 Initialized="PART_SelectableTextBlock_Initialized"
+                                                                IsHitTestVisible="{Binding !$parent[ListBox].Tag}"
                                                                 SelectionEnd="{Binding SelectionEnd, Mode=TwoWay}"
                                                                 SelectionStart="{Binding SelectionStart, Mode=TwoWay}"
                                                                 Text="{Binding MessageModel.Content}"
@@ -618,10 +764,47 @@
                                                                                 </Style>
                                                                             </MenuItem.Styles>
                                                                         </MenuItem>
-                                                                        <MenuItem Header="Удалить">
+                                                                        <MenuItem
+                                                                            x:DataType="vm:MainVM"
+                                                                            Command="{Binding ToggleMultiSelectCommand}"
+                                                                            DataContext="{Binding $parent[ListBox].DataContext}"
+                                                                            Header="Выбрать"
+                                                                            IsVisible="{Binding !IsMultiSelect}">
+                                                                            <MenuItem.Icon>
+                                                                                <LucideIcon Kind="CircleCheck" Size="20" />
+                                                                            </MenuItem.Icon>
+                                                                        </MenuItem>
+                                                                        <MenuItem
+                                                                            x:DataType="vm:MainVM"
+                                                                            Command="{Binding ToggleMultiSelectCommand}"
+                                                                            DataContext="{Binding $parent[ListBox].DataContext}"
+                                                                            Header="Отменить выбор"
+                                                                            IsVisible="{Binding IsMultiSelect}">
+                                                                            <MenuItem.Icon>
+                                                                                <LucideIcon Kind="CircleX" Size="20" />
+                                                                            </MenuItem.Icon>
+                                                                        </MenuItem>
+                                                                        <MenuItem
+                                                                            x:DataType="vm:MainVM"
+                                                                            Command="{Binding DeletingDialogCommand}"
+                                                                            DataContext="{Binding $parent[ListBox].DataContext}"
+                                                                            Header="Удалить">
                                                                             <MenuItem.Icon>
                                                                                 <LucideIcon Kind="Trash2" Size="20" />
                                                                             </MenuItem.Icon>
+                                                                            <MenuItem.Styles>
+                                                                                <Style Selector="MenuItem">
+                                                                                    <Setter Property="Foreground" Value="Red" />
+                                                                                </Style>
+                                                                                <Style Selector="MenuItem:pointerover /template/ ContentPresenter#PART_HeaderPresenter, MenuItem:selected /template/ ContentPresenter#PART_HeaderPresenter">
+                                                                                    <Setter Property="Foreground" Value="Red" />
+                                                                                </Style>
+                                                                                <Style Selector="MenuItem:pointerover /template/ Border#PART_LayoutRoot, MenuItem:selected /template/ Border#PART_LayoutRoot">
+                                                                                    <Setter Property="Background">
+                                                                                        <SolidColorBrush Opacity="0.15" Color="Red" />
+                                                                                    </Setter>
+                                                                                </Style>
+                                                                            </MenuItem.Styles>
                                                                         </MenuItem>
                                                                     </ContextMenu>
                                                                 </SelectableTextBlock.ContextMenu>
@@ -744,8 +927,8 @@
                                     MaxWidth="720"
                                     Margin="10"
                                     VerticalAlignment="Bottom"
-                                    Background="#FF979C"
-                                    BorderBrush="#842426"
+                                    Background="{DynamicResource ErrorLowColor}"
+                                    BorderBrush="{DynamicResource SystemErrorTextColor}"
                                     BorderThickness="1"
                                     CornerRadius="7"
                                     IsVisible="{Binding Error, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
@@ -753,7 +936,7 @@
                                         <SelectableTextBlock
                                             x:Name="ErrorTextBlock"
                                             Margin="10,6,10,6"
-                                            Foreground="#842426"
+                                            Foreground="{DynamicResource SystemErrorTextColor}"
                                             Text="{Binding Error}"
                                             TextWrapping="Wrap">
                                             <SelectableTextBlock.ContextMenu>
@@ -774,7 +957,17 @@
                                             VerticalAlignment="Top"
                                             Classes="icon-button"
                                             Command="{Binding CloseErrorMessageCommand}"
-                                            Foreground="#842426">
+                                            Foreground="{DynamicResource SystemErrorTextColor}">
+                                            <Button.Styles>
+                                                <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                                                    <Setter Property="Foreground" Value="{DynamicResource SystemErrorTextColor}" />
+                                                    <Setter Property="Background" Value="{DynamicResource ErrorColor}" />
+                                                </Style>
+                                                <Style Selector="Button:pressed /template/ ContentPresenter#PART_ContentPresenter">
+                                                    <Setter Property="Foreground" Value="{DynamicResource SystemErrorTextColor}" />
+                                                    <Setter Property="Background" Value="{DynamicResource ErrorColor}" />
+                                                </Style>
+                                            </Button.Styles>
                                             <LucideIcon Kind="X" Size="18" />
                                         </Button>
                                         <Button
@@ -787,7 +980,17 @@
                                             Click="CopyErrorButton_Click"
                                             Command="{Binding CopyMessageTextCommand}"
                                             CommandParameter="{Binding #ErrorTextBlock}"
-                                            Foreground="#842426">
+                                            Foreground="{DynamicResource SystemErrorTextColor}">
+                                            <Button.Styles>
+                                                <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                                                    <Setter Property="Foreground" Value="{DynamicResource SystemErrorTextColor}" />
+                                                    <Setter Property="Background" Value="{DynamicResource ErrorColor}" />
+                                                </Style>
+                                                <Style Selector="Button:pressed /template/ ContentPresenter#PART_ContentPresenter">
+                                                    <Setter Property="Foreground" Value="{DynamicResource SystemErrorTextColor}" />
+                                                    <Setter Property="Background" Value="{DynamicResource ErrorColor}" />
+                                                </Style>
+                                            </Button.Styles>
                                             <LucideIcon Kind="Copy" Size="14" />
                                         </Button>
                                     </Grid>
@@ -1180,8 +1383,9 @@
                         <MultiBinding Converter="{x:Static BoolConverters.Or}">
                             <Binding Path="IsSettingsOpen" />
                             <Binding Path="IsPromptEditorOpen" />
-                        </MultiBinding>    
-                    </Image.IsVisible>    
+                            <Binding Path="IsDeletingDialogOpen" />
+                        </MultiBinding>
+                    </Image.IsVisible>
                 </Image>
                 <wv:WebView
                     x:Name="MyWebView"
@@ -1194,6 +1398,7 @@
                             <Binding Path="!IsModel3DLoading" Source="{x:Static vm:SettingsVM.Instance}" />
                             <Binding Path="!IsSettingsOpen" />
                             <Binding Path="!IsPromptEditorOpen" />
+                            <Binding Path="!IsDeletingDialogOpen" />
                         </MultiBinding>
                     </wv:WebView.IsVisible>
                 </wv:WebView>
@@ -1378,6 +1583,7 @@
                 <MultiBinding Converter="{x:Static BoolConverters.Or}">
                     <Binding Path="IsSettingsOpen" />
                     <Binding Path="IsPromptEditorOpen" />
+                    <Binding Path="IsDeletingDialogOpen" />
                 </MultiBinding>
             </Grid.IsVisible>
             <Grid.Background>
@@ -1407,8 +1613,8 @@
                         FontWeight="DemiBold"
                         Text="Настройки" />
                     <ListBox
-                        Grid.Column="0"
                         Grid.Row="1"
+                        Grid.Column="0"
                         Padding="10,0,10,10"
                         Background="Transparent">
                         <ListBox.Styles>
@@ -1479,12 +1685,12 @@
                     </ListBox>
                     <ScrollViewer
                         Grid.Row="0"
-                        Grid.Column="1"
                         Grid.RowSpan="2"
+                        Grid.Column="1"
                         x:DataType="vm:SettingsVM"
-                        DataContext="{x:Static vm:SettingsVM.Instance}"
+                        BorderBrush="{DynamicResource SystemBaseLowColor}"
                         BorderThickness="1,0,0,0"
-                        BorderBrush="{DynamicResource SystemBaseLowColor}">
+                        DataContext="{x:Static vm:SettingsVM.Instance}">
                         <Grid>
                             <Grid.Resources>
                                 <ControlTheme x:Key="SettingsGroup" TargetType="Border">
@@ -1863,13 +2069,13 @@
                                                 <Button
                                                     Classes="word-button"
                                                     Command="{Binding OpenModel3DFileCommand}"
-                                                    Content="Добавить" 
-                                                    IsVisible="{Binding !IsModel3DLoading}"/>
+                                                    Content="Добавить"
+                                                    IsVisible="{Binding !IsModel3DLoading}" />
                                                 <StackPanel
                                                     HorizontalAlignment="Center"
                                                     VerticalAlignment="Center"
-                                                    Orientation="Horizontal"
                                                     IsVisible="{Binding IsModel3DLoading}"
+                                                    Orientation="Horizontal"
                                                     Spacing="6">
                                                     <Arc
                                                         Width="16"
@@ -1919,10 +2125,10 @@
                                                     <Setter Property="Foreground" Value="{DynamicResource SystemAccentColorLight3}" />
                                                 </Style>
                                                 <Style Selector="ListBoxItem:disabled /template/ ContentPresenter#PART_ContentPresenter">
-                                                    <Setter Property="Background" Value="{DynamicResource SystemListLowColor}"/>
+                                                    <Setter Property="Background" Value="{DynamicResource SystemListLowColor}" />
                                                 </Style>
                                                 <Style Selector="ListBoxItem:disabled:selected /template/ ContentPresenter#PART_ContentPresenter">
-                                                    <Setter Property="Background" Value="{DynamicResource SystemListMediumColor}"/>
+                                                    <Setter Property="Background" Value="{DynamicResource SystemListMediumColor}" />
                                                 </Style>
                                             </ListBox.Styles>
                                             <ListBox.ItemsPanel>
@@ -1964,9 +2170,9 @@
                     </ScrollViewer>
                     <Button
                         Grid.Row="0"
+                        Grid.RowSpan="2"
                         Grid.Column="0"
                         Grid.ColumnSpan="2"
-                        Grid.RowSpan="2"
                         Margin="6"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Top"
@@ -2027,6 +2233,72 @@
                         VerticalAlignment="Top"
                         Classes="icon-button"
                         Command="{Binding PromptEditorCommand}">
+                        <LucideIcon Kind="X" Size="18" />
+                    </Button>
+                </Grid>
+            </Border>
+            <!--  Deleting Dialog  -->
+            <Border
+                MaxWidth="500"
+                MaxHeight="180"
+                Margin="52"
+                Padding="16,12,16,12"
+                Background="{DynamicResource SystemChromeLowColor}"
+                BorderThickness="1"
+                CornerRadius="8"
+                IsVisible="{Binding IsDeletingDialogOpen}">
+                <Grid RowDefinitions="Auto,*,Auto">
+                    <TextBlock
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        FontSize="22"
+                        FontWeight="DemiBold"
+                        Text="Удаление" />
+                    <TextBlock
+                        Grid.Row="1"
+                        Padding="0,12"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        FontSize="16"
+                        Text="Вы уверены, что хотите удалить выбранные сообщения?" />
+                    <StackPanel
+                        Grid.Row="2"
+                        Margin="4"
+                        HorizontalAlignment="Right"
+                        Orientation="Horizontal"
+                        Spacing="6">
+                        <Button
+                            Background="{DynamicResource ErrorLowColor}"
+                            BorderBrush="{DynamicResource SystemErrorTextColor}"
+                            Classes="word-button"
+                            Command="{Binding DeleteMessageCommand}"
+                            Content="Удалить"
+                            Foreground="{DynamicResource SystemErrorTextColor}">
+                            <Button.Styles>
+                                <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                                    <Setter Property="Foreground" Value="{DynamicResource SystemErrorTextColor}" />
+                                    <Setter Property="Background" Value="{DynamicResource ErrorColor}" />
+                                    <Setter Property="BorderBrush" Value="{DynamicResource SystemErrorTextColor}" />
+                                </Style>
+                                <Style Selector="Button:pressed /template/ ContentPresenter#PART_ContentPresenter">
+                                    <Setter Property="Foreground" Value="{DynamicResource SystemErrorTextColor}" />
+                                    <Setter Property="Background" Value="{DynamicResource ErrorColor}" />
+                                    <Setter Property="BorderBrush" Value="{DynamicResource SystemErrorTextColor}" />
+                                </Style>
+                            </Button.Styles>
+                        </Button>
+                        <Button
+                            Classes="word-button"
+                            Command="{Binding DeletingDialogCommand}"
+                            Content="Отмена" />
+                    </StackPanel>
+                    <Button
+                        Grid.Row="0"
+                        Grid.RowSpan="2"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Top"
+                        Classes="icon-button"
+                        Command="{Binding DeletingDialogCommand}">
                         <LucideIcon Kind="X" Size="18" />
                     </Button>
                 </Grid>

@@ -51,6 +51,7 @@ namespace WaifuAI.ViewModels
                  KnowledgeBase.Add(record);
             IsInitializing = false;
             KnowledgeBase.CollectionChanged += OnKnowledgeBaseChanged;
+            SelectedMessages.CollectionChanged += OnSelectedMessagesChanged;
         }
 
         private static readonly string KnowledgeBasePath =
@@ -63,10 +64,13 @@ namespace WaifuAI.ViewModels
         [ObservableProperty] private string _webAddress;
         [ObservableProperty] private string _question = string.Empty;
         [ObservableProperty] private MessageVM? _selectedMessage;
+        public ObservableCollection<MessageVM> SelectedMessages { get; } = [];
+        [ObservableProperty] private bool _isMultiSelect;
         [ObservableProperty] private string? _error;
         [ObservableProperty] private MessageVM? _replyMessage;
         [ObservableProperty] private bool _isSettingsOpen;
         [ObservableProperty] private bool _isPromptEditorOpen;
+        [ObservableProperty] private bool _isDeletingDialogOpen;
 
         public ObservableCollection<MessageVM> Chat { get; } = [];
         public ObservableCollection<KnowledgeRecord> KnowledgeBase { get; } = [];
@@ -79,6 +83,21 @@ namespace WaifuAI.ViewModels
             if (e.OldItems != null)
                 foreach (KnowledgeRecord record in e.OldItems)
                     DatabaseService.RemoveRecordAsync(record);
+        }
+
+        private void OnSelectedMessagesChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            Dispatcher.UIThread.Post(() =>
+            {
+                if (!IsMultiSelect)
+                {
+                    for (int i = SelectedMessages.Count - 1; i >= 0; i--)
+                        if (SelectedMessages[i] != SelectedMessage)
+                            SelectedMessages.RemoveAt(i);
+                }
+                else if (SelectedMessages.Count <= 0)
+                    IsMultiSelect = false;
+            });
         }
 
         private readonly List<Message> _history = [
@@ -136,6 +155,7 @@ namespace WaifuAI.ViewModels
                 query.Messages.Add(systemPrompt);
                 query.Messages.AddRange(_history.Skip(1));
                 Chat.Add(message);
+                ReplyMessage?.ReplyingMessages.Add(message);
                 message.ReplyMessage = ReplyMessage;
                 ReplyMessage = null;
                 Question = string.Empty;
@@ -160,11 +180,7 @@ namespace WaifuAI.ViewModels
                     return;
                 }
                 var messageText = resultMessage.MessageModel.Content;
-                _history.Add(new Message
-                {
-                    Role = resultMessage.MessageModel.Role,
-                    Content = messageText
-                });
+                _history.Add(resultMessage.MessageModel);
                 VoiceService.Say(
                     messageText, 
                     SettingsVM.Instance.SelectedSource, 
@@ -243,6 +259,42 @@ namespace WaifuAI.ViewModels
         }
 
         [RelayCommand]
+        private void ToggleMultiSelect()
+        {
+            if (IsMultiSelect)
+                SelectedMessages.Clear();
+            IsMultiSelect = !IsMultiSelect;
+        }
+
+        [RelayCommand]
+        private void DeletingDialog()
+        {
+            WeakReferenceMessenger.Default.Send(new SnapshotMessage(!IsDeletingDialogOpen));
+            IsDeletingDialogOpen = !IsDeletingDialogOpen;
+        }
+        
+        [RelayCommand]
+        private void DeleteMessage()
+        {
+            var messagesToDelete = SelectedMessages.ToList();
+            foreach (var msg in messagesToDelete)
+            {
+                if (msg == ReplyMessage)
+                    ReleaseReplyAndQuote();
+                if (msg.IsReplied is true or false)
+                    foreach (var replyMsg in msg.ReplyingMessages)
+                        replyMsg.ReplyMessage = null;
+                if (msg.MessageModel != null)
+                    _history.Remove(msg.MessageModel);
+                Chat.Remove(msg);
+            }
+            SelectedMessages.Clear();
+            SelectedMessage = null;
+            IsMultiSelect = false;
+            IsDeletingDialogOpen = false;
+        }
+
+        [RelayCommand]
         private void ReleaseReplyAndQuote()
         {
             if (ReplyMessage is null)
@@ -283,7 +335,6 @@ namespace WaifuAI.ViewModels
             var selectedArchetype = SettingsVM.Instance.SelectedArchetype;
             var promptPath = Path.Combine(SettingsVM.PromptsPath, $"{selectedArchetype.Name}.txt");
             await File.WriteAllTextAsync(promptPath, selectedArchetype.Prompt);
-            WeakReferenceMessenger.Default.Send(new SnapshotMessage(!IsPromptEditorOpen));
             IsPromptEditorOpen = false;
         }
         

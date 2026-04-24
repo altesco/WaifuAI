@@ -61,6 +61,10 @@ namespace WaifuAI.Views
                 {
                     try
                     {
+                        if (MyWebView.Bounds.Width == 0 || 
+                            MyWebView.Bounds.Height == 0 ||
+                            !m.Value)
+                            return;
                         MyWebView.ExecuteScript("window.vrmApp.takePrintscreen()");
                         string jsCode = @"return window.vrmApp.printscreen";
                         string base64Data = string.Empty;
@@ -83,7 +87,7 @@ namespace WaifuAI.Views
                     }
                     catch (Exception ex)
                     {
-                        Debug.WriteLine($"Snapshot failed: {ex.Message}");
+                        Console.WriteLine($"Snapshot failed: {ex.Message}");
                     }
                 });
             });
