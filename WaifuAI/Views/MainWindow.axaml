@@ -23,6 +23,7 @@
     <Window.Resources>
         <conv:MathConverter x:Key="MathConverter" />
         <conv:StringValueConverter x:Key="StringValueConverter" />
+        <conv:BoolToSelectionModeConverter x:Key="BoolToSelectionModeConverter" />
         <ControlTheme x:Key="{x:Type AdornerLayer}" TargetType="AdornerLayer">
             <Setter Property="DefaultFocusAdorner">
                 <FocusAdornerTemplate>
@@ -438,8 +439,8 @@
                                     ItemsSource="{Binding Chat}"
                                     SelectedItem="{Binding SelectedMessage, Mode=TwoWay}"
                                     SelectedItems="{Binding SelectedMessages}"
-                                    SelectionMode="Multiple,Toggle"
-                                    Tag="{Binding IsMultiSelect}" >
+                                    SelectionMode="{Binding IsMultiSelect, Converter={StaticResource BoolToSelectionModeConverter}}"
+                                    Tag="{Binding IsMultiSelect}">
                                     <ListBox.Styles>
                                         <Style Selector="ListBox /template/ ItemsPresenter">
                                             <Setter Property="MaxWidth" Value="720" />
@@ -449,6 +450,18 @@
                                         <ControlTheme x:DataType="vm:MessageVM" TargetType="ListBoxItem">
                                             <Setter Property="Background" Value="Transparent" />
                                             <Setter Property="IsHitTestVisible" Value="{Binding MessageModel.Role, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter=temp}" />
+                                            <!-- <Setter Property="(Interaction.Behaviors)">
+                                                <BehaviorCollectionTemplate>
+                                                    <BehaviorCollection>
+                                                        <EventTriggerBehavior EventName="DoubleTapped">
+                                                            <InvokeCommandAction
+                                                                x:DataType="vm:MainVM"
+                                                                Command="{Binding MakeReplyCommand}"
+                                                                DataContext="{Binding $parent[ListBox].DataContext}" />
+                                                        </EventTriggerBehavior>
+                                                    </BehaviorCollection>
+                                                </BehaviorCollectionTemplate>
+                                            </Setter>-->
                                         </ControlTheme>
                                     </ListBox.ItemContainerTheme>
                                     <ListBox.ItemTemplate>
@@ -457,13 +470,32 @@
                                                 <Border
                                                     Grid.Column="0"
                                                     Grid.ColumnSpan="3"
+                                                    Background="{DynamicResource SystemAccentColor}"
+                                                    Tag="{Binding IsHighlighted}">
+                                                    <Border.Styles>
+                                                        <Style Selector="Border[Tag=True]">
+                                                            <Setter Property="Transitions">
+                                                                <Transitions>
+                                                                    <DoubleTransition Property="Opacity" Duration="0:0:0.0" />
+                                                                </Transitions>
+                                                            </Setter>
+                                                            <Setter Property="Opacity" Value="0.4" />
+                                                        </Style>
+                                                        <Style Selector="Border[Tag=False]">
+                                                            <Setter Property="Transitions">
+                                                                <Transitions>
+                                                                    <DoubleTransition Property="Opacity" Duration="0:0:0.5" />
+                                                                </Transitions>
+                                                            </Setter>
+                                                            <Setter Property="Opacity" Value="0" />
+                                                        </Style>
+                                                    </Border.Styles>
+                                                </Border>
+                                                <Border
+                                                    Grid.Column="0"
+                                                    Grid.ColumnSpan="3"
                                                     x:DataType="vm:MainVM"
                                                     DataContext="{Binding $parent[ListBox].DataContext}">
-                                                    <!-- <Interaction.Behaviors>
-                                                        <EventTriggerBehavior EventName="DoubleTapped">
-                                                            <InvokeCommandAction x:DataType="vm:MainVM" Command="{Binding MakeReplyCommand}"/>
-                                                        </EventTriggerBehavior>
-                                                    </Interaction.Behaviors>-->
                                                     <Border.Tag>
                                                         <MultiBinding Converter="{x:Static BoolConverters.And}">
                                                             <Binding Path="$parent[ListBoxItem].IsSelected" />
@@ -533,7 +565,8 @@
                                                                             x:DataType="vm:MainVM"
                                                                             Command="{Binding MakeReplyCommand}"
                                                                             DataContext="{Binding $parent[ListBox].DataContext}"
-                                                                            Header="Ответить на сообщение">
+                                                                            Header="Ответить на сообщение"
+                                                                            IsVisible="{Binding !$parent[ListBoxItem].((vm:MessageVM)DataContext).IsFailed}">
                                                                             <MenuItem.Icon>
                                                                                 <LucideIcon Kind="MessageSquareReply" Size="20" />
                                                                             </MenuItem.Icon>
@@ -604,7 +637,8 @@
                                                                             x:DataType="vm:MainVM"
                                                                             Command="{Binding MakeReplyCommand}"
                                                                             DataContext="{Binding $parent[ListBox].DataContext}"
-                                                                            Header="Ответить на сообщение">
+                                                                            Header="Ответить на сообщение"
+                                                                            IsVisible="{Binding !$parent[ListBoxItem].((vm:MessageVM)DataContext).IsFailed}">
                                                                             <MenuItem.Icon>
                                                                                 <LucideIcon Kind="MessageSquareReply" Size="20" />
                                                                             </MenuItem.Icon>
@@ -668,9 +702,28 @@
                                                                 Width="Nan"
                                                                 Height="Nan"
                                                                 Padding="0"
+                                                                HorizontalAlignment="Stretch"
                                                                 BorderThickness="0"
-                                                                CornerRadius="6,12,6,6"
+                                                                CornerRadius="6"
                                                                 IsVisible="{Binding ReplyMessage, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                                                <Interaction.Behaviors>
+                                                                    <BehaviorCollection>
+                                                                        <EventTriggerBehavior EventName="Click">
+                                                                            <InvokeCommandAction
+                                                                                x:DataType="vm:MainVM"
+                                                                                Command="{Binding ScrollToMessageCommand}"
+                                                                                CommandParameter="{Binding $parent[ListBoxItem].DataContext}"
+                                                                                DataContext="{Binding $parent[ListBox].DataContext}" />
+                                                                        </EventTriggerBehavior>
+                                                                        <!-- <EventTriggerBehavior EventName="DoubleTapped">
+                                                                            <InvokeCommandAction
+                                                                                x:DataType="vm:MainVM"
+                                                                                Command="{Binding ScrollToMessageCommand}"
+                                                                                CommandParameter="{Binding $parent[ListBoxItem].DataContext}"
+                                                                                DataContext="{Binding $parent[ListBox].DataContext}" />
+                                                                        </EventTriggerBehavior>-->
+                                                                    </BehaviorCollection>
+                                                                </Interaction.Behaviors>
                                                                 <Grid ColumnDefinitions="4,*">
                                                                     <Border
                                                                         Grid.Column="0"
@@ -697,7 +750,7 @@
                                                                         </TextBlock>
                                                                         <TextBlock
                                                                             HorizontalAlignment="Left"
-                                                                            Text="{Binding ReplyMessage.Quote}"
+                                                                            Text="{Binding Quote}"
                                                                             TextTrimming="CharacterEllipsis" />
                                                                     </StackPanel>
                                                                 </Grid>
@@ -711,8 +764,42 @@
                                                                 IsHitTestVisible="{Binding !$parent[ListBox].Tag}"
                                                                 SelectionEnd="{Binding SelectionEnd, Mode=TwoWay}"
                                                                 SelectionStart="{Binding SelectionStart, Mode=TwoWay}"
+                                                                Tag="{Binding IsHighlighted}"
                                                                 Text="{Binding MessageModel.Content}"
                                                                 TextWrapping="Wrap">
+                                                                <SelectableTextBlock.Styles>
+                                                                    <Style Selector="SelectableTextBlock[Tag=True]">
+                                                                        <Setter Property="SelectionBrush" Value="{DynamicResource TextControlSelectionHighlightColor}" />
+                                                                    </Style>
+                                                                    <Style Selector="SelectableTextBlock[Tag=False]">
+                                                                        <Setter Property="Transitions">
+                                                                            <Transitions>
+                                                                                <BrushTransition Property="SelectionBrush" Duration="0:0:0.5"/>
+                                                                            </Transitions>
+                                                                        </Setter>
+                                                                        <Style.Animations>
+                                                                            <Animation Duration="0:0:0.5" FillMode="Forward">
+                                                                                <KeyFrame Cue="0%">
+                                                                                    <Setter Property="SelectionBrush" Value="{DynamicResource TextControlSelectionHighlightColor}"/>
+                                                                                </KeyFrame>
+                                                                                <KeyFrame Cue="80%">
+                                                                                    <Setter Property="SelectionBrush" Value="Transparent"/>
+                                                                                </KeyFrame>
+                                                                                <KeyFrame Cue="100%">
+                                                                                    <Setter Property="SelectionBrush" Value="{DynamicResource TextControlSelectionHighlightColor}"/>
+                                                                                </KeyFrame>
+                                                                            </Animation>
+                                                                        </Style.Animations>
+                                                                    </Style>
+                                                                    <Style Selector="SelectableTextBlock[Tag=False]">
+                                                                        <Setter Property="Transitions">
+                                                                            <Transitions>
+                                                                                <BrushTransition Property="SelectionBrush" Duration="0:0:0.5" />
+                                                                            </Transitions>
+                                                                        </Setter>
+                                                                        <Setter Property="SelectionBrush" Value="Transparent" />
+                                                                    </Style>
+                                                                </SelectableTextBlock.Styles>
                                                                 <SelectableTextBlock.ContextMenu>
                                                                     <ContextMenu>
                                                                         <MenuItem
@@ -737,6 +824,7 @@
                                                                         <MenuItem
                                                                             x:DataType="vm:MainVM"
                                                                             DataContext="{Binding $parent[ListBox].DataContext}"
+                                                                            IsVisible="{Binding !$parent[ListBoxItem].((vm:MessageVM)DataContext).IsFailed}"
                                                                             Tag="{Binding #PART_SelectableTextBlock.CanCopy}">
                                                                             <MenuItem.Styles>
                                                                                 <Style Selector="MenuItem[Tag=True]">
@@ -1052,7 +1140,7 @@
                                                 Grid.Row="1"
                                                 Grid.Column="1"
                                                 IsVisible="{Binding ReplyMessage, Converter={x:Static ObjectConverters.IsNotNull}}"
-                                                Text="{Binding ReplyMessage.Quote}"
+                                                Text="{Binding Quote}"
                                                 TextTrimming="CharacterEllipsis" />
                                             <Button
                                                 Grid.Row="0"

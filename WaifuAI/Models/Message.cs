@@ -1,3 +1,4 @@
+using System;
 using System.Text.Json.Serialization;
 
 namespace WaifuAI.Models;
@@ -9,4 +10,6 @@ public class Message
 
     [JsonPropertyName("content")]
     public string Content { get; set; } = string.Empty;
+
+    [JsonIgnore] public Guid Id { get; set; } = Guid.NewGuid();
 }

@@ -91,6 +91,23 @@ namespace WaifuAI.Views
                     }
                 });
             });
+            WeakReferenceMessenger.Default.Register<MainWindow, ScrollMessage>(this, (_, m) =>
+            {
+                Dispatcher.UIThread.Post(async () =>
+                {
+                    if (MessageList.Items[m.Value.sourceIndex] is not MessageVM sourceMsg ||
+                        MessageList.Items[m.Value.replyIndex] is not MessageVM replyMsg)
+                        return;
+                    MessageList.ScrollIntoView(replyMsg);
+                    replyMsg.IsHighlighted = true;
+                    replyMsg.SelectionStart = sourceMsg.QuoteStart;
+                    replyMsg.SelectionEnd = sourceMsg.QuoteEnd;
+                    await Task.Delay(500);
+                    replyMsg.IsHighlighted = false;
+                    replyMsg.SelectionStart = 0;
+                    replyMsg.SelectionEnd = 0;
+                });
+            });
             AddHandler(Button.ClickEvent, (_, e) =>
             {
                 if (e.Source is not Button btn || string.IsNullOrEmpty(btn.Name))

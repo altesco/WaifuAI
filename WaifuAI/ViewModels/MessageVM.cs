@@ -8,14 +8,37 @@ public partial class MessageVM : ObservableObject
 {
     public Message? MessageModel { get; set; }
     
-    [ObservableProperty] private string _time = string.Empty;
-    [ObservableProperty] private bool _isFailed;
-    [ObservableProperty] private int _selectionStart;
-    [ObservableProperty] private int _selectionEnd;
+    // свойства того что было процитировано из другого сообщения
     [ObservableProperty] private string? _quote;
     [ObservableProperty] private int _quoteStart;
     [ObservableProperty] private int _quoteEnd;
-    [ObservableProperty] private bool? _isReplied; // or else - quoted BY OTHER MESSAGE, else nothing (null)
-    [ObservableProperty] private MessageVM? _replyMessage; // сообщение, на которое отвечает this
-    public List<MessageVM> ReplyingMessages { get; } = []; // сообщения, которое отвечает на this
+    [ObservableProperty] private bool? _isReplied; 
+
+    // сообщение, на которое отвечает this
+    [ObservableProperty] private MessageVM? _replyMessage; 
+
+    // cообщения, которые отвечают на this
+    public List<MessageVM> ReplyingMessages { get; } = [];
+    
+    // выделение для подсветки
+    [ObservableProperty] private int _selectionStart;
+    [ObservableProperty] private int _selectionEnd;
+    [ObservableProperty] private bool _isHighlighted;
+
+    [ObservableProperty] private string _time = string.Empty;
+    [ObservableProperty] private bool _isFailed;
+
+    // partial void OnIsHighlightedChanged(bool value)
+    // {
+    //     if (value)
+    //     {
+    //         SelectionStart = QuoteStart;
+    //         SelectionEnd = QuoteEnd;
+    //     }
+    //     else
+    //     {
+    //         SelectionStart = 0;
+    //         SelectionEnd = 0;
+    //     }
+    // }
 }

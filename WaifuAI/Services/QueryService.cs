@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net.Http;
 using System.Text;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Threading.Tasks;
 using WaifuAI.Models;
@@ -43,7 +44,12 @@ public static class QueryService
     public static async Task<Message> DoProviderQuery(QueryModel queryModel)
     {
         queryModel.Model = SettingsVM.Instance.AiModel;
-        var json = JsonSerializer.Serialize(queryModel);
+        var serializeOptions = new JsonSerializerOptions
+        {
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+            WriteIndented = true
+        };
+        var json = JsonSerializer.Serialize(queryModel, serializeOptions);
         Console.WriteLine(json);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
         ApiService.HttpClient.DefaultRequestHeaders.Clear();
@@ -53,8 +59,8 @@ public static class QueryService
             var response = await ApiService.HttpClient.PostAsync(SettingsVM.Instance.ApiUrl, content);
             var resJson = await response.Content.ReadAsStringAsync();
             Console.WriteLine(resJson);
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            var result = JsonSerializer.Deserialize<ResponceModel>(resJson, options);
+            var deserializeOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            var result = JsonSerializer.Deserialize<ResponceModel>(resJson, deserializeOptions);
             return result?.Choices[0].Message ?? new Message { Role = "system", Content = "Тишина..." };
         }
         catch (Exception ex)
