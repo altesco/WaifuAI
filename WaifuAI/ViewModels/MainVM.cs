@@ -107,7 +107,9 @@ public partial class MainVM : ObservableValidator
         var message = new Message
         {
             Role = "system",
-            Content = text
+            Content = $"[Current DateTime: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}]\n" +
+                      $"Это текущее время и дата семпая. Поэтому это и твое текущее время и дата тоже.\n\n" +
+                      $"{text}"
         };
         var header = "[Knowledge Records]";
         var embedding = 
@@ -123,7 +125,7 @@ public partial class MainVM : ObservableValidator
             .ToList();
         if (recordsToAdd.Count <= 0)
             return message;
-        message.Content += $"\n{header}\n";
+        message.Content += $"\n\n{header}\n";
         foreach (var record in recordsToAdd)
             message.Content += $"{record.Key}: {record.Value}\n";
         return message;
@@ -132,31 +134,38 @@ public partial class MainVM : ObservableValidator
     [RelayCommand]
     private async Task Query()
     {
+        var timestamp = DateTime.Now;
         try
         {
             CloseErrorMessage();
             var query = new QueryModel();
             var message = new MessageVM
             {
-                MessageModel = new Message { Role = "user", Content = Question },
-                Time = DateTime.Now.ToString("HH:mm")
+                MessageModel = new Message
+                {
+                    Role = "user", 
+                    Content = Question,
+                    Time = timestamp
+                },
+                Time = timestamp.ToString("HH:mm")
             };
 
             var messageToHistory = new Message
             {
                 Role = message.MessageModel.Role,
-                Id = message.MessageModel.Id
+                Id = message.MessageModel.Id,
+                Content = $"[Sent at: {timestamp.ToString("yyyy-MM-dd HH:mm:ss")}]\n"
             };
             if (ReplyMessage?.IsReplied == true)
-                messageToHistory.Content =
-                    $"[Replying to the {ReplyMessage.MessageModel?.Role}'s message: " +
-                    $"'{ReplyMessage.Quote}']\n\n'{Question}'";
+                messageToHistory.Content +=
+                    $"[Replying to the {ReplyMessage.MessageModel?.Role}'s message: '{Quote}']\n\n" +
+                    $"{Question}";
             else if (ReplyMessage?.IsReplied == false)
-                messageToHistory.Content =
-                    $"[Replying to the {ReplyMessage.MessageModel?.Role}'s quote: " +
-                    $"'{ReplyMessage.Quote}']\n\n'{Question}'";
+                messageToHistory.Content +=
+                    $"[Replying to the {ReplyMessage.MessageModel?.Role}'s quote: '{Quote}']\n\n" +
+                    $"{Question}";
             else
-                messageToHistory.Content = Question;
+                messageToHistory.Content += Question;
             _history.Add(messageToHistory);
 
             var systemPrompt = await GetSystemPrompt();
@@ -196,7 +205,6 @@ public partial class MainVM : ObservableValidator
                 return;
             }
             var messageText = resultMessage.MessageModel.Content;
-            _history.Add(resultMessage.MessageModel);
             VoiceService.Say(
                 messageText, 
                 SettingsVM.Instance.SelectedSource, 
@@ -207,8 +215,12 @@ public partial class MainVM : ObservableValidator
                 SettingsVM.Instance.Pitch,
                 SettingsVM.Instance.Bass, 
                 SettingsVM.Instance.Treble);
+            resultMessage.MessageModel.Content =
+                $"[Sent at: {timestamp.ToString("yyyy-MM-dd HH:mm:ss")}]\n" +
+                resultMessage.MessageModel.Content;
+            _history.Add(resultMessage.MessageModel);
             resultMessage.MessageModel.Content = MessageParser.GetCleanText(messageText);
-            resultMessage.Time = DateTime.Now.ToString("HH:mm");
+            resultMessage.Time = resultMessage.MessageModel.Time.ToString("HH:mm");
             Chat.Add(resultMessage);
             await MessageParser.ParseTextForKnowledgeUpdates(messageText, KnowledgeBase);
         }
