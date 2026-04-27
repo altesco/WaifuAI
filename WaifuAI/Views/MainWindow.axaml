@@ -888,12 +888,46 @@
                                                                         </ContextMenu>
                                                                     </SelectableTextBlock.ContextMenu>
                                                                 </SelectableTextBlock>
-                                                                <TextBlock
-                                                                    HorizontalAlignment="Right"
-                                                                    FontSize="12"
-                                                                    IsVisible="{Binding MessageModel.Role, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter=temp}"
-                                                                    Opacity="0.5"
-                                                                    Text="{Binding MessageModel.Time, StringFormat='{}{0:HH:mm}'}" />
+                                                                <Grid 
+                                                                    ColumnDefinitions="Auto,Auto,Auto,*,Auto" 
+                                                                    IsVisible="{Binding MessageModel.Role, 
+                                                                    Converter={x:Static ObjectConverters.NotEqual}, 
+                                                                    ConverterParameter=temp}">
+                                                                    <LucideIcon 
+                                                                        Kind="WeightTilde"
+                                                                        Size="14"
+                                                                        Foreground="{DynamicResource SystemBaseMediumColor}"
+                                                                        Margin="0,0,3,0"/>
+                                                                    <TextBlock
+                                                                        Grid.Column="1"
+                                                                        FontSize="12"
+                                                                        Foreground="{DynamicResource SystemBaseMediumColor}"
+                                                                        Text="{Binding MessageModel.Tokens, StringFormat={}Токены: {0}}"/>
+                                                                    <Separator
+                                                                        Grid.Column="2"
+                                                                        Margin="8,2,8,2"
+                                                                        Background="{DynamicResource SystemBaseLowColor}"
+                                                                        Width="1"
+                                                                        Height="NaN"
+                                                                        Tag="{Binding #PART_Column2.Bounds.Width}">
+                                                                        <Separator.Styles>
+                                                                            <Style Selector="Separator">
+                                                                                <Setter Property="IsVisible" Value="False"/>
+                                                                            </Style>
+                                                                            <Style Selector="Separator[Tag=0]">
+                                                                                <Setter Property="IsVisible" Value="True"/>   
+                                                                            </Style>    
+                                                                        </Separator.Styles>    
+                                                                    </Separator>
+                                                                    <Border 
+                                                                        x:Name="PART_Column2"
+                                                                        Grid.Column="3"/>
+                                                                    <TextBlock
+                                                                        Grid.Column="4"
+                                                                        FontSize="12"
+                                                                        Foreground="{DynamicResource SystemBaseMediumColor}"
+                                                                        Text="{Binding MessageModel.Time, StringFormat='{}{0:HH:mm}'}" />
+                                                                </Grid>
                                                             </StackPanel>
                                                             <!--  Loading animation  -->
                                                             <StackPanel
@@ -1212,7 +1246,7 @@
                                             Padding="7,3,6,3"
                                             IsVisible="{Binding Tokens, 
                                             Converter={x:Static ObjectConverters.IsNotNull}}">
-                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                            <StackPanel Orientation="Horizontal" Spacing="3">
                                                 <LucideIcon 
                                                     Kind="WeightTilde" 
                                                     Size="14"

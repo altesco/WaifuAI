@@ -35,7 +35,7 @@ public static class QueryService
                 }
                 return new Message { Role = "system", Content = $"Ошибка {(int)answer.StatusCode}" };
             }
-            var model = JsonSerializer.Deserialize<ResponceModel>(json);
+            var model = JsonSerializer.Deserialize<ResponseModel>(json);
             if (model == null)
                 return new Message 
                 { 
@@ -44,6 +44,7 @@ public static class QueryService
                 };
             var message = model.Choices[0].Message;
             message.Time = DateTime.Now;
+            message.Tokens = model?.Usage.CompletionTokens ?? 0;
             return message;
         }
         catch (Exception e)
@@ -90,7 +91,7 @@ public static class QueryService
                 return new Message { Role = "system", Content = $"Ошибка {(int)response.StatusCode}" };
             }
             var deserializeOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            var result = JsonSerializer.Deserialize<ResponceModel>(resJson, deserializeOptions);
+            var result = JsonSerializer.Deserialize<ResponseModel>(resJson, deserializeOptions);
             var message = result?.Choices[0].Message ?? 
                           new Message { Role = "assistant", Content = "wtf something is wrong" };
             message.Time = DateTime.Now;

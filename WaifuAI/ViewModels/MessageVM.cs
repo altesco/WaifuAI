@@ -26,4 +26,6 @@ public partial class MessageVM : ObservableObject
     [ObservableProperty] private bool _isHighlighted;
 
     [ObservableProperty] private bool _isFailed;
+
+    // [ObservableProperty] private bool _tokens;
 }

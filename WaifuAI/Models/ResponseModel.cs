@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace WaifuAI.Models
 {
-    internal class ResponceModel
+    internal class ResponseModel
     {
         [JsonPropertyName("choices")]
         public List<Choice> Choices { get; set; } = [];

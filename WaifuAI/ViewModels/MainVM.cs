@@ -159,7 +159,8 @@ public partial class MainVM : ObservableValidator
                 {
                     Role = "user", 
                     Content = Question,
-                    Time = timestamp
+                    Time = timestamp,
+                    Tokens = Tokens ?? 0
                 }
             };
 
