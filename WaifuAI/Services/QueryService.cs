@@ -94,6 +94,7 @@ public static class QueryService
             var message = result?.Choices[0].Message ?? 
                           new Message { Role = "assistant", Content = "wtf something is wrong" };
             message.Time = DateTime.Now;
+            message.Tokens = result?.Usage.CompletionTokens ?? 0;
             return message;
         }
         catch (Exception ex)

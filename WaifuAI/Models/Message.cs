@@ -13,4 +13,5 @@ public class Message
 
     [JsonIgnore] public Guid Id { get; set; } = Guid.NewGuid();
     [JsonIgnore] public DateTime Time { get; set; }
+    [JsonIgnore] public int Tokens { get; set; }
 }

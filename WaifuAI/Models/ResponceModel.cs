@@ -11,6 +11,9 @@ namespace WaifuAI.Models
     {
         [JsonPropertyName("choices")]
         public List<Choice> Choices { get; set; } = [];
+
+        [JsonPropertyName("usage")]
+        public UsageModel Usage { get; set; }
     }
 
     internal class Choice
@@ -20,5 +23,17 @@ namespace WaifuAI.Models
 
         [JsonPropertyName("finish_reason")]
         public string FinishReason { get; set; } = string.Empty;
+    }
+
+    public class UsageModel
+    {
+        [JsonPropertyName("prompt_tokens")]
+        public int PromptTokens { get; set; }
+
+        [JsonPropertyName("completion_tokens")]
+        public int CompletionTokens { get; set; }
+
+        [JsonPropertyName("total_tokens")]
+        public int TotalTokens { get; set; }
     }
 }

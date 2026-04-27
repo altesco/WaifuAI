@@ -25,20 +25,5 @@ public partial class MessageVM : ObservableObject
     [ObservableProperty] private int _selectionEnd;
     [ObservableProperty] private bool _isHighlighted;
 
-    [ObservableProperty] private string _time = string.Empty;
     [ObservableProperty] private bool _isFailed;
-
-    // partial void OnIsHighlightedChanged(bool value)
-    // {
-    //     if (value)
-    //     {
-    //         SelectionStart = QuoteStart;
-    //         SelectionEnd = QuoteEnd;
-    //     }
-    //     else
-    //     {
-    //         SelectionStart = 0;
-    //         SelectionEnd = 0;
-    //     }
-    // }
 }

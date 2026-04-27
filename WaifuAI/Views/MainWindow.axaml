@@ -893,7 +893,7 @@
                                                                     FontSize="12"
                                                                     IsVisible="{Binding MessageModel.Role, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter=temp}"
                                                                     Opacity="0.5"
-                                                                    Text="{Binding Time}" />
+                                                                    Text="{Binding MessageModel.Time, StringFormat='{}{0:HH:mm}'}" />
                                                             </StackPanel>
                                                             <!--  Loading animation  -->
                                                             <StackPanel
@@ -1214,7 +1214,7 @@
                                             Converter={x:Static ObjectConverters.IsNotNull}}">
                                             <StackPanel Orientation="Horizontal" Spacing="4">
                                                 <LucideIcon 
-                                                    Kind="Scale" 
+                                                    Kind="WeightTilde" 
                                                     Size="14"
                                                     Foreground="{DynamicResource SystemBaseMediumColor}"/>
                                                 <TextBlock

@@ -160,8 +160,7 @@ public partial class MainVM : ObservableValidator
                     Role = "user", 
                     Content = Question,
                     Time = timestamp
-                },
-                Time = timestamp.ToString("HH:mm")
+                }
             };
 
             var messageToHistory = new Message
@@ -234,7 +233,6 @@ public partial class MainVM : ObservableValidator
                 resultMessage.MessageModel.Content;
             _history.Add(resultMessage.MessageModel);
             resultMessage.MessageModel.Content = MessageParser.GetCleanText(messageText);
-            resultMessage.Time = resultMessage.MessageModel.Time.ToString("HH:mm");
             Chat.Add(resultMessage);
             await MessageParser.ParseTextForKnowledgeUpdates(messageText, KnowledgeBase);
         }
