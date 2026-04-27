@@ -14,6 +14,7 @@ using WaifuAI.Services;
 using CommunityToolkit.Mvvm.Messaging;
 using ElBruno.LocalEmbeddings;
 using ElBruno.LocalEmbeddings.Extensions;
+using SharpToken;
 
 namespace WaifuAI.ViewModels;
 
@@ -40,6 +41,8 @@ public partial class MainVM : ObservableValidator
         await SettingsVM.Instance.InitializeSpeakers();
         InitializingMessage = "Создание векторного генератора...";
         await MessageParser.CreateVectorGenerator();
+        InitializingMessage = "Подготовка лингвистических модулей...";
+        await Task.Run(() => _encoder = GptEncoding.GetEncoding("cl100k_base"));
         InitializingMessage = "Загрузка базы знаний...";
         await DatabaseService.InitializeDatabase(KnowledgeBasePath);
         var records = await DatabaseService.GetRecordsAsync();
@@ -53,17 +56,20 @@ public partial class MainVM : ObservableValidator
     private static readonly string KnowledgeBasePath =
         Path.Combine(SettingsVM.AppDirectory, "knowledge_base.json");
 
+    private static GptEncoding _encoder;
+
     public bool IsWindows => OperatingSystem.IsWindows();
     [ObservableProperty] private bool _isInitializing;
     [ObservableProperty] private string _initializingMessage;
     [ObservableProperty] private string _webAddress;
     [ObservableProperty] private string _question = string.Empty;
+    [ObservableProperty] private int? _tokens;
     [ObservableProperty] private MessageVM? _selectedMessage;
     public ObservableCollection<MessageVM> SelectedMessages { get; } = [];
     [ObservableProperty] private bool _isMultiSelect;
     [ObservableProperty] private string? _error;
 
-    [ObservableProperty] private MessageVM? _replyMessage;
+    [ObservableProperty] private MessageVM? _replyMessage;    
     // у сообщения которое готовится
     [ObservableProperty] private string? _quote;
     [ObservableProperty] private int _quoteStart;
@@ -74,6 +80,14 @@ public partial class MainVM : ObservableValidator
     [ObservableProperty] private bool _isDeletingDialogOpen;
     public ObservableCollection<MessageVM> Chat { get; } = [];
     public ObservableCollection<KnowledgeRecord> KnowledgeBase { get; } = [];
+
+    partial void OnQuestionChanged(string value)
+    {
+        var tokens = _encoder.Encode(value);
+        Tokens = tokens.Count == 0
+            ? null
+            : tokens.Count;
+    }
 
     private void OnKnowledgeBaseChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
@@ -107,7 +121,7 @@ public partial class MainVM : ObservableValidator
         var message = new Message
         {
             Role = "system",
-            Content = $"[Current DateTime: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}]\n" +
+            Content = $"[Current DateTime: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss, dddd")}]\n" +
                       $"Это текущее время и дата семпая. Поэтому это и твое текущее время и дата тоже.\n\n" +
                       $"{text}"
         };
@@ -154,7 +168,7 @@ public partial class MainVM : ObservableValidator
             {
                 Role = message.MessageModel.Role,
                 Id = message.MessageModel.Id,
-                Content = $"[Sent at: {timestamp.ToString("yyyy-MM-dd HH:mm:ss")}]\n"
+                Content = $"[Sent at: {timestamp.ToString("yyyy-MM-dd HH:mm:ss, dddd")}]\n"
             };
             if (ReplyMessage?.IsReplied == true)
                 messageToHistory.Content +=
@@ -216,7 +230,7 @@ public partial class MainVM : ObservableValidator
                 SettingsVM.Instance.Bass, 
                 SettingsVM.Instance.Treble);
             resultMessage.MessageModel.Content =
-                $"[Sent at: {timestamp.ToString("yyyy-MM-dd HH:mm:ss")}]\n" +
+                $"[Sent at: {timestamp.ToString("yyyy-MM-dd HH:mm:ss, dddd")}]\n" +
                 resultMessage.MessageModel.Content;
             _history.Add(resultMessage.MessageModel);
             resultMessage.MessageModel.Content = MessageParser.GetCleanText(messageText);

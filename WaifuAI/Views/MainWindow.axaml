@@ -1092,7 +1092,7 @@
                                             <Setter Property="BorderThickness" Value="1,1,1,1" />
                                         </Style>
                                     </Border.Styles>
-                                    <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
+                                    <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto">
                                         <Grid
                                             Grid.ColumnSpan="2"
                                             ColumnDefinitions="Auto,*,Auto"
@@ -1200,6 +1200,31 @@
                                                 <LucideIcon Kind="Mic" Size="20" />
                                             </Button>
                                         </StackPanel>
+                                        <Border
+                                            Grid.Column="0"
+                                            Grid.ColumnSpan="2"
+                                            Grid.Row="2"
+                                            Margin="10,0,0,6"
+                                            HorizontalAlignment="Left"
+                                            BorderThickness="0"
+                                            Background="{DynamicResource SystemListLowColor}"
+                                            CornerRadius="999"
+                                            Padding="7,3,6,3"
+                                            IsVisible="{Binding Tokens, 
+                                            Converter={x:Static ObjectConverters.IsNotNull}}">
+                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                                <LucideIcon 
+                                                    Kind="Scale" 
+                                                    Size="14"
+                                                    Foreground="{DynamicResource SystemBaseMediumColor}"/>
+                                                <TextBlock
+                                                    Text="{Binding Tokens, StringFormat={}Токены: {0}}"
+                                                    Padding="0"
+                                                    FontSize="12"
+                                                    VerticalAlignment="Center"
+                                                    Foreground="{DynamicResource SystemBaseMediumColor}"/>
+                                            </StackPanel>
+                                        </Border>
                                     </Grid>
                                 </Border>
                             </Grid>
