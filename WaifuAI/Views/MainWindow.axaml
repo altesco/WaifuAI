@@ -269,7 +269,9 @@
             </Style>
         </Grid.Styles>
         <!--  Main  -->
-        <Grid IsVisible="{Binding !IsInitializing}" RowDefinitions="40,*">
+        <Grid 
+            IsVisible="{Binding !IsAppInitializing, Source={x:Static vm:SettingsVM.Instance}}" 
+            RowDefinitions="40,*">
             <Classes.blurred>
                 <MultiBinding Converter="{x:Static BoolConverters.Or}">
                     <Binding Path="IsSettingsOpen" />
@@ -789,7 +791,7 @@
                                                                     SelectionEnd="{Binding SelectionEnd, Mode=TwoWay}"
                                                                     SelectionStart="{Binding SelectionStart, Mode=TwoWay}"
                                                                     Tag="{Binding IsHighlighted}"
-                                                                    Text="{Binding MessageModel.Content}"
+                                                                    Text="{Binding MessageModel.CleanText}"
                                                                     TextWrapping="Wrap">
                                                                     <SelectableTextBlock.ContextMenu>
                                                                         <ContextMenu>
@@ -2447,7 +2449,7 @@
         <!--  Startup  -->
         <StackPanel
             VerticalAlignment="Center"
-            IsVisible="{Binding IsInitializing}"
+            IsVisible="{Binding IsAppInitializing, Source={x:Static vm:SettingsVM.Instance}}"
             Spacing="16">
             <TextBlock HorizontalAlignment="Center" Text="{Binding InitializingMessage}" />
             <ProgressBar
@@ -2455,8 +2457,8 @@
                 MaxWidth="1000"
                 Margin="100,0"
                 CornerRadius="3"
-                IsIndeterminate="{Binding IsInitializing}"
-                IsVisible="{Binding IsInitializing}" />
+                IsIndeterminate="{Binding IsAppInitializing, Source={x:Static vm:SettingsVM.Instance}}"
+                IsVisible="{Binding IsAppInitializing, Source={x:Static vm:SettingsVM.Instance}}" />
         </StackPanel>
     </Grid>
 </Window>

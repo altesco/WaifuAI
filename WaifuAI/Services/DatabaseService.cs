@@ -1,34 +1,21 @@
-using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using SQLite;
 using WaifuAI.Models;
+using WaifuAI.ViewModels;
 
 namespace WaifuAI.Services;
 
 public static class DatabaseService
 {
-    private static SQLiteAsyncConnection _db;
+    public static readonly KnowledgeDatabase KnowledgeDb = 
+        new (SettingsVM.KnowledgeBasePath);
 
-    public static async Task InitializeDatabase(string dbPath)
+    public static readonly SQLiteAsyncConnection HistoryDb =
+        new (SettingsVM.HistoryPath);
+
+    public static async Task InitializeDatabases()
     {
-        _db = new SQLiteAsyncConnection(dbPath);
-        await _db.CreateTableAsync<KnowledgeRecord>();
+        await KnowledgeDb.CreateTableAsync<KnowledgeRecord>();
+        await HistoryDb.CreateTableAsync<Message>();
     }
-
-    public static async Task<List<KnowledgeRecord>> GetRecordsAsync() => 
-        await _db.Table<KnowledgeRecord>().ToListAsync();
-
-    public static async Task UpdateFavoriteAsync(Guid id, bool isFavorite)
-    {
-        var record = await _db.Table<KnowledgeRecord>().Where(x => x.Id == id).FirstOrDefaultAsync();
-        if (record is null)
-            return;
-        record.IsFavorite = isFavorite;
-        await _db.UpdateAsync(record);
-    }
-
-    public static Task SaveRecordAsync(KnowledgeRecord record) => _db.InsertOrReplaceAsync(record);
-
-    public static Task RemoveRecordAsync(KnowledgeRecord record) => _db.DeleteAsync(record);
 }

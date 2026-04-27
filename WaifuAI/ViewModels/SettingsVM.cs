@@ -32,8 +32,6 @@ namespace WaifuAI.ViewModels;
 
 public partial class SettingsVM : ObservableValidator
 {
-    private SettingsVM() { }   
-    
     private static SettingsVM? _instance;
     public static SettingsVM Instance => _instance ??= new SettingsVM();
     
@@ -46,13 +44,18 @@ public partial class SettingsVM : ObservableValidator
 
     public static readonly string PromptsPath = Path.Combine(AppDirectory, "Prompts");
 
+    public static readonly string KnowledgeBasePath = Path.Combine(AppDirectory, "knowledge_base.db");
+
+    public static readonly string HistoryPath = Path.Combine(AppDirectory, "history.db");
+
     private SettingsModel SettingsModel { get; set; }
 
-    [ObservableProperty] private bool _isLoading;
+    [ObservableProperty] private bool _isSettingsLoading;
+    [ObservableProperty] private bool _isAppInitializing = true;
 
     public async Task Load()
     {
-        IsLoading = true;
+        IsSettingsLoading = true;
         if (File.Exists(FilePath))
         {
             var json = await File.ReadAllTextAsync(FilePath);
@@ -116,7 +119,7 @@ public partial class SettingsVM : ObservableValidator
         // Servers
         
 
-        IsLoading = false;
+        IsSettingsLoading = false;
     }
 
     private void Save()
@@ -164,7 +167,7 @@ public partial class SettingsVM : ObservableValidator
     protected override void OnPropertyChanged(PropertyChangedEventArgs e)
     {
         base.OnPropertyChanged(e);
-        if (IsLoading)
+        if (IsSettingsLoading)
             return;
         Save();
     }
@@ -389,7 +392,7 @@ public partial class SettingsVM : ObservableValidator
 
     partial void OnSelectedVoiceModelChanged(string value)
     {
-        if (IsLoading || string.IsNullOrEmpty(value))
+        if (IsSettingsLoading || string.IsNullOrEmpty(value))
             return;
         _ = RefreshVoiceModelInfo();
         _ = RefreshSpeakersAsync(value, SelectedSpeaker);
@@ -569,7 +572,7 @@ public partial class SettingsVM : ObservableValidator
 
     partial void OnSelectedModel3DChanged(string value)
     {
-        if (IsLoading)
+        if (IsSettingsLoading)
             return;
         _ = ChangeModel3D(value);
     }

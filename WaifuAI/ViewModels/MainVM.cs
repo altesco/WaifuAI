@@ -28,7 +28,6 @@ public partial class MainVM : ObservableValidator
 
     private async Task InitializeAsync()
     {
-        IsInitializing = true;
         InitializingMessage = "Загрузка данных...";
         await SettingsVM.Instance.Load();
         InitializingMessage = "Запуск веб-сервера...";
@@ -44,22 +43,37 @@ public partial class MainVM : ObservableValidator
         InitializingMessage = "Подготовка лингвистических модулей...";
         await Task.Run(() => _encoder = GptEncoding.GetEncoding("cl100k_base"));
         InitializingMessage = "Загрузка базы знаний...";
-        await DatabaseService.InitializeDatabase(KnowledgeBasePath);
-        var records = await DatabaseService.GetRecordsAsync();
+        await DatabaseService.InitializeDatabases();
+        var records = 
+            await DatabaseService.KnowledgeDb.Table<KnowledgeRecord>().ToListAsync();
         foreach (var record in records)
-             KnowledgeBase.Add(record);
-        IsInitializing = false;
+            KnowledgeBase.Add(record);
+        InitializingMessage = "Загрузка истории чата...";
+        var messages = await DatabaseService.HistoryDb.Table<Message>()
+            .OrderBy(m => m.Time)
+            .ToListAsync();
+        foreach (var msg in messages)
+        {
+            _history.Add(msg);
+            Chat.Add(new MessageVM(msg));
+        }
+        var messageMap = Chat.ToDictionary(m => m.MessageModel.Id);
+        foreach (var msg in Chat)
+        {
+            if (msg.MessageModel.ReplyMessageId == null ||
+                !messageMap.TryGetValue(msg.MessageModel.ReplyMessageId.Value, out var replyMsg))
+                continue;
+            msg.ReplyMessage = replyMsg;
+            replyMsg.ReplyingMessages.Add(msg);
+        }
+        SettingsVM.Instance.IsAppInitializing = false;
         KnowledgeBase.CollectionChanged += OnKnowledgeBaseChanged;
         SelectedMessages.CollectionChanged += OnSelectedMessagesChanged;
     }
 
-    private static readonly string KnowledgeBasePath =
-        Path.Combine(SettingsVM.AppDirectory, "knowledge_base.json");
-
     private static GptEncoding _encoder;
 
     public bool IsWindows => OperatingSystem.IsWindows();
-    [ObservableProperty] private bool _isInitializing;
     [ObservableProperty] private string _initializingMessage;
     [ObservableProperty] private string _webAddress;
     [ObservableProperty] private string _question = string.Empty;
@@ -93,10 +107,10 @@ public partial class MainVM : ObservableValidator
     {
         if (e.NewItems != null)
             foreach (KnowledgeRecord record in e.NewItems)
-                DatabaseService.SaveRecordAsync(record);
+                DatabaseService.KnowledgeDb.InsertOrReplaceAsync(record);
         if (e.OldItems != null)
             foreach (KnowledgeRecord record in e.OldItems)
-                DatabaseService.RemoveRecordAsync(record);
+                DatabaseService.KnowledgeDb.DeleteAsync(record);
     }
 
     private void OnSelectedMessagesChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -153,34 +167,26 @@ public partial class MainVM : ObservableValidator
         {
             CloseErrorMessage();
             var query = new QueryModel();
-            var message = new MessageVM
+            var message = new MessageVM(messageModel: new()
             {
-                MessageModel = new Message
-                {
-                    Role = "user", 
-                    Content = Question,
-                    Time = timestamp,
-                    Tokens = Tokens ?? 0
-                }
-            };
+                Role = "user",
+                CleanText = Question,
+                Content = $"[Sent at: {timestamp.ToString("yyyy-MM-dd HH:mm:ss, dddd")}]\n",
+                Time = timestamp,
+                Tokens = Tokens ?? 0
+            });
 
-            var messageToHistory = new Message
-            {
-                Role = message.MessageModel.Role,
-                Id = message.MessageModel.Id,
-                Content = $"[Sent at: {timestamp.ToString("yyyy-MM-dd HH:mm:ss, dddd")}]\n"
-            };
             if (ReplyMessage?.IsReplied == true)
-                messageToHistory.Content +=
-                    $"[Replying to the {ReplyMessage.MessageModel?.Role}'s message: '{Quote}']\n\n" +
+                message.MessageModel.Content +=
+                    $"[Replying to the {ReplyMessage.MessageModel.Role}'s message: '{Quote}']\n\n" +
                     $"{Question}";
             else if (ReplyMessage?.IsReplied == false)
-                messageToHistory.Content +=
-                    $"[Replying to the {ReplyMessage.MessageModel?.Role}'s quote: '{Quote}']\n\n" +
+                message.MessageModel.Content +=
+                    $"[Replying to the {ReplyMessage.MessageModel.Role}'s quote: '{Quote}']\n\n" +
                     $"{Question}";
             else
-                messageToHistory.Content += Question;
-            _history.Add(messageToHistory);
+                message.MessageModel.Content += $"\n{Question}";
+            _history.Add(message.MessageModel);
 
             var systemPrompt = await GetSystemPrompt();
             query.Messages.Add(systemPrompt);
@@ -198,26 +204,27 @@ public partial class MainVM : ObservableValidator
             ReplyMessage = null;
             Question = string.Empty;
 
-            var tempMessage = new MessageVM
-            {
-                MessageModel = new Message { Role = "temp" }
-            };
+            var tempMessage = new MessageVM(
+                messageModel: new Message { Role = "temp" }
+            );
             Chat.Add(tempMessage);
-            MessageVM resultMessage = new MessageVM();
-            if (SettingsVM.Instance.IsServerQuery)
-                resultMessage.MessageModel = await QueryService.DoServerQuery(query);
-            else
-                resultMessage.MessageModel = await QueryService.DoProviderQuery(query);
+
+            var messageModel = SettingsVM.Instance.IsServerQuery
+                ? await QueryService.DoServerQuery(query)
+                : await QueryService.DoProviderQuery(query);
+            var resultMessage = new MessageVM(messageModel);
             Chat.Remove(tempMessage);
+
             if (resultMessage.MessageModel.Role == "system")
             {
-                Question = message.MessageModel.Content;
+                Question = message.MessageModel.CleanText;
                 Error = resultMessage.MessageModel.Content;
                 message.IsFailed = true;
                 ReplyMessage = message.ReplyMessage;
                 _history.Remove(_history.Last());
                 return;
             }
+
             var messageText = resultMessage.MessageModel.Content;
             VoiceService.Say(
                 messageText, 
@@ -229,12 +236,17 @@ public partial class MainVM : ObservableValidator
                 SettingsVM.Instance.Pitch,
                 SettingsVM.Instance.Bass, 
                 SettingsVM.Instance.Treble);
+
+            resultMessage.MessageModel.CleanText = MessageParser.GetCleanText(messageText);
             resultMessage.MessageModel.Content =
-                $"[Sent at: {timestamp.ToString("yyyy-MM-dd HH:mm:ss, dddd")}]\n" +
+                $"[Sent at: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss, dddd")}]\n" +
                 resultMessage.MessageModel.Content;
+
             _history.Add(resultMessage.MessageModel);
-            resultMessage.MessageModel.Content = MessageParser.GetCleanText(messageText);
+            await DatabaseService.HistoryDb.InsertOrReplaceAsync(message.MessageModel);
+            await DatabaseService.HistoryDb.InsertOrReplaceAsync(resultMessage.MessageModel);
             Chat.Add(resultMessage);
+            
             await MessageParser.ParseTextForKnowledgeUpdates(messageText, KnowledgeBase);
         }
         catch (Exception e)
@@ -295,7 +307,7 @@ public partial class MainVM : ObservableValidator
         ReplyMessage = SelectedMessage;
         if (ReplyMessage is null)
             return;
-        Quote = SelectedMessage?.MessageModel?.Content;
+        Quote = SelectedMessage?.MessageModel.CleanText;
         ReplyMessage.IsReplied = true;
     }
 
@@ -332,14 +344,22 @@ public partial class MainVM : ObservableValidator
         var messagesToDelete = SelectedMessages.ToList();
         foreach (var msg in messagesToDelete)
         {
-            if (msg.MessageModel?.Id == ReplyMessage?.MessageModel?.Id)
-                ReleaseReplyAndQuote();
-            if (msg.IsReplied is true or false)
-                foreach (var replyMsg in msg.ReplyingMessages)
-                    replyMsg.ReplyMessage = null;
-            if (msg.MessageModel != null)
-                _history.Remove(_history.FirstOrDefault(m => m.Id == msg.MessageModel.Id));
+            _history.Remove(msg.MessageModel);
+
+            foreach (var replyingMsg in msg.ReplyingMessages)
+            {
+                replyingMsg.MessageModel.Content =
+                    $"[Sent at: {replyingMsg.MessageModel.Time.ToString("yyyy-MM-dd HH:mm:ss, dddd")}]\n\n" +
+                    replyingMsg.MessageModel.CleanText;
+                replyingMsg.ReplyMessage = null;
+            }
+            msg.ReplyMessage?.ReplyingMessages.Remove(msg);
+
+            DatabaseService.HistoryDb.DeleteAsync(msg.MessageModel);
             Chat.Remove(msg);
+
+            if (msg.MessageModel.Id == ReplyMessage?.MessageModel.Id)
+                ReleaseReplyAndQuote();
         }
         SelectedMessages.Clear();
         SelectedMessage = null;
@@ -394,7 +414,7 @@ public partial class MainVM : ObservableValidator
     {
         if (args is not KnowledgeRecord record)
             return;
-        await DatabaseService.UpdateFavoriteAsync(record.Id, record.IsFavorite);
+        await DatabaseService.KnowledgeDb.UpdateFavoriteAsync(record.Id, record.IsFavorite);
     }
     
     [ObservableProperty] private bool _isMaximized;

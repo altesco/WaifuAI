@@ -45,7 +45,7 @@ namespace WaifuAI
                     RoutingStrategies.Tunnel);
                 ActualThemeVariantChanged += (_, _) => 
                 {
-                    if (SettingsVM.Instance.IsLoading)
+                    if (SettingsVM.Instance.IsSettingsLoading)
                         return;
                     ModelService.SetBackground();
                     Dispatcher.UIThread.InvokeAsync(async () =>
