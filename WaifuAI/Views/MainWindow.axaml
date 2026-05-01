@@ -269,14 +269,13 @@
             </Style>
         </Grid.Styles>
         <!--  Main  -->
-        <Grid 
-            IsVisible="{Binding !IsAppInitializing, Source={x:Static vm:SettingsVM.Instance}}" 
-            RowDefinitions="40,*">
+        <Grid IsVisible="{Binding !IsAppInitializing, Source={x:Static vm:SettingsVM.Instance}}" RowDefinitions="40,*">
             <Classes.blurred>
                 <MultiBinding Converter="{x:Static BoolConverters.Or}">
                     <Binding Path="IsSettingsOpen" />
                     <Binding Path="IsPromptEditorOpen" />
-                    <Binding Path="IsDeletingDialogOpen" />
+                    <Binding Path="IsDeletingMessageDialogOpen" />
+                    <Binding Path="IsDeletingRecordDialogOpen" />
                 </MultiBinding>
             </Classes.blurred>
             <Grid.Styles>
@@ -447,7 +446,7 @@
                                         <Style Selector="ListBox /template/ ItemsPresenter">
                                             <Setter Property="MaxWidth" Value="720" />
                                         </Style>
-                                    </ListBox.Styles> -->
+                                    </ListBox.Styles>-->
                                     <ListBox.ItemContainerTheme>
                                         <ControlTheme x:DataType="vm:MessageVM" TargetType="ListBoxItem">
                                             <Setter Property="Background" Value="Transparent" />
@@ -531,15 +530,15 @@
                                                         </ContextMenu>
                                                     </Border.ContextMenu>
                                                 </Border>
-                                                <Grid ColumnDefinitions="Auto,*,Auto" MaxWidth="720">
+                                                <Grid MaxWidth="720" ColumnDefinitions="Auto,*,Auto">
                                                     <Border
                                                         MinHeight="32"
                                                         MaxWidth="360"
                                                         Margin="16,6,16,6"
                                                         Padding="12,6,12,6"
                                                         Background="{DynamicResource SystemListLowColor}"
-                                                        BorderThickness="1"
                                                         BorderBrush="{DynamicResource SystemListMediumColor}"
+                                                        BorderThickness="1"
                                                         Tag="{Binding MessageModel.Role}">
                                                         <Border.Styles>
                                                             <Style Selector="Border">
@@ -590,7 +589,7 @@
                                                                             </MenuItem>
                                                                             <MenuItem
                                                                                 x:DataType="vm:MainVM"
-                                                                                Command="{Binding DeletingDialogCommand}"
+                                                                                Command="{Binding DeletingMessageDialogCommand}"
                                                                                 DataContext="{Binding $parent[ListBox].DataContext}"
                                                                                 Header="Удалить">
                                                                                 <MenuItem.Icon>
@@ -662,7 +661,7 @@
                                                                             </MenuItem>
                                                                             <MenuItem
                                                                                 x:DataType="vm:MainVM"
-                                                                                Command="{Binding DeletingDialogCommand}"
+                                                                                Command="{Binding DeletingMessageDialogCommand}"
                                                                                 DataContext="{Binding $parent[ListBox].DataContext}"
                                                                                 Header="Удалить">
                                                                                 <MenuItem.Icon>
@@ -867,7 +866,7 @@
                                                                             </MenuItem>
                                                                             <MenuItem
                                                                                 x:DataType="vm:MainVM"
-                                                                                Command="{Binding DeletingDialogCommand}"
+                                                                                Command="{Binding DeletingMessageDialogCommand}"
                                                                                 DataContext="{Binding $parent[ListBox].DataContext}"
                                                                                 Header="Удалить">
                                                                                 <MenuItem.Icon>
@@ -890,40 +889,34 @@
                                                                         </ContextMenu>
                                                                     </SelectableTextBlock.ContextMenu>
                                                                 </SelectableTextBlock>
-                                                                <Grid 
-                                                                    ColumnDefinitions="Auto,Auto,Auto,*,Auto" 
-                                                                    IsVisible="{Binding MessageModel.Role, 
-                                                                    Converter={x:Static ObjectConverters.NotEqual}, 
-                                                                    ConverterParameter=temp}">
-                                                                    <LucideIcon 
-                                                                        Kind="WeightTilde"
-                                                                        Size="14"
+                                                                <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto" IsVisible="{Binding MessageModel.Role, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter=temp}">
+                                                                    <LucideIcon
+                                                                        Margin="0,0,3,0"
                                                                         Foreground="{DynamicResource SystemBaseMediumColor}"
-                                                                        Margin="0,0,3,0"/>
+                                                                        Kind="WeightTilde"
+                                                                        Size="14" />
                                                                     <TextBlock
                                                                         Grid.Column="1"
                                                                         FontSize="12"
                                                                         Foreground="{DynamicResource SystemBaseMediumColor}"
-                                                                        Text="{Binding MessageModel.Tokens, StringFormat={}Токены: {0}}"/>
+                                                                        Text="{Binding MessageModel.Tokens, StringFormat={}Токены: {0}}" />
                                                                     <Separator
                                                                         Grid.Column="2"
-                                                                        Margin="8,2,8,2"
-                                                                        Background="{DynamicResource SystemBaseLowColor}"
                                                                         Width="1"
                                                                         Height="NaN"
+                                                                        Margin="8,2,8,2"
+                                                                        Background="{DynamicResource SystemBaseLowColor}"
                                                                         Tag="{Binding #PART_Column2.Bounds.Width}">
                                                                         <Separator.Styles>
                                                                             <Style Selector="Separator">
-                                                                                <Setter Property="IsVisible" Value="False"/>
+                                                                                <Setter Property="IsVisible" Value="False" />
                                                                             </Style>
                                                                             <Style Selector="Separator[Tag=0]">
-                                                                                <Setter Property="IsVisible" Value="True"/>   
-                                                                            </Style>    
-                                                                        </Separator.Styles>    
+                                                                                <Setter Property="IsVisible" Value="True" />
+                                                                            </Style>
+                                                                        </Separator.Styles>
                                                                     </Separator>
-                                                                    <Border 
-                                                                        x:Name="PART_Column2"
-                                                                        Grid.Column="3"/>
+                                                                    <Border x:Name="PART_Column2" Grid.Column="3" />
                                                                     <TextBlock
                                                                         Grid.Column="4"
                                                                         FontSize="12"
@@ -1237,28 +1230,27 @@
                                             </Button>
                                         </StackPanel>
                                         <Border
+                                            Grid.Row="2"
                                             Grid.Column="0"
                                             Grid.ColumnSpan="2"
-                                            Grid.Row="2"
                                             Margin="10,0,0,6"
-                                            HorizontalAlignment="Left"
-                                            BorderThickness="0"
-                                            Background="{DynamicResource SystemListLowColor}"
-                                            CornerRadius="999"
                                             Padding="7,3,6,3"
-                                            IsVisible="{Binding Tokens, 
-                                            Converter={x:Static ObjectConverters.IsNotNull}}">
+                                            HorizontalAlignment="Left"
+                                            Background="{DynamicResource SystemListLowColor}"
+                                            BorderThickness="0"
+                                            CornerRadius="999"
+                                            IsVisible="{Binding Tokens, Converter={x:Static ObjectConverters.IsNotNull}}">
                                             <StackPanel Orientation="Horizontal" Spacing="3">
-                                                <LucideIcon 
-                                                    Kind="WeightTilde" 
-                                                    Size="14"
-                                                    Foreground="{DynamicResource SystemBaseMediumColor}"/>
+                                                <LucideIcon
+                                                    Foreground="{DynamicResource SystemBaseMediumColor}"
+                                                    Kind="WeightTilde"
+                                                    Size="14" />
                                                 <TextBlock
-                                                    Text="{Binding Tokens, StringFormat={}Токены: {0}}"
                                                     Padding="0"
-                                                    FontSize="12"
                                                     VerticalAlignment="Center"
-                                                    Foreground="{DynamicResource SystemBaseMediumColor}"/>
+                                                    FontSize="12"
+                                                    Foreground="{DynamicResource SystemBaseMediumColor}"
+                                                    Text="{Binding Tokens, StringFormat={}Токены: {0}}" />
                                             </StackPanel>
                                         </Border>
                                     </Grid>
@@ -1274,11 +1266,43 @@
                                 CanUserResizeColumns="True"
                                 GridLinesVisibility="All"
                                 IsReadOnly="True"
+                                SelectedItem="{Binding SelectedKnowledgeRecord}"
+                                SelectionMode="Single"
                                 ItemsSource="{Binding KnowledgeBase}"
                                 RowBackground="{DynamicResource SystemChromeMediumLowColor}"
                                 RowHeight="NaN"
                                 UseLayoutRounding="True">
                                 <DataGrid.Styles>
+                                    <Style Selector="DataGridRow">
+                                        <Setter Property="ContextMenu">
+                                            <Setter.Value>
+                                                <ContextMenu>
+                                                    <MenuItem
+                                                        x:DataType="vm:MainVM"
+                                                        Command="{Binding DeletingRecordDialogCommand}"
+                                                        DataContext="{Binding $parent[DataGrid].DataContext}"
+                                                        Header="Удалить">
+                                                        <MenuItem.Icon>
+                                                            <LucideIcon Kind="Trash2" Size="20" />
+                                                        </MenuItem.Icon>
+                                                        <MenuItem.Styles>
+                                                            <Style Selector="MenuItem">
+                                                                <Setter Property="Foreground" Value="Red" />
+                                                            </Style>
+                                                            <Style Selector="MenuItem:pointerover /template/ ContentPresenter#PART_HeaderPresenter, MenuItem:selected /template/ ContentPresenter#PART_HeaderPresenter">
+                                                                <Setter Property="Foreground" Value="Red" />
+                                                            </Style>
+                                                            <Style Selector="MenuItem:pointerover /template/ Border#PART_LayoutRoot, MenuItem:selected /template/ Border#PART_LayoutRoot">
+                                                                <Setter Property="Background">
+                                                                    <SolidColorBrush Opacity="0.15" Color="Red" />
+                                                                </Setter>
+                                                            </Style>
+                                                        </MenuItem.Styles>
+                                                    </MenuItem>
+                                                </ContextMenu>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
                                     <Style Selector="DataGridRow:nth-child(even)">
                                         <Setter Property="Background" Value="{DynamicResource SystemChromeMediumColor}" />
                                     </Style>
@@ -1525,7 +1549,8 @@
                         <MultiBinding Converter="{x:Static BoolConverters.Or}">
                             <Binding Path="IsSettingsOpen" />
                             <Binding Path="IsPromptEditorOpen" />
-                            <Binding Path="IsDeletingDialogOpen" />
+                            <Binding Path="IsDeletingMessageDialogOpen" />
+                            <Binding Path="IsDeletingRecordDialogOpen" />
                         </MultiBinding>
                     </Image.IsVisible>
                 </Image>
@@ -1540,7 +1565,8 @@
                             <Binding Path="!IsModel3DLoading" Source="{x:Static vm:SettingsVM.Instance}" />
                             <Binding Path="!IsSettingsOpen" />
                             <Binding Path="!IsPromptEditorOpen" />
-                            <Binding Path="!IsDeletingDialogOpen" />
+                            <Binding Path="!IsDeletingMessageDialogOpen" />
+                            <Binding Path="!IsDeletingRecordDialogOpen" />
                         </MultiBinding>
                     </wv:WebView.IsVisible>
                 </wv:WebView>
@@ -1725,7 +1751,8 @@
                 <MultiBinding Converter="{x:Static BoolConverters.Or}">
                     <Binding Path="IsSettingsOpen" />
                     <Binding Path="IsPromptEditorOpen" />
-                    <Binding Path="IsDeletingDialogOpen" />
+                    <Binding Path="IsDeletingMessageDialogOpen" />
+                    <Binding Path="IsDeletingRecordDialogOpen" />
                 </MultiBinding>
             </Grid.IsVisible>
             <Grid.Background>
@@ -2379,7 +2406,7 @@
                     </Button>
                 </Grid>
             </Border>
-            <!--  Deleting Dialog  -->
+            <!--  Deleting Message Dialog  -->
             <Border
                 MaxWidth="500"
                 MaxHeight="180"
@@ -2388,7 +2415,7 @@
                 Background="{DynamicResource SystemChromeLowColor}"
                 BorderThickness="1"
                 CornerRadius="8"
-                IsVisible="{Binding IsDeletingDialogOpen}">
+                IsVisible="{Binding IsDeletingMessageDialogOpen}">
                 <Grid RowDefinitions="Auto,*,Auto">
                     <TextBlock
                         HorizontalAlignment="Left"
@@ -2402,6 +2429,7 @@
                         HorizontalAlignment="Left"
                         VerticalAlignment="Top"
                         FontSize="16"
+                        TextWrapping="Wrap"
                         Text="Вы уверены, что хотите удалить выбранные сообщения?" />
                     <StackPanel
                         Grid.Row="2"
@@ -2431,7 +2459,7 @@
                         </Button>
                         <Button
                             Classes="word-button"
-                            Command="{Binding DeletingDialogCommand}"
+                            Command="{Binding DeletingMessageDialogCommand}"
                             Content="Отмена" />
                     </StackPanel>
                     <Button
@@ -2440,11 +2468,78 @@
                         HorizontalAlignment="Right"
                         VerticalAlignment="Top"
                         Classes="icon-button"
-                        Command="{Binding DeletingDialogCommand}">
+                        Command="{Binding DeletingMessageDialogCommand}">
                         <LucideIcon Kind="X" Size="18" />
                     </Button>
                 </Grid>
             </Border>
+            <!-- Deleting KnowledgeRecord Dialog -->
+            <Border
+                MaxWidth="500"
+                MaxHeight="180"
+                Margin="52"
+                Padding="16,12,16,12"
+                Background="{DynamicResource SystemChromeLowColor}"
+                BorderThickness="1"
+                CornerRadius="8"
+                IsVisible="{Binding IsDeletingRecordDialogOpen}">
+                <Grid RowDefinitions="Auto,*,Auto">
+                    <TextBlock
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        FontSize="22"
+                        FontWeight="DemiBold"
+                        Text="Удаление" />
+                    <TextBlock
+                        Grid.Row="1"
+                        Padding="0,12"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        FontSize="16"
+                        TextWrapping="Wrap"
+                        Text="Вы уверены, что хотите удалить выбранную запись из базы знаний?" />
+                    <StackPanel
+                        Grid.Row="2"
+                        Margin="4"
+                        HorizontalAlignment="Right"
+                        Orientation="Horizontal"
+                        Spacing="6">
+                        <Button
+                            Background="{DynamicResource ErrorLowColor}"
+                            BorderBrush="{DynamicResource SystemErrorTextColor}"
+                            Classes="word-button"
+                            Command="{Binding DeleteKnowledgeRecordCommand}"
+                            Content="Удалить"
+                            Foreground="{DynamicResource SystemErrorTextColor}">
+                            <Button.Styles>
+                                <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                                    <Setter Property="Foreground" Value="{DynamicResource SystemErrorTextColor}" />
+                                    <Setter Property="Background" Value="{DynamicResource ErrorColor}" />
+                                    <Setter Property="BorderBrush" Value="{DynamicResource SystemErrorTextColor}" />
+                                </Style>
+                                <Style Selector="Button:pressed /template/ ContentPresenter#PART_ContentPresenter">
+                                    <Setter Property="Foreground" Value="{DynamicResource SystemErrorTextColor}" />
+                                    <Setter Property="Background" Value="{DynamicResource ErrorColor}" />
+                                    <Setter Property="BorderBrush" Value="{DynamicResource SystemErrorTextColor}" />
+                                </Style>
+                            </Button.Styles>
+                        </Button>
+                        <Button
+                            Classes="word-button"
+                            Command="{Binding DeletingRecordDialogCommand}"
+                            Content="Отмена" />
+                    </StackPanel>
+                    <Button
+                        Grid.Row="0"
+                        Grid.RowSpan="2"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Top"
+                        Classes="icon-button"
+                        Command="{Binding DeletingRecordDialogCommand}">
+                        <LucideIcon Kind="X" Size="18" />
+                    </Button>
+                </Grid>
+            </Border>    
         </Grid>
         <!--  Startup  -->
         <StackPanel

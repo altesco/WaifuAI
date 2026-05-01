@@ -1,5 +1,4 @@
 using CommunityToolkit.Mvvm.Messaging.Messages;
-using System.Threading.Tasks;
 
 namespace WaifuAI.Services;
 

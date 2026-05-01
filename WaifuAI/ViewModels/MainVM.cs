@@ -91,9 +91,11 @@ public partial class MainVM : ObservableValidator
 
     [ObservableProperty] private bool _isSettingsOpen;
     [ObservableProperty] private bool _isPromptEditorOpen;
-    [ObservableProperty] private bool _isDeletingDialogOpen;
+    [ObservableProperty] private bool _isDeletingMessageDialogOpen;
+    [ObservableProperty] private bool _isDeletingRecordDialogOpen;
     public ObservableCollection<MessageVM> Chat { get; } = [];
     public ObservableCollection<KnowledgeRecord> KnowledgeBase { get; } = [];
+    [ObservableProperty] private KnowledgeRecord? _selectedKnowledgeRecord;
 
     partial void OnQuestionChanged(string value)
     {
@@ -131,21 +133,28 @@ public partial class MainVM : ObservableValidator
         if (_history.Count <= 0)
             return new Message();
         var archetypePrompt = SettingsVM.Instance.SelectedArchetype.Prompt;
-        var text = $"{archetypePrompt}\n\n{_history[0].Content}";
+
+        var now = DateTime.Now;
+        string byWho = _history.Last().Role == "user"
+            ? "Sempai" : "you";
+
         var message = new Message
         {
             Role = "system",
-            Content = $"[Current DateTime: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss, dddd")}]\n" +
-                      $"Это текущее время и дата семпая. Поэтому это и твое текущее время и дата тоже.\n\n" +
-                      $"{text}"
+            Content = $"{archetypePrompt}\n\n" +
+                      $"[Current DateTime: {now.ToString("yyyy-MM-dd HH:mm:ss, dddd")}]\n" +
+                      $"This is Senpai's current time and date. Therefore, it is your current time and date too.\n" +
+                      $"The last message was sent by {byWho} {TimeAgoText(now, _history.Last().Time)}\n\n" +
+                      $"{_history[0].Content}"
         };
+
         var header = "[Knowledge Records]";
-        var embedding = 
+        var embedding =
             await MessageParser.VectorGenerator.GenerateEmbeddingAsync(Question);
         var recordsToAdd = KnowledgeBase
-            .Select(r => new { 
-                Record = r, 
-                Score = embedding.Vector.CosineSimilarity(r.Vector) 
+            .Select(r => new {
+                Record = r,
+                Score = embedding.Vector.CosineSimilarity(r.Vector)
             })
             .OrderByDescending(x => x.Score)
             .Take(5)
@@ -156,7 +165,24 @@ public partial class MainVM : ObservableValidator
         message.Content += $"\n\n{header}\n";
         foreach (var record in recordsToAdd)
             message.Content += $"{record.Key}: {record.Value}\n";
+
         return message;
+    }
+    
+    private string TimeAgoText(DateTime now, DateTime lastMessageTime)
+    {
+        TimeSpan diff = now - lastMessageTime;
+        string timeAgo;
+        if (diff.TotalDays >= 1)
+            timeAgo = $"{(int)diff.TotalDays} days ago";
+        else if (diff.TotalHours >= 1)
+            timeAgo = $"{(int)diff.TotalHours} hours ago";
+        else if (diff.TotalMinutes >= 1)
+            timeAgo = $"{(int)diff.TotalMinutes} minutes ago";
+        else
+            timeAgo = "just now";
+        timeAgo += $" (at {lastMessageTime.ToString("yyyy-MM-dd HH:mm:ss, dddd")})";
+        return timeAgo;
     }
 
     [RelayCommand]
@@ -171,18 +197,19 @@ public partial class MainVM : ObservableValidator
             {
                 Role = "user",
                 CleanText = Question,
-                Content = $"[Sent at: {timestamp.ToString("yyyy-MM-dd HH:mm:ss, dddd")}]\n",
                 Time = timestamp,
                 Tokens = Tokens ?? 0
             });
 
             if (ReplyMessage?.IsReplied == true)
                 message.MessageModel.Content +=
-                    $"[Replying to the {ReplyMessage.MessageModel.Role}'s message: '{Quote}']\n\n" +
+                    $"[Replying to the {ReplyMessage.MessageModel.Role}'s message " +
+                    $"sent {TimeAgoText(timestamp, _history.Last().Time)}: '{Quote}']\n\n" +
                     $"{Question}";
             else if (ReplyMessage?.IsReplied == false)
                 message.MessageModel.Content +=
-                    $"[Replying to the {ReplyMessage.MessageModel.Role}'s quote: '{Quote}']\n\n" +
+                    $"[Replying to the {ReplyMessage.MessageModel.Role}'s quote " +
+                    $"in message sent {TimeAgoText(timestamp, _history.Last().Time)}: '{Quote}']\n\n" +
                     $"{Question}";
             else
                 message.MessageModel.Content += $"\n{Question}";
@@ -222,6 +249,11 @@ public partial class MainVM : ObservableValidator
                 message.IsFailed = true;
                 ReplyMessage = message.ReplyMessage;
                 _history.Remove(_history.Last());
+                if (ReplyMessage is null)
+                    return;    
+                Quote = ReplyMessage.Quote;
+                QuoteStart = ReplyMessage.QuoteStart;
+                QuoteEnd = ReplyMessage.QuoteEnd;
                 return;
             }
 
@@ -238,9 +270,9 @@ public partial class MainVM : ObservableValidator
                 SettingsVM.Instance.Treble);
 
             resultMessage.MessageModel.CleanText = MessageParser.GetCleanText(messageText);
-            resultMessage.MessageModel.Content =
-                $"[Sent at: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss, dddd")}]\n" +
-                resultMessage.MessageModel.Content;
+            // resultMessage.MessageModel.Content =
+            //     $"[Sent at: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss, dddd")}]\n" +
+            //     resultMessage.MessageModel.Content;
 
             _history.Add(resultMessage.MessageModel);
             await DatabaseService.HistoryDb.InsertOrReplaceAsync(message.MessageModel);
@@ -332,10 +364,10 @@ public partial class MainVM : ObservableValidator
     }
 
     [RelayCommand]
-    private void DeletingDialog()
+    private void DeletingMessageDialog()
     {
-        WeakReferenceMessenger.Default.Send(new SnapshotMessage(!IsDeletingDialogOpen));
-        IsDeletingDialogOpen = !IsDeletingDialogOpen;
+        WeakReferenceMessenger.Default.Send(new SnapshotMessage(!IsDeletingMessageDialogOpen));
+        IsDeletingMessageDialogOpen = !IsDeletingMessageDialogOpen;
     }
     
     [RelayCommand]
@@ -348,9 +380,7 @@ public partial class MainVM : ObservableValidator
 
             foreach (var replyingMsg in msg.ReplyingMessages)
             {
-                replyingMsg.MessageModel.Content =
-                    $"[Sent at: {replyingMsg.MessageModel.Time.ToString("yyyy-MM-dd HH:mm:ss, dddd")}]\n\n" +
-                    replyingMsg.MessageModel.CleanText;
+                replyingMsg.MessageModel.Content = replyingMsg.MessageModel.CleanText;
                 replyingMsg.ReplyMessage = null;
             }
             msg.ReplyMessage?.ReplyingMessages.Remove(msg);
@@ -364,7 +394,7 @@ public partial class MainVM : ObservableValidator
         SelectedMessages.Clear();
         SelectedMessage = null;
         IsMultiSelect = false;
-        IsDeletingDialogOpen = false;
+        IsDeletingMessageDialogOpen = false;
     }
 
     [RelayCommand]
@@ -415,6 +445,23 @@ public partial class MainVM : ObservableValidator
         if (args is not KnowledgeRecord record)
             return;
         await DatabaseService.KnowledgeDb.UpdateFavoriteAsync(record.Id, record.IsFavorite);
+    }
+
+    [RelayCommand]
+    private void DeletingRecordDialog()
+    {
+        WeakReferenceMessenger.Default.Send(new SnapshotMessage(!IsDeletingRecordDialogOpen));
+        IsDeletingRecordDialogOpen = !IsDeletingRecordDialogOpen;
+    }
+
+    [RelayCommand]
+    private async Task DeleteKnowledgeRecord()
+    {
+        if (SelectedKnowledgeRecord is null)
+            return;
+        KnowledgeBase.Remove(SelectedKnowledgeRecord);
+        await DatabaseService.KnowledgeDb.DeleteAsync(SelectedKnowledgeRecord);
+        IsDeletingRecordDialogOpen = false;
     }
     
     [ObservableProperty] private bool _isMaximized;

@@ -1,4 +1,3 @@
-using System;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
@@ -6,7 +5,6 @@ using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Input;
 using Avalonia.Interactivity;
