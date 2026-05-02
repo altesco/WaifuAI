@@ -1610,38 +1610,20 @@
                                         Text="Сервер"
                                         TextTrimming="CharacterEllipsis" />
                                 </RadioButton>
-
-                                <StackPanel Spacing="4" Tag="{Binding #ServerButton.IsChecked}">
-                                    <Grid ColumnDefinitions="Auto,*">
-                                        <LucideIcon
-                                            Kind="Hash"
-                                            Size="16"
-                                            StrokeWidth="2" />
-                                        <TextBlock
-                                            Grid.Column="1"
-                                            Margin="4,0,0,0"
-                                            VerticalAlignment="Center"
-                                            FontWeight="DemiBold"
-                                            Text="Порт"
-                                            TextTrimming="CharacterEllipsis" />
-                                    </Grid>
+                                <views:SideCard
+                                    IsBigTextBox="True"
+                                    Header="Порт"
+                                    Icon="{LucideIconContent Hash, Size=16, StrokeWidth=2}"
+                                    IsEnabled="{Binding IsServerQuery}">
                                     <TextBox Text="{Binding Port, Mode=TwoWay}" />
-                                    <Grid Margin="0,8,0,0" ColumnDefinitions="Auto,*">
-                                        <LucideIcon
-                                            Kind="Network"
-                                            Size="16"
-                                            StrokeWidth="2" />
-                                        <TextBlock
-                                            Grid.Column="1"
-                                            Margin="4,0,0,0"
-                                            VerticalAlignment="Center"
-                                            FontWeight="DemiBold"
-                                            Text="IP-адрес"
-                                            TextTrimming="CharacterEllipsis" />
-                                    </Grid>
+                                </views:SideCard>
+                                <views:SideCard
+                                    IsBigTextBox="True"
+                                    Header="IP-адрес"
+                                    Icon="{LucideIconContent Network, Size=16, StrokeWidth=2}"
+                                    IsEnabled="{Binding IsServerQuery}">
                                     <TextBox Text="{Binding IpAddress, Mode=TwoWay}" />
-                                </StackPanel>
-
+                                </views:SideCard>
                                 <RadioButton
                                     x:Name="ProviderButton"
                                     GroupName="ModelSource"
@@ -1652,51 +1634,27 @@
                                         FontWeight="DemiBold"
                                         Text="Облачный провайдер" />
                                 </RadioButton>
-
-                                <StackPanel Spacing="4" Tag="{Binding #ProviderButton.IsChecked}">
-                                    <Grid ColumnDefinitions="Auto,*">
-                                        <LucideIcon
-                                            Kind="KeyRound"
-                                            Size="16"
-                                            StrokeWidth="2" />
-                                        <TextBlock
-                                            Grid.Column="1"
-                                            Margin="4,0,0,0"
-                                            VerticalAlignment="Center"
-                                            FontWeight="DemiBold"
-                                            Text="API Ключ"
-                                            TextTrimming="CharacterEllipsis" />
-                                    </Grid>
+                                <views:SideCard
+                                    IsBigTextBox="True"
+                                    Header="API Ключ"
+                                    Icon="{LucideIconContent KeyRound, Size=16, StrokeWidth=2}"
+                                    IsEnabled="{Binding !IsServerQuery}">
                                     <TextBox Text="{Binding ApiKey, Mode=TwoWay}" />
-                                    <Grid Margin="0,8,0,0" ColumnDefinitions="Auto,*">
-                                        <LucideIcon
-                                            Kind="Link"
-                                            Size="16"
-                                            StrokeWidth="2" />
-                                        <TextBlock
-                                            Grid.Column="1"
-                                            Margin="4,0,0,0"
-                                            VerticalAlignment="Center"
-                                            FontWeight="DemiBold"
-                                            Text="API URL"
-                                            TextTrimming="CharacterEllipsis" />
-                                    </Grid>
+                                </views:SideCard>
+                                <views:SideCard
+                                    IsBigTextBox="True"
+                                    Header="API URL"
+                                    Icon="{LucideIconContent Link, Size=16, StrokeWidth=2}"
+                                    IsEnabled="{Binding !IsServerQuery}">
                                     <TextBox Text="{Binding ApiUrl, Mode=TwoWay}" />
-                                    <Grid Margin="0,8,0,0" ColumnDefinitions="Auto,*">
-                                        <LucideIcon
-                                            Kind="Bot"
-                                            Size="16"
-                                            StrokeWidth="2" />
-                                        <TextBlock
-                                            Grid.Column="1"
-                                            Margin="4,0,0,0"
-                                            VerticalAlignment="Center"
-                                            FontWeight="DemiBold"
-                                            Text="Модель"
-                                            TextTrimming="CharacterEllipsis" />
-                                    </Grid>
+                                </views:SideCard>
+                                <views:SideCard
+                                    IsBigTextBox="True"
+                                    Header="Модель"
+                                    Icon="{LucideIconContent Bot, Size=16, StrokeWidth=2}"
+                                    IsEnabled="{Binding !IsServerQuery}">
                                     <TextBox Text="{Binding AiModel, Mode=TwoWay}" />
-                                </StackPanel>
+                                </views:SideCard>
                             </StackPanel>
                         </ScrollViewer>
                     </Grid>

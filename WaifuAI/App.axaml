@@ -79,6 +79,7 @@
         </FluentTheme>
         <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml"/>
         <StyleInclude Source="/Views/SettingsCard.axaml" />
+        <StyleInclude Source="/Views/SideCard.axaml"/>
         <StyleInclude Source="/Views/SidePanel.axaml"/>
     </Application.Styles>
 </Application>
