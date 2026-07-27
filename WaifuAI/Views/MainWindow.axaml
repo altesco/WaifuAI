@@ -21,7 +21,6 @@
     Loaded="Window_OnLoaded"
     mc:Ignorable="d">
     <Window.Resources>
-        <conv:MathConverter x:Key="MathConverter" />
         <conv:StringValueConverter x:Key="StringValueConverter" />
         <conv:BoolToSelectionModeConverter x:Key="BoolToSelectionModeConverter" />
         <ControlTheme x:Key="{x:Type AdornerLayer}" TargetType="AdornerLayer">
@@ -1266,11 +1265,11 @@
                                 CanUserResizeColumns="True"
                                 GridLinesVisibility="All"
                                 IsReadOnly="True"
-                                SelectedItem="{Binding SelectedKnowledgeRecord}"
-                                SelectionMode="Single"
                                 ItemsSource="{Binding KnowledgeBase}"
                                 RowBackground="{DynamicResource SystemChromeMediumLowColor}"
                                 RowHeight="NaN"
+                                SelectedItem="{Binding SelectedKnowledgeRecord}"
+                                SelectionMode="Single"
                                 UseLayoutRounding="True">
                                 <DataGrid.Styles>
                                     <Style Selector="DataGridRow">
@@ -1412,104 +1411,145 @@
                         </views:SidePanel>
                         <!--  Personality  -->
                         <views:SidePanel Header="Личность" IsVisible="{Binding #PersonalityButton.IsChecked}">
-                            <ListBox
-                                Padding="0"
-                                x:DataType="vm:SettingsVM"
-                                Background="Transparent"
-                                DataContext="{x:Static vm:SettingsVM.Instance}"
-                                ItemsSource="{Binding Archetypes}"
-                                SelectedItem="{Binding SelectedArchetype, Mode=TwoWay}">
-                                <ListBox.Styles>
-                                    <Style Selector="ListBoxItem">
-                                        <Setter Property="CornerRadius" Value="0" />
-                                        <Setter Property="Margin" Value="0" />
-                                        <Setter Property="MaxWidth" Value="720" />
-                                        <Setter Property="Tag" Value="{Binding $self.Bounds.Width}" />
-                                        <Style Selector="^[Tag=720]">
-                                            <Setter Property="CornerRadius" Value="5" />
-                                        </Style>
-                                        <Style Selector="^[Tag=720]:nth-child(1)">
-                                            <Setter Property="Margin" Value="0,8,0,0" />
-                                        </Style>
-                                        <Style Selector="^[Tag=720]:nth-last-child(1)">
-                                            <Setter Property="Margin" Value="0,0,0,8" />
-                                        </Style>
-                                    </Style>
-                                    <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
-                                        <Setter Property="Background" Value="{DynamicResource SystemChromeHighColor}" />
-                                    </Style>
-                                    <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
-                                        <Setter Property="Background" Value="{DynamicResource SystemListLowColor}" />
-                                    </Style>
-                                </ListBox.Styles>
-                                <ListBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <StackPanel Spacing="4">
-                                            <Grid>
-                                                <Button
-                                                    Width="{Binding $self.Bounds.Height}"
-                                                    Height="NaN"
-                                                    HorizontalAlignment="Right"
-                                                    VerticalAlignment="Stretch"
-                                                    x:DataType="vm:MainVM"
-                                                    Classes="icon-button"
-                                                    Command="{Binding PromptEditorCommand}"
-                                                    DataContext="{Binding $parent[views:SidePanel].DataContext}"
-                                                    IsVisible="{Binding $parent[ListBoxItem].IsSelected}"
-                                                    ToolTip.Placement="Bottom"
-                                                    ToolTip.Tip="Изменить промпт"
-                                                    ToolTip.VerticalOffset="4">
-                                                    <LucideIcon Kind="Pencil" Size="14" />
-                                                </Button>
-                                                <Border
-                                                    Padding="8,2,6,2"
-                                                    HorizontalAlignment="Left"
-                                                    VerticalAlignment="Center"
-                                                    BorderThickness="1"
-                                                    CornerRadius="7">
-                                                    <Border.Background>
-                                                        <SolidColorBrush Opacity="0.2" Color="{Binding Color}" />
-                                                    </Border.Background>
-                                                    <Border.BorderBrush>
-                                                        <SolidColorBrush Color="{Binding Color}" />
-                                                    </Border.BorderBrush>
-                                                    <StackPanel Orientation="Horizontal" Spacing="2">
-                                                        <TextBlock Text="{Binding Name}">
-                                                            <TextBlock.Foreground>
+                            <ScrollViewer>
+                                <StackPanel
+                                    MaxWidth="720"
+                                    Margin="16,8"
+                                    x:DataType="vm:SettingsVM"
+                                    DataContext="{x:Static vm:SettingsVM.Instance}"
+                                    Spacing="8">
+                                    <TextBlock
+                                        VerticalAlignment="Center"
+                                        FontSize="16"
+                                        FontWeight="DemiBold"
+                                        Text="Профиль"
+                                        TextTrimming="CharacterEllipsis" />
+                                    <views:SideCard
+                                        Header="Имя"
+                                        Icon="{LucideIconContent User,
+                                                                 Size=16,
+                                                                 StrokeWidth=2}"
+                                        IsBigTextBox="True">
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <TextBox Text="{Binding WaifuName, Mode=TwoWay}"/>
+                                            <Button
+                                                Grid.Column="1"
+                                                Margin="6,0,0,0"
+                                                Classes="icon-button">
+                                                <LucideIcon Kind="Dices" Size="20" />
+                                            </Button>
+                                        </Grid>
+                                    </views:SideCard>
+                                    <views:SideCard
+                                        Description="Её лучший день в году"
+                                        Header="День рождения"
+                                        Icon="{LucideIconContent Cake,
+                                                                 Size=20}">
+                                        <TextBox Text="{Binding Birthday, Mode=TwoWay}" Watermark="ГГГГ-ММ-ДД" />
+                                    </views:SideCard>
+                                    <TextBlock
+Margin="0,4,0,4"
+VerticalAlignment="Center"
+FontSize="16"
+FontWeight="DemiBold"
+Text="Архетип"
+TextTrimming="CharacterEllipsis" />
+                                    <ListBox
+Margin="-16,0"
+Padding="0"
+Background="Transparent"
+ItemsSource="{Binding Archetypes}"
+SelectedItem="{Binding SelectedArchetype, Mode=TwoWay}">
+                                        <ListBox.Styles>
+                                            <Style Selector="ListBoxItem">
+                                                <Setter Property="CornerRadius" Value="0" />
+                                                <Setter Property="Margin" Value="0" />
+                                                <Setter Property="MaxWidth" Value="720" />
+                                                <Setter Property="Tag" Value="{Binding $self.Bounds.Width}" />
+                                                <Style Selector="^[Tag=720]">
+                                                    <Setter Property="CornerRadius" Value="5" />
+                                                </Style>
+                                            </Style>
+                                            <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
+                                                <Setter Property="Background"
+Value="{DynamicResource SystemChromeHighColor}" />
+                                            </Style>
+                                            <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
+                                                <Setter Property="Background"
+Value="{DynamicResource SystemListLowColor}" />
+                                            </Style>
+                                        </ListBox.Styles>
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Spacing="4">
+                                                    <Grid>
+                                                        <Button
+Width="{Binding $self.Bounds.Height}"
+Height="NaN"
+HorizontalAlignment="Right"
+VerticalAlignment="Stretch"
+x:DataType="vm:MainVM"
+Classes="icon-button"
+Command="{Binding PromptEditorCommand}"
+DataContext="{Binding $parent[views:SidePanel].DataContext}"
+IsVisible="{Binding $parent[ListBoxItem].IsSelected}"
+ToolTip.Placement="Bottom"
+ToolTip.Tip="Изменить промпт"
+ToolTip.VerticalOffset="4">
+                                                            <LucideIcon Kind="Pencil" Size="14" />
+                                                        </Button>
+                                                        <Border
+Padding="8,2,6,2"
+HorizontalAlignment="Left"
+VerticalAlignment="Center"
+BorderThickness="1"
+CornerRadius="7">
+                                                            <Border.Background>
+                                                                <SolidColorBrush Opacity="0.2" Color="{Binding Color}" />
+                                                            </Border.Background>
+                                                            <Border.BorderBrush>
                                                                 <SolidColorBrush Color="{Binding Color}" />
-                                                            </TextBlock.Foreground>
-                                                        </TextBlock>
-                                                        <TextBlock
-                                                            MinWidth="0"
-                                                            FontFamily="Segoe UI Emoji, Noto Color Emoji, Apple Color Emoji"
-                                                            Text="{Binding Emoji}" />
-                                                    </StackPanel>
-                                                </Border>
-                                            </Grid>
-                                            <TextBlock
-                                                Margin="6,0"
-                                                Tag="{Binding $parent[ListBoxItem].IsSelected}"
-                                                Text="{Binding Description}"
-                                                TextWrapping="Wrap">
-                                                <TextBlock.Styles>
-                                                    <Style Selector="TextBlock[Tag=False]">
-                                                        <Setter Property="Foreground" Value="{DynamicResource SystemBaseMediumHighColor}" />
-                                                    </Style>
-                                                </TextBlock.Styles>
-                                            </TextBlock>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </ListBox.ItemTemplate>
-                            </ListBox>
+                                                            </Border.BorderBrush>
+                                                            <StackPanel Orientation="Horizontal" Spacing="2">
+                                                                <TextBlock Text="{Binding Name}">
+                                                                    <TextBlock.Foreground>
+                                                                        <SolidColorBrush Color="{Binding Color}" />
+                                                                    </TextBlock.Foreground>
+                                                                </TextBlock>
+                                                                <TextBlock
+MinWidth="0"
+FontFamily="Noto Color Emoji, Apple Color Emoji"
+Text="{Binding Emoji}" />
+                                                            </StackPanel>
+                                                        </Border>
+                                                    </Grid>
+                                                    <TextBlock
+Margin="6,0"
+Tag="{Binding $parent[ListBoxItem].IsSelected}"
+Text="{Binding Description}"
+TextWrapping="Wrap">
+                                                        <TextBlock.Styles>
+                                                            <Style Selector="TextBlock[Tag=False]">
+                                                                <Setter Property="Foreground"
+Value="{DynamicResource SystemBaseMediumHighColor}" />
+                                                            </Style>
+                                                        </TextBlock.Styles>
+                                                    </TextBlock>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                </StackPanel>
+                            </ScrollViewer>
                         </views:SidePanel>
                     </Panel>
                 </Border>
                 <GridSplitter
-                    Grid.Column="1"
-                    Width="4"
-                    HorizontalAlignment="Right"
-                    Background="Transparent"
-                    DragCompleted="LeftThumb_OnDragCompleted">
+Grid.Column="1"
+Width="4"
+HorizontalAlignment="Right"
+Background="Transparent"
+DragCompleted="LeftThumb_OnDragCompleted">
                     <GridSplitter.IsVisible>
                         <MultiBinding Converter="{x:Static BoolConverters.Or}">
                             <Binding ElementName="ChatButton" Path="IsChecked" />
@@ -1519,21 +1559,21 @@
                     </GridSplitter.IsVisible>
                 </GridSplitter>
                 <StackPanel
-                    Grid.Column="2"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    IsVisible="{Binding Source={x:Static vm:SettingsVM.Instance}, Path=IsModel3DLoading}"
-                    Spacing="4">
+Grid.Column="2"
+HorizontalAlignment="Center"
+VerticalAlignment="Center"
+IsVisible="{Binding Source={x:Static vm:SettingsVM.Instance}, Path=IsModel3DLoading}"
+Spacing="4">
                     <Arc
-                        Width="36"
-                        Height="36"
-                        Classes="loading"
-                        Opacity="0.4"
-                        StartAngle="0"
-                        Stroke="{Binding $parent[Window].Foreground}"
-                        StrokeLineCap="Round"
-                        StrokeThickness="2"
-                        SweepAngle="270">
+Width="36"
+Height="36"
+Classes="loading"
+Opacity="0.4"
+StartAngle="0"
+Stroke="{Binding $parent[Window].Foreground}"
+StrokeLineCap="Round"
+StrokeThickness="2"
+SweepAngle="270">
                         <Arc.Transitions>
                             <Transitions>
                                 <DoubleTransition Property="RotateTransform.Angle" Duration="0:0:1" />
@@ -1555,11 +1595,11 @@
                     </Image.IsVisible>
                 </Image>
                 <wv:WebView
-                    x:Name="MyWebView"
-                    Grid.Column="2"
-                    Address="{Binding WebAddress}"
-                    DisableBuiltinContextMenus="True"
-                    JavascriptContextCreated="MyWebView_JavascriptContextCreated">
+x:Name="MyWebView"
+Grid.Column="2"
+Address="{Binding WebAddress}"
+DisableBuiltinContextMenus="True"
+JavascriptContextCreated="MyWebView_JavascriptContextCreated">
                     <wv:WebView.IsVisible>
                         <MultiBinding Converter="{x:Static BoolConverters.And}">
                             <Binding Path="!IsModel3DLoading" Source="{x:Static vm:SettingsVM.Instance}" />
@@ -1572,16 +1612,17 @@
                 </wv:WebView>
                 <!--  RightPanel  -->
                 <Border
-                    Grid.Column="3"
-                    x:DataType="vm:SettingsVM"
-                    Background="{DynamicResource SystemChromeMediumColor}"
-                    BorderThickness="1,0,0,0"
-                    DataContext="{x:Static vm:SettingsVM.Instance}"
-                    IsVisible="{Binding #ModelButton.IsChecked}">
+Grid.Column="3"
+x:DataType="vm:SettingsVM"
+Background="{DynamicResource SystemChromeMediumColor}"
+BorderThickness="1,0,0,0"
+DataContext="{x:Static vm:SettingsVM.Instance}"
+IsVisible="{Binding #ModelButton.IsChecked}">
                     <Border.Styles>
                         <Style Selector="TextBox">
                             <Setter Property="CornerRadius" Value="5" />
-                            <Setter Property="FontFamily" Value="{Binding SelectedMonoFontFamily, Source={x:Static vm:SettingsVM.Instance}}" />
+                            <Setter Property="FontFamily"
+Value="{Binding SelectedMonoFontFamily, Source={x:Static vm:SettingsVM.Instance}}" />
                         </Style>
                         <Style Selector="StackPanel[Tag=False]">
                             <Setter Property="IsEnabled" Value="False" />
@@ -1590,69 +1631,79 @@
                     <Grid RowDefinitions="Auto,*">
                         <Border Height="48" BorderThickness="0,0,0,1">
                             <TextBlock
-                                Margin="16,0,16,0"
-                                VerticalAlignment="Center"
-                                FontSize="18"
-                                FontWeight="Bold"
-                                Text="Источник модели"
-                                TextTrimming="CharacterEllipsis" />
+Margin="16,0,16,0"
+VerticalAlignment="Center"
+FontSize="18"
+FontWeight="Bold"
+Text="Источник модели"
+TextTrimming="CharacterEllipsis" />
                         </Border>
                         <ScrollViewer Grid.Row="1">
                             <StackPanel Margin="16,8,16,16" Spacing="8">
                                 <RadioButton
-                                    x:Name="ServerButton"
-                                    GroupName="ModelSource"
-                                    IsChecked="{Binding IsServerQuery}">
+x:Name="ServerButton"
+GroupName="ModelSource"
+IsChecked="{Binding IsServerQuery}">
                                     <TextBlock
-                                        VerticalAlignment="Center"
-                                        FontSize="16"
-                                        FontWeight="DemiBold"
-                                        Text="Сервер"
-                                        TextTrimming="CharacterEllipsis" />
+VerticalAlignment="Center"
+FontSize="16"
+FontWeight="DemiBold"
+Text="Сервер"
+TextTrimming="CharacterEllipsis" />
                                 </RadioButton>
                                 <views:SideCard
-                                    IsBigTextBox="True"
-                                    Header="Порт"
-                                    Icon="{LucideIconContent Hash, Size=16, StrokeWidth=2}"
-                                    IsEnabled="{Binding IsServerQuery}">
+Header="Порт"
+Icon="{LucideIconContent Hash,
+                                                             Size=16,
+                                                             StrokeWidth=2}"
+IsBigTextBox="True"
+IsEnabled="{Binding IsServerQuery}">
                                     <TextBox Text="{Binding Port, Mode=TwoWay}" />
                                 </views:SideCard>
                                 <views:SideCard
-                                    IsBigTextBox="True"
-                                    Header="IP-адрес"
-                                    Icon="{LucideIconContent Network, Size=16, StrokeWidth=2}"
-                                    IsEnabled="{Binding IsServerQuery}">
+Header="IP-адрес"
+Icon="{LucideIconContent Network,
+                                                             Size=16,
+                                                             StrokeWidth=2}"
+IsBigTextBox="True"
+IsEnabled="{Binding IsServerQuery}">
                                     <TextBox Text="{Binding IpAddress, Mode=TwoWay}" />
                                 </views:SideCard>
                                 <RadioButton
-                                    x:Name="ProviderButton"
-                                    GroupName="ModelSource"
-                                    IsChecked="{Binding !IsServerQuery}">
+x:Name="ProviderButton"
+GroupName="ModelSource"
+IsChecked="{Binding !IsServerQuery}">
                                     <TextBlock
-                                        VerticalAlignment="Center"
-                                        FontSize="16"
-                                        FontWeight="DemiBold"
-                                        Text="Облачный провайдер" />
+VerticalAlignment="Center"
+FontSize="16"
+FontWeight="DemiBold"
+Text="Облачный провайдер" />
                                 </RadioButton>
                                 <views:SideCard
-                                    IsBigTextBox="True"
-                                    Header="API Ключ"
-                                    Icon="{LucideIconContent KeyRound, Size=16, StrokeWidth=2}"
-                                    IsEnabled="{Binding !IsServerQuery}">
+Header="API Ключ"
+Icon="{LucideIconContent KeyRound,
+                                                             Size=16,
+                                                             StrokeWidth=2}"
+IsBigTextBox="True"
+IsEnabled="{Binding !IsServerQuery}">
                                     <TextBox Text="{Binding ApiKey, Mode=TwoWay}" />
                                 </views:SideCard>
                                 <views:SideCard
-                                    IsBigTextBox="True"
-                                    Header="API URL"
-                                    Icon="{LucideIconContent Link, Size=16, StrokeWidth=2}"
-                                    IsEnabled="{Binding !IsServerQuery}">
+Header="API URL"
+Icon="{LucideIconContent Link,
+                                                             Size=16,
+                                                             StrokeWidth=2}"
+IsBigTextBox="True"
+IsEnabled="{Binding !IsServerQuery}">
                                     <TextBox Text="{Binding ApiUrl, Mode=TwoWay}" />
                                 </views:SideCard>
                                 <views:SideCard
-                                    IsBigTextBox="True"
-                                    Header="Модель"
-                                    Icon="{LucideIconContent Bot, Size=16, StrokeWidth=2}"
-                                    IsEnabled="{Binding !IsServerQuery}">
+Header="Модель"
+Icon="{LucideIconContent Bot,
+                                                             Size=16,
+                                                             StrokeWidth=2}"
+IsBigTextBox="True"
+IsEnabled="{Binding !IsServerQuery}">
                                     <TextBox Text="{Binding AiModel, Mode=TwoWay}" />
                                 </views:SideCard>
                             </StackPanel>
@@ -1660,11 +1711,11 @@
                     </Grid>
                 </Border>
                 <GridSplitter
-                    Grid.Column="3"
-                    Width="4"
-                    HorizontalAlignment="Left"
-                    Background="Transparent"
-                    DragCompleted="RightThumb_OnDragCompleted">
+Grid.Column="3"
+Width="4"
+HorizontalAlignment="Left"
+Background="Transparent"
+DragCompleted="RightThumb_OnDragCompleted">
                     <GridSplitter.IsVisible>
                         <MultiBinding Converter="{x:Static BoolConverters.Or}">
                             <Binding ElementName="ModelButton" Path="IsChecked" />
@@ -1673,30 +1724,30 @@
                     </GridSplitter.IsVisible>
                 </GridSplitter>
                 <Border
-                    Grid.Column="4"
-                    Background="{DynamicResource SystemChromeMediumColor}"
-                    BorderThickness="1,0,0,0">
+Grid.Column="4"
+Background="{DynamicResource SystemChromeMediumColor}"
+BorderThickness="1,0,0,0">
                     <StackPanel
-                        Margin="5"
-                        HorizontalAlignment="Center"
-                        Spacing="4">
+Margin="5"
+HorizontalAlignment="Center"
+Spacing="4">
                         <ToggleButton
-                            x:Name="ParametersButton"
-                            IsCheckedChanged="RightToggleButton_OnIsCheckedChanged"
-                            ToolTip.HorizontalOffset="4"
-                            ToolTip.Placement="Left"
-                            ToolTip.Tip="Параметры ИИ"
-                            ToolTip.VerticalOffset="0">
+x:Name="ParametersButton"
+IsCheckedChanged="RightToggleButton_OnIsCheckedChanged"
+ToolTip.HorizontalOffset="4"
+ToolTip.Placement="Left"
+ToolTip.Tip="Параметры ИИ"
+ToolTip.VerticalOffset="0">
                             <LucideIcon Kind="Settings2" Size="20" />
                         </ToggleButton>
                         <ToggleButton
-                            x:Name="ModelButton"
-                            IsChecked="True"
-                            IsCheckedChanged="RightToggleButton_OnIsCheckedChanged"
-                            ToolTip.HorizontalOffset="4"
-                            ToolTip.Placement="Left"
-                            ToolTip.Tip="Источник модели"
-                            ToolTip.VerticalOffset="0">
+x:Name="ModelButton"
+IsChecked="True"
+IsCheckedChanged="RightToggleButton_OnIsCheckedChanged"
+ToolTip.HorizontalOffset="4"
+ToolTip.Placement="Left"
+ToolTip.Tip="Источник модели"
+ToolTip.VerticalOffset="0">
                             <LucideIcon Kind="Server" Size="20" />
                         </ToggleButton>
                     </StackPanel>
@@ -1719,13 +1770,13 @@
 
             <!--  Settings  -->
             <Border
-                MaxWidth="1400"
-                MaxHeight="900"
-                Margin="52"
-                Background="{DynamicResource SystemChromeLowColor}"
-                BorderThickness="1"
-                CornerRadius="8"
-                IsVisible="{Binding IsSettingsOpen}">
+MaxWidth="1400"
+MaxHeight="900"
+Margin="52"
+Background="{DynamicResource SystemChromeLowColor}"
+BorderThickness="1"
+CornerRadius="8"
+IsVisible="{Binding IsSettingsOpen}">
                 <Border.Styles>
                     <Style Selector="Separator">
                         <Setter Property="Height" Value="1" />
@@ -1735,15 +1786,15 @@
                 </Border.Styles>
                 <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,*">
                     <TextBlock
-                        Margin="16,12"
-                        FontSize="22"
-                        FontWeight="DemiBold"
-                        Text="Настройки" />
+Margin="16,12"
+FontSize="22"
+FontWeight="DemiBold"
+Text="Настройки" />
                     <ListBox
-                        Grid.Row="1"
-                        Grid.Column="0"
-                        Padding="10,0,10,10"
-                        Background="Transparent">
+Grid.Row="1"
+Grid.Column="0"
+Padding="10,0,10,10"
+Background="Transparent">
                         <ListBox.Styles>
                             <Style Selector="ListBoxItem">
                                 <Setter Property="CornerRadius" Value="4" />
@@ -1760,64 +1811,64 @@
                         <ListBoxItem x:Name="General">
                             <Grid ColumnDefinitions="Auto,*">
                                 <LucideIcon
-                                    Margin="0,0,8,0"
-                                    Kind="Wrench"
-                                    Size="18" />
+Margin="0,0,8,0"
+Kind="Wrench"
+Size="18" />
                                 <TextBlock
-                                    Grid.Column="1"
-                                    VerticalAlignment="Center"
-                                    Text="Общие"
-                                    TextTrimming="CharacterEllipsis" />
+Grid.Column="1"
+VerticalAlignment="Center"
+Text="Общие"
+TextTrimming="CharacterEllipsis" />
                             </Grid>
                         </ListBoxItem>
                         <ListBoxItem x:Name="Sound" IsSelected="True">
                             <Grid ColumnDefinitions="Auto,*">
                                 <LucideIcon
-                                    Margin="0,0,8,0"
-                                    Kind="Volume2"
-                                    Size="18" />
+Margin="0,0,8,0"
+Kind="Volume2"
+Size="18" />
                                 <TextBlock
-                                    Grid.Column="1"
-                                    VerticalAlignment="Center"
-                                    Text="Звук"
-                                    TextTrimming="CharacterEllipsis" />
+Grid.Column="1"
+VerticalAlignment="Center"
+Text="Звук"
+TextTrimming="CharacterEllipsis" />
                             </Grid>
                         </ListBoxItem>
                         <ListBoxItem x:Name="ModelAppearence">
                             <Grid ColumnDefinitions="Auto,*">
                                 <LucideIcon
-                                    Margin="0,0,8,0"
-                                    Kind="Shirt"
-                                    Size="18" />
+Margin="0,0,8,0"
+Kind="Shirt"
+Size="18" />
                                 <TextBlock
-                                    Grid.Column="1"
-                                    VerticalAlignment="Center"
-                                    Text="Внешний вид"
-                                    TextTrimming="CharacterEllipsis" />
+Grid.Column="1"
+VerticalAlignment="Center"
+Text="Внешний вид"
+TextTrimming="CharacterEllipsis" />
                             </Grid>
                         </ListBoxItem>
                         <ListBoxItem>
                             <Grid ColumnDefinitions="Auto,*">
                                 <LucideIcon
-                                    Margin="0,0,8,0"
-                                    Kind="Info"
-                                    Size="18" />
+Margin="0,0,8,0"
+Kind="Info"
+Size="18" />
                                 <TextBlock
-                                    Grid.Column="1"
-                                    VerticalAlignment="Center"
-                                    Text="О программе"
-                                    TextTrimming="CharacterEllipsis" />
+Grid.Column="1"
+VerticalAlignment="Center"
+Text="О программе"
+TextTrimming="CharacterEllipsis" />
                             </Grid>
                         </ListBoxItem>
                     </ListBox>
                     <ScrollViewer
-                        Grid.Row="0"
-                        Grid.RowSpan="2"
-                        Grid.Column="1"
-                        x:DataType="vm:SettingsVM"
-                        BorderBrush="{DynamicResource SystemBaseLowColor}"
-                        BorderThickness="1,0,0,0"
-                        DataContext="{x:Static vm:SettingsVM.Instance}">
+Grid.Row="0"
+Grid.RowSpan="2"
+Grid.Column="1"
+x:DataType="vm:SettingsVM"
+BorderBrush="{DynamicResource SystemBaseLowColor}"
+BorderThickness="1,0,0,0"
+DataContext="{x:Static vm:SettingsVM.Instance}">
                         <Grid>
                             <Grid.Resources>
                                 <ControlTheme x:Key="SettingsGroup" TargetType="Border">
@@ -1836,16 +1887,16 @@
                             </Grid.Styles>
                             <StackPanel Margin="24,12" IsVisible="{Binding #General.IsSelected}">
                                 <TextBlock
-                                    Margin="24,6,0,0"
-                                    FontSize="15"
-                                    FontWeight="Bold"
-                                    Text="Оформление" />
+Margin="24,6,0,0"
+FontSize="15"
+FontWeight="Bold"
+Text="Оформление" />
                                 <Border Theme="{DynamicResource SettingsGroup}">
                                     <StackPanel>
                                         <views:SettingsCard
-                                            Description="Основная тема приложения"
-                                            Header="Тема"
-                                            Icon="{LucideIconContent SunMoon,
+Description="Основная тема приложения"
+Header="Тема"
+Icon="{LucideIconContent SunMoon,
                                                                      20}">
                                             <ComboBox SelectedIndex="{Binding SelectedTheme, Mode=TwoWay}">
                                                 <ComboBoxItem Content="Светлая" />
@@ -1855,34 +1906,35 @@
                                         </views:SettingsCard>
                                         <Separator />
                                         <views:SettingsCard
-                                            Description="Выбор акцентного цвета приложения"
-                                            Header="Акцентный цвет"
-                                            Icon="{LucideIconContent Pipette,
+Description="Выбор акцентного цвета приложения"
+Header="Акцентный цвет"
+Icon="{LucideIconContent Pipette,
                                                                      20}">
                                             <StackPanel Orientation="Horizontal" Spacing="8">
                                                 <TextBlock VerticalAlignment="Center" Text="HEX:" />
                                                 <TextBox
-                                                    Width="90"
-                                                    Padding="6,0,6,0"
-                                                    VerticalContentAlignment="Center"
-                                                    Text="{Binding SelectedColor, Mode=TwoWay}"
-                                                    Watermark="#RRGGBB" />
+Width="90"
+Padding="6,0,6,0"
+VerticalContentAlignment="Center"
+Text="{Binding SelectedColor, Mode=TwoWay}"
+Watermark="#RRGGBB" />
                                                 <Border
-                                                    Width="24"
-                                                    Height="24"
-                                                    Background="{DynamicResource SystemAccentColor}"
-                                                    BorderBrush="{DynamicResource SystemAccentColorDark1}"
-                                                    BorderThickness="1"
-                                                    CornerRadius="12" />
+Width="24"
+Height="24"
+Background="{DynamicResource SystemAccentColor}"
+BorderBrush="{DynamicResource SystemAccentColorDark1}"
+BorderThickness="1"
+CornerRadius="12" />
                                             </StackPanel>
                                         </views:SettingsCard>
                                         <Separator />
                                         <views:SettingsCard
-                                            Description="Выбор шрифта интерфейса приложения"
-                                            Header="Шрифт"
-                                            Icon="{LucideIconContent Type,
+Description="Выбор шрифта интерфейса приложения"
+Header="Шрифт"
+Icon="{LucideIconContent Type,
                                                                      20}">
-                                            <ComboBox ItemsSource="{Binding Fonts}" SelectedItem="{Binding SelectedFont, Mode=TwoWay}">
+                                            <ComboBox ItemsSource="{Binding Fonts}"
+SelectedItem="{Binding SelectedFont, Mode=TwoWay}">
                                                 <Interaction.Behaviors>
                                                     <EventTriggerBehavior EventName="DropDownOpened">
                                                         <InvokeCommandAction Command="{Binding RefreshFontsCommand}" />
@@ -1892,14 +1944,16 @@
                                         </views:SettingsCard>
                                         <Separator />
                                         <views:SettingsCard
-                                            Description="Выбор используемого в приложении моноширинного шрифта"
-                                            Header="Моноширинный шрифт"
-                                            Icon="{LucideIconContent SquareTerminal,
+Description="Выбор используемого в приложении моноширинного шрифта"
+Header="Моноширинный шрифт"
+Icon="{LucideIconContent SquareTerminal,
                                                                      20}">
-                                            <ComboBox ItemsSource="{Binding MonospaceFonts}" SelectedItem="{Binding SelectedMonoFont, Mode=TwoWay}">
+                                            <ComboBox ItemsSource="{Binding MonospaceFonts}"
+SelectedItem="{Binding SelectedMonoFont, Mode=TwoWay}">
                                                 <Interaction.Behaviors>
                                                     <EventTriggerBehavior EventName="DropDownOpened">
-                                                        <InvokeCommandAction Command="{Binding RefreshMonoFontsCommand}" />
+                                                        <InvokeCommandAction
+Command="{Binding RefreshMonoFontsCommand}" />
                                                     </EventTriggerBehavior>
                                                 </Interaction.Behaviors>
                                             </ComboBox>
@@ -1907,32 +1961,35 @@
                                     </StackPanel>
                                 </Border>
                                 <TextBlock
-                                    Margin="24,0,0,0"
-                                    FontSize="15"
-                                    FontWeight="Bold"
-                                    Text="Язык" />
+Margin="24,0,0,0"
+FontSize="15"
+FontWeight="Bold"
+Text="Язык" />
                                 <Border Theme="{DynamicResource SettingsGroup}">
                                     <StackPanel>
                                         <views:SettingsCard
-                                            Description="Язык интерфейса всего приложения"
-                                            Header="Язык интерфейса"
-                                            Icon="{LucideIconContent Globe,
+Description="Язык интерфейса всего приложения"
+Header="Язык интерфейса"
+Icon="{LucideIconContent Globe,
                                                                      20}">
-                                            <ComboBox ItemsSource="{Binding AppLanguages}" SelectedItem="{Binding SelectedAppLanguage}">
+                                            <ComboBox ItemsSource="{Binding AppLanguages}"
+SelectedItem="{Binding SelectedAppLanguage}">
                                                 <ComboBox.ItemTemplate>
                                                     <DataTemplate>
-                                                        <TextBlock Text="{Binding Converter={StaticResource StringValueConverter}}" />
+                                                        <TextBlock
+Text="{Binding Converter={StaticResource StringValueConverter}}" />
                                                     </DataTemplate>
                                                 </ComboBox.ItemTemplate>
                                             </ComboBox>
                                         </views:SettingsCard>
                                         <Separator />
                                         <views:SettingsCard
-                                            Description="Язык, на котором будет происходить общение с моделью. От этого параметра зависит список доступных голосовых моделей"
-                                            Header="Язык модели"
-                                            Icon="{LucideIconContent Languages,
+Description="Язык, на котором будет происходить общение с моделью. От этого параметра зависит список доступных голосовых моделей"
+Header="Язык модели"
+Icon="{LucideIconContent Languages,
                                                                      20}">
-                                            <ComboBox ItemsSource="{Binding Languages}" SelectedItem="{Binding SelectedLanguage}">
+                                            <ComboBox ItemsSource="{Binding Languages}"
+SelectedItem="{Binding SelectedLanguage}">
                                                 <ComboBox.IsEnabled>
                                                     <MultiBinding Converter="{x:Static BoolConverters.And}">
                                                         <Binding Path="!IsSpeakersLoading" />
@@ -1941,7 +1998,8 @@
                                                 </ComboBox.IsEnabled>
                                                 <ComboBox.ItemTemplate>
                                                     <DataTemplate>
-                                                        <TextBlock Text="{Binding Converter={StaticResource StringValueConverter}}" />
+                                                        <TextBlock
+Text="{Binding Converter={StaticResource StringValueConverter}}" />
                                                     </DataTemplate>
                                                 </ComboBox.ItemTemplate>
                                             </ComboBox>
@@ -1951,18 +2009,19 @@
                             </StackPanel>
                             <StackPanel Margin="24,12" IsVisible="{Binding #Sound.IsSelected}">
                                 <TextBlock
-                                    Margin="24,6,0,0"
-                                    FontSize="15"
-                                    FontWeight="Bold"
-                                    Text="Провайдер" />
+Margin="24,6,0,0"
+FontSize="15"
+FontWeight="Bold"
+Text="Провайдер" />
                                 <Border Theme="{DynamicResource SettingsGroup}">
                                     <StackPanel>
                                         <views:SettingsCard
-                                            Description="Выбор технологии синтеза речи"
-                                            Header="Источник"
-                                            Icon="{LucideIconContent Cpu,
+Description="Выбор технологии синтеза речи"
+Header="Источник"
+Icon="{LucideIconContent Cpu,
                                                                      20}">
-                                            <ComboBox ItemsSource="{Binding Sources}" SelectedItem="{Binding SelectedSource}">
+                                            <ComboBox ItemsSource="{Binding Sources}"
+SelectedItem="{Binding SelectedSource}">
                                                 <ComboBox.IsEnabled>
                                                     <MultiBinding Converter="{x:Static BoolConverters.And}">
                                                         <Binding Path="!IsSpeakersLoading" />
@@ -1973,29 +2032,30 @@
                                         </views:SettingsCard>
                                         <Separator />
                                         <views:SettingsCard
-                                            Description="Технологическая база для генерации речи"
-                                            Header="Модель синтеза"
-                                            Icon="{LucideIconContent Bot,
+Description="Технологическая база для генерации речи"
+Header="Модель синтеза"
+Icon="{LucideIconContent Bot,
                                                                      20}">
                                             <StackPanel Orientation="Horizontal" Spacing="8">
                                                 <StackPanel
-                                                    VerticalAlignment="Center"
-                                                    IsVisible="{Binding IsDownloading}"
-                                                    Spacing="2">
+VerticalAlignment="Center"
+IsVisible="{Binding IsDownloading}"
+Spacing="2">
                                                     <Grid>
                                                         <TextBlock
-                                                            FontFamily="{Binding SelectedMonoFontFamily}"
-                                                            FontSize="12"
-                                                            Text="{Binding DownloadSpeed, StringFormat={}{0} MB/s}" />
+FontFamily="{Binding SelectedMonoFontFamily}"
+FontSize="12"
+Text="{Binding DownloadSpeed, StringFormat={}{0} MB/s}" />
                                                         <TextBlock
-                                                            HorizontalAlignment="Right"
-                                                            FontFamily="{Binding SelectedMonoFontFamily}"
-                                                            FontSize="12"
-                                                            Text="{Binding DownloadProgress, StringFormat={}{0}%}" />
+HorizontalAlignment="Right"
+FontFamily="{Binding SelectedMonoFontFamily}"
+FontSize="12"
+Text="{Binding DownloadProgress, StringFormat={}{0}%}" />
                                                     </Grid>
                                                     <ProgressBar MinWidth="160" Value="{Binding DownloadProgress}" />
                                                 </StackPanel>
-                                                <Button Classes="icon-button" Command="{Binding DownloadVoiceModelCommand}">
+                                                <Button Classes="icon-button"
+Command="{Binding DownloadVoiceModelCommand}">
                                                     <Button.IsVisible>
                                                         <MultiBinding Converter="{x:Static BoolConverters.And}">
                                                             <Binding Path="!IsSelectedVoiceModelLoaded" />
@@ -2005,12 +2065,13 @@
                                                     <LucideIcon Kind="Download" Size="20" />
                                                 </Button>
                                                 <Button
-                                                    Classes="icon-button"
-                                                    Command="{Binding CancelDownloadCommand}"
-                                                    IsVisible="{Binding IsDownloading}">
+Classes="icon-button"
+Command="{Binding CancelDownloadCommand}"
+IsVisible="{Binding IsDownloading}">
                                                     <LucideIcon Kind="CircleX" Size="18" />
                                                 </Button>
-                                                <ComboBox ItemsSource="{Binding Models}" SelectedItem="{Binding SelectedVoiceModel}">
+                                                <ComboBox ItemsSource="{Binding Models}"
+SelectedItem="{Binding SelectedVoiceModel}">
                                                     <ComboBox.IsEnabled>
                                                         <MultiBinding Converter="{x:Static BoolConverters.And}">
                                                             <Binding Path="!IsSpeakersLoading" />
@@ -2022,12 +2083,13 @@
                                         </views:SettingsCard>
                                         <Separator />
                                         <views:SettingsCard
-                                            Description="Конкретный голос и тембр, доступный в рамках выбранной модели"
-                                            Header="Голос"
-                                            Icon="{LucideIconContent Speech,
+Description="Конкретный голос и тембр, доступный в рамках выбранной модели"
+Header="Голос"
+Icon="{LucideIconContent Speech,
                                                                      20}">
                                             <Grid>
-                                                <ComboBox ItemsSource="{Binding Speakers}" SelectedItem="{Binding SelectedSpeaker}">
+                                                <ComboBox ItemsSource="{Binding Speakers}"
+SelectedItem="{Binding SelectedSpeaker}">
                                                     <ComboBox.IsVisible>
                                                         <MultiBinding Converter="{x:Static BoolConverters.And}">
                                                             <Binding Path="!IsSpeakersLoading" />
@@ -2036,24 +2098,24 @@
                                                     </ComboBox.IsVisible>
                                                 </ComboBox>
                                                 <Arc
-                                                    Width="24"
-                                                    Height="24"
-                                                    Classes="loading"
-                                                    IsVisible="{Binding IsSpeakersLoading}"
-                                                    Opacity="0.4"
-                                                    StartAngle="0"
-                                                    Stroke="{Binding $parent[Window].Foreground}"
-                                                    StrokeLineCap="Round"
-                                                    StrokeThickness="2"
-                                                    SweepAngle="270">
+Width="24"
+Height="24"
+Classes="loading"
+IsVisible="{Binding IsSpeakersLoading}"
+Opacity="0.4"
+StartAngle="0"
+Stroke="{Binding $parent[Window].Foreground}"
+StrokeLineCap="Round"
+StrokeThickness="2"
+SweepAngle="270">
                                                     <Arc.RenderTransform>
                                                         <RotateTransform />
                                                     </Arc.RenderTransform>
                                                 </Arc>
                                                 <TextBlock
-                                                    VerticalAlignment="Center"
-                                                    FontWeight="DemiBold"
-                                                    Text="Загрузите модель">
+VerticalAlignment="Center"
+FontWeight="DemiBold"
+Text="Загрузите модель">
                                                     <TextBlock.IsVisible>
                                                         <MultiBinding Converter="{x:Static BoolConverters.And}">
                                                             <Binding Path="!IsSpeakersLoading" />
@@ -2066,16 +2128,16 @@
                                     </StackPanel>
                                 </Border>
                                 <TextBlock
-                                    Margin="24,0,0,0"
-                                    FontSize="15"
-                                    FontWeight="Bold"
-                                    Text="Голос" />
+Margin="24,0,0,0"
+FontSize="15"
+FontWeight="Bold"
+Text="Голос" />
                                 <Border Theme="{DynamicResource SettingsGroup}">
                                     <StackPanel>
                                         <views:SettingsCard
-                                            Description="Общая громкость голоса"
-                                            Header="Громкость"
-                                            Tag="{Binding VolumeLevel}">
+Description="Общая громкость голоса"
+Header="Громкость"
+Tag="{Binding VolumeLevel}">
                                             <views:SettingsCard.Styles>
                                                 <Style Selector="views|SettingsCard[Tag=0]">
                                                     <Setter Property="Icon">
@@ -2116,64 +2178,64 @@
                                             </views:SettingsCard.Styles>
                                             <StackPanel Orientation="Horizontal" Spacing="10">
                                                 <Slider
-                                                    Maximum="2.0"
-                                                    Minimum="0.0"
-                                                    Value="{Binding Volume, Mode=TwoWay}" />
+Maximum="2.0"
+Minimum="0.0"
+Value="{Binding Volume, Mode=TwoWay}" />
                                                 <TextBox
-                                                    Width="64"
-                                                    HorizontalContentAlignment="Center"
-                                                    Text="{Binding Volume, Mode=TwoWay, StringFormat='{}{0:0.0}'}" />
+Width="64"
+HorizontalContentAlignment="Center"
+Text="{Binding Volume, Mode=TwoWay, StringFormat='{}{0:0.0}'}" />
                                             </StackPanel>
                                         </views:SettingsCard>
                                         <Separator />
                                         <views:SettingsCard
-                                            Description="Регулировка высоты тона: низкие значения делают голос более грубым и глубоким, высокие — тонким и звонким"
-                                            Header="Высота голоса"
-                                            Icon="{LucideIconContent AudioLines,
+Description="Регулировка высоты тона: низкие значения делают голос более грубым и глубоким, высокие — тонким и звонким"
+Header="Высота голоса"
+Icon="{LucideIconContent AudioLines,
                                                                      20}">
                                             <StackPanel Orientation="Horizontal" Spacing="10">
                                                 <Slider
-                                                    Maximum="2.0"
-                                                    Minimum="0.0"
-                                                    Value="{Binding Pitch, Mode=TwoWay}" />
+Maximum="2.0"
+Minimum="0.0"
+Value="{Binding Pitch, Mode=TwoWay}" />
                                                 <TextBox
-                                                    Width="64"
-                                                    HorizontalContentAlignment="Center"
-                                                    Text="{Binding Pitch, Mode=TwoWay, StringFormat='{}{0:0.0}'}" />
+Width="64"
+HorizontalContentAlignment="Center"
+Text="{Binding Pitch, Mode=TwoWay, StringFormat='{}{0:0.0}'}" />
                                             </StackPanel>
                                         </views:SettingsCard>
                                         <Separator />
                                         <views:SettingsCard
-                                            Description="Ясность и звонкость произношения. Повышает четкость и разборчивость слов"
-                                            Header="Верхние частоты"
-                                            Icon="{LucideIconContent ChartNoAxesColumnIncreasing,
+Description="Ясность и звонкость произношения. Повышает четкость и разборчивость слов"
+Header="Верхние частоты"
+Icon="{LucideIconContent ChartNoAxesColumnIncreasing,
                                                                      20}">
                                             <StackPanel Orientation="Horizontal" Spacing="10">
                                                 <Slider
-                                                    Maximum="10.0"
-                                                    Minimum="-10.0"
-                                                    Value="{Binding Treble, Mode=TwoWay}" />
+Maximum="10.0"
+Minimum="-10.0"
+Value="{Binding Treble, Mode=TwoWay}" />
                                                 <TextBox
-                                                    Width="64"
-                                                    HorizontalContentAlignment="Center"
-                                                    Text="{Binding Treble, Mode=TwoWay, StringFormat='{}{0:0.0}'}" />
+Width="64"
+HorizontalContentAlignment="Center"
+Text="{Binding Treble, Mode=TwoWay, StringFormat='{}{0:0.0}'}" />
                                             </StackPanel>
                                         </views:SettingsCard>
                                         <Separator />
                                         <views:SettingsCard
-                                            Description="Глубина и плотность голоса. Помогает убрать писклявость"
-                                            Header="Нижние частоты"
-                                            Icon="{LucideIconContent ChartNoAxesColumnDecreasing,
+Description="Глубина и плотность голоса. Помогает убрать писклявость"
+Header="Нижние частоты"
+Icon="{LucideIconContent ChartNoAxesColumnDecreasing,
                                                                      20}">
                                             <StackPanel Orientation="Horizontal" Spacing="10">
                                                 <Slider
-                                                    Maximum="10.0"
-                                                    Minimum="-10.0"
-                                                    Value="{Binding Bass, Mode=TwoWay}" />
+Maximum="10.0"
+Minimum="-10.0"
+Value="{Binding Bass, Mode=TwoWay}" />
                                                 <TextBox
-                                                    Width="64"
-                                                    HorizontalContentAlignment="Center"
-                                                    Text="{Binding Bass, Mode=TwoWay, StringFormat='{}{0:0.0}'}" />
+Width="64"
+HorizontalContentAlignment="Center"
+Text="{Binding Bass, Mode=TwoWay, StringFormat='{}{0:0.0}'}" />
                                             </StackPanel>
                                         </views:SettingsCard>
                                     </StackPanel>
@@ -2181,58 +2243,60 @@
                             </StackPanel>
                             <StackPanel Margin="24,12" IsVisible="{Binding #ModelAppearence.IsSelected}">
                                 <TextBlock
-                                    Margin="24,6,0,0"
-                                    FontSize="15"
-                                    FontWeight="Bold"
-                                    Text="Модель" />
+Margin="24,6,0,0"
+FontSize="15"
+FontWeight="Bold"
+Text="Модель" />
                                 <Border Theme="{DynamicResource SettingsGroup}">
                                     <StackPanel>
                                         <views:SettingsCard
-                                            Description="Выбор модели персонажа с устройства. Скачанные .vrm файлы моделей доступны по пути /какой-то/путь. В эту же директорию файл модели скопируется при добавлении"
-                                            Header="Модель персонажа"
-                                            Icon="{LucideIconContent Box,
+Description="Выбор модели персонажа с устройства. Скачанные .vrm файлы моделей доступны по пути /какой-то/путь. В эту же директорию файл модели скопируется при добавлении"
+Header="Модель персонажа"
+Icon="{LucideIconContent Box,
                                                                      Size=20}">
                                             <Grid>
                                                 <Button
-                                                    Classes="word-button"
-                                                    Command="{Binding OpenModel3DFileCommand}"
-                                                    Content="Добавить"
-                                                    IsVisible="{Binding !IsModel3DLoading}" />
+Classes="word-button"
+Command="{Binding OpenModel3DFileCommand}"
+Content="Добавить"
+IsVisible="{Binding !IsModel3DLoading}" />
                                                 <StackPanel
-                                                    HorizontalAlignment="Center"
-                                                    VerticalAlignment="Center"
-                                                    IsVisible="{Binding IsModel3DLoading}"
-                                                    Orientation="Horizontal"
-                                                    Spacing="6">
+HorizontalAlignment="Center"
+VerticalAlignment="Center"
+IsVisible="{Binding IsModel3DLoading}"
+Orientation="Horizontal"
+Spacing="6">
                                                     <Arc
-                                                        Width="16"
-                                                        Height="16"
-                                                        Classes="loading"
-                                                        StartAngle="0"
-                                                        Stroke="{DynamicResource SystemAccentColor}"
-                                                        StrokeJoin="Round"
-                                                        StrokeLineCap="Round"
-                                                        StrokeThickness="1.5"
-                                                        SweepAngle="270">
+Width="16"
+Height="16"
+Classes="loading"
+StartAngle="0"
+Stroke="{DynamicResource SystemAccentColor}"
+StrokeJoin="Round"
+StrokeLineCap="Round"
+StrokeThickness="1.5"
+SweepAngle="270">
                                                         <Arc.Transitions>
                                                             <Transitions>
-                                                                <DoubleTransition Property="RotateTransform.Angle" Duration="0:0:1" />
+                                                                <DoubleTransition Property="RotateTransform.Angle"
+Duration="0:0:1" />
                                                             </Transitions>
                                                         </Arc.Transitions>
                                                         <Arc.RenderTransform>
                                                             <RotateTransform />
                                                         </Arc.RenderTransform>
                                                     </Arc>
-                                                    <TextBlock Foreground="{DynamicResource SystemAccentColor}" Text="Загрузка модели" />
+                                                    <TextBlock Foreground="{DynamicResource SystemAccentColor}"
+Text="Загрузка модели" />
                                                 </StackPanel>
                                             </Grid>
                                         </views:SettingsCard>
                                         <ListBox
-                                            Margin="-3,8,-3,0"
-                                            Background="Transparent"
-                                            IsEnabled="{Binding !IsModel3DLoading}"
-                                            ItemsSource="{Binding Models3D}"
-                                            SelectedItem="{Binding SelectedModel3D, Mode=TwoWay}">
+Margin="-3,8,-3,0"
+Background="Transparent"
+IsEnabled="{Binding !IsModel3DLoading}"
+ItemsSource="{Binding Models3D}"
+SelectedItem="{Binding SelectedModel3D, Mode=TwoWay}">
                                             <ListBox.Styles>
                                                 <Style Selector="ListBoxItem">
                                                     <Setter Property="Height" Value="30" />
@@ -2240,22 +2304,34 @@
                                                     <Setter Property="VerticalContentAlignment" Value="Center" />
                                                     <Setter Property="Margin" Value="3" />
                                                     <Setter Property="CornerRadius" Value="15" />
-                                                    <Setter Property="Background" Value="{DynamicResource SystemAccentColorLight3}" />
-                                                    <Setter Property="Foreground" Value="{DynamicResource SystemAccentColorDark3}" />
+                                                    <Setter Property="Background"
+Value="{DynamicResource SystemAccentColorLight3}" />
+                                                    <Setter Property="Foreground"
+Value="{DynamicResource SystemAccentColorDark3}" />
                                                 </Style>
-                                                <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-                                                    <Setter Property="Background" Value="{DynamicResource SystemAccentColorLight2}" />
-                                                    <Setter Property="Foreground" Value="{DynamicResource SystemAccentColorDark3}" />
+                                                <Style
+Selector="ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                                                    <Setter Property="Background"
+Value="{DynamicResource SystemAccentColorLight2}" />
+                                                    <Setter Property="Foreground"
+Value="{DynamicResource SystemAccentColorDark3}" />
                                                 </Style>
-                                                <Style Selector="ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
-                                                    <Setter Property="Background" Value="{DynamicResource SystemAccentColorDark3}" />
-                                                    <Setter Property="Foreground" Value="{DynamicResource SystemAccentColorLight3}" />
+                                                <Style
+Selector="ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+                                                    <Setter Property="Background"
+Value="{DynamicResource SystemAccentColorDark3}" />
+                                                    <Setter Property="Foreground"
+Value="{DynamicResource SystemAccentColorLight3}" />
                                                 </Style>
-                                                <Style Selector="ListBoxItem:disabled /template/ ContentPresenter#PART_ContentPresenter">
-                                                    <Setter Property="Background" Value="{DynamicResource SystemListLowColor}" />
+                                                <Style
+Selector="ListBoxItem:disabled /template/ ContentPresenter#PART_ContentPresenter">
+                                                    <Setter Property="Background"
+Value="{DynamicResource SystemListLowColor}" />
                                                 </Style>
-                                                <Style Selector="ListBoxItem:disabled:selected /template/ ContentPresenter#PART_ContentPresenter">
-                                                    <Setter Property="Background" Value="{DynamicResource SystemListMediumColor}" />
+                                                <Style
+Selector="ListBoxItem:disabled:selected /template/ ContentPresenter#PART_ContentPresenter">
+                                                    <Setter Property="Background"
+Value="{DynamicResource SystemListMediumColor}" />
                                                 </Style>
                                             </ListBox.Styles>
                                             <ListBox.ItemsPanel>
@@ -2266,28 +2342,28 @@
                                         </ListBox>
                                         <Separator />
                                         <views:SettingsCard
-                                            Description="Путь к папке, в которую должны добавляться модели"
-                                            Header="Папка моделей"
-                                            Icon="{LucideIconContent FolderClosed,
+Description="Путь к папке, в которую должны добавляться модели"
+Header="Папка моделей"
+Icon="{LucideIconContent FolderClosed,
                                                                      Size=20}">
                                             <StackPanel Orientation="Horizontal" Spacing="10">
                                                 <Border
-                                                    MaxWidth="260"
-                                                    VerticalAlignment="Center"
-                                                    Background="{DynamicResource SystemAccentColorLight3}"
-                                                    CornerRadius="4">
+MaxWidth="260"
+VerticalAlignment="Center"
+Background="{DynamicResource SystemAccentColorLight3}"
+CornerRadius="4">
                                                     <TextBlock
-                                                        Margin="0"
-                                                        Padding="6,2,6,2"
-                                                        FontFamily="{Binding SelectedMonoFontFamily, Source={x:Static vm:SettingsVM.Instance}}"
-                                                        Foreground="{DynamicResource SystemAccentColorDark3}"
-                                                        Text="{Binding Model3DFolder}"
-                                                        TextTrimming="LeadingCharacterEllipsis" />
+Margin="0"
+Padding="6,2,6,2"
+FontFamily="{Binding SelectedMonoFontFamily, Source={x:Static vm:SettingsVM.Instance}}"
+Foreground="{DynamicResource SystemAccentColorDark3}"
+Text="{Binding Model3DFolder}"
+TextTrimming="LeadingCharacterEllipsis" />
                                                 </Border>
                                                 <Button
-                                                    Classes="word-button"
-                                                    Command="{Binding ChangeModel3DFolderCommand}"
-                                                    Content="Изменить" />
+Classes="word-button"
+Command="{Binding ChangeModel3DFolderCommand}"
+Content="Изменить" />
                                             </StackPanel>
                                         </views:SettingsCard>
                                     </StackPanel>
@@ -2296,112 +2372,112 @@
                         </Grid>
                     </ScrollViewer>
                     <Button
-                        Grid.Row="0"
-                        Grid.RowSpan="2"
-                        Grid.Column="0"
-                        Grid.ColumnSpan="2"
-                        Margin="6"
-                        HorizontalAlignment="Right"
-                        VerticalAlignment="Top"
-                        Classes="icon-button"
-                        Command="{Binding SettingsCommand}">
+Grid.Row="0"
+Grid.RowSpan="2"
+Grid.Column="0"
+Grid.ColumnSpan="2"
+Margin="6"
+HorizontalAlignment="Right"
+VerticalAlignment="Top"
+Classes="icon-button"
+Command="{Binding SettingsCommand}">
                         <LucideIcon Kind="X" Size="18" />
                     </Button>
                 </Grid>
             </Border>
             <!--  Prompt Editor  -->
             <Border
-                MaxWidth="800"
-                MaxHeight="500"
-                Margin="52"
-                Padding="16,12,16,12"
-                Background="{DynamicResource SystemChromeLowColor}"
-                BorderThickness="1"
-                CornerRadius="8"
-                IsVisible="{Binding IsPromptEditorOpen}">
+MaxWidth="800"
+MaxHeight="500"
+Margin="52"
+Padding="16,12,16,12"
+Background="{DynamicResource SystemChromeLowColor}"
+BorderThickness="1"
+CornerRadius="8"
+IsVisible="{Binding IsPromptEditorOpen}">
                 <Grid RowDefinitions="Auto,*,Auto">
                     <TextBlock
-                        HorizontalAlignment="Left"
-                        VerticalAlignment="Center"
-                        FontSize="22"
-                        FontWeight="DemiBold"
-                        Text="Редактировать промпт" />
+HorizontalAlignment="Left"
+VerticalAlignment="Center"
+FontSize="22"
+FontWeight="DemiBold"
+Text="Редактировать промпт" />
                     <TextBox
-                        Grid.Row="1"
-                        Height="NaN"
-                        Margin="0,12"
-                        Padding="12"
-                        VerticalAlignment="Stretch"
-                        VerticalContentAlignment="Top"
-                        x:DataType="vm:SettingsVM"
-                        AcceptsReturn="True"
-                        AcceptsTab="True"
-                        DataContext="{x:Static vm:SettingsVM.Instance}"
-                        Text="{Binding SelectedArchetype.Prompt, Mode=TwoWay}"
-                        TextWrapping="Wrap" />
+Grid.Row="1"
+Height="NaN"
+Margin="0,12"
+Padding="12"
+VerticalAlignment="Stretch"
+VerticalContentAlignment="Top"
+x:DataType="vm:SettingsVM"
+AcceptsReturn="True"
+AcceptsTab="True"
+DataContext="{x:Static vm:SettingsVM.Instance}"
+Text="{Binding SelectedArchetype.Prompt, Mode=TwoWay}"
+TextWrapping="Wrap" />
                     <StackPanel
-                        Grid.Row="2"
-                        HorizontalAlignment="Right"
-                        Orientation="Horizontal"
-                        Spacing="6">
+Grid.Row="2"
+HorizontalAlignment="Right"
+Orientation="Horizontal"
+Spacing="6">
                         <Button
-                            Classes="word-button"
-                            Command="{Binding SavePromptCommand}"
-                            Content="Сохранить" />
+Classes="word-button"
+Command="{Binding SavePromptCommand}"
+Content="Сохранить" />
                         <Button
-                            Classes="word-button"
-                            Command="{Binding PromptEditorCommand}"
-                            Content="Отмена" />
+Classes="word-button"
+Command="{Binding PromptEditorCommand}"
+Content="Отмена" />
                     </StackPanel>
                     <Button
-                        Grid.Row="0"
-                        Grid.RowSpan="2"
-                        HorizontalAlignment="Right"
-                        VerticalAlignment="Top"
-                        Classes="icon-button"
-                        Command="{Binding PromptEditorCommand}">
+Grid.Row="0"
+Grid.RowSpan="2"
+HorizontalAlignment="Right"
+VerticalAlignment="Top"
+Classes="icon-button"
+Command="{Binding PromptEditorCommand}">
                         <LucideIcon Kind="X" Size="18" />
                     </Button>
                 </Grid>
             </Border>
             <!--  Deleting Message Dialog  -->
             <Border
-                MaxWidth="500"
-                MaxHeight="180"
-                Margin="52"
-                Padding="16,12,16,12"
-                Background="{DynamicResource SystemChromeLowColor}"
-                BorderThickness="1"
-                CornerRadius="8"
-                IsVisible="{Binding IsDeletingMessageDialogOpen}">
+MaxWidth="500"
+MaxHeight="180"
+Margin="52"
+Padding="16,12,16,12"
+Background="{DynamicResource SystemChromeLowColor}"
+BorderThickness="1"
+CornerRadius="8"
+IsVisible="{Binding IsDeletingMessageDialogOpen}">
                 <Grid RowDefinitions="Auto,*,Auto">
                     <TextBlock
-                        HorizontalAlignment="Left"
-                        VerticalAlignment="Center"
-                        FontSize="22"
-                        FontWeight="DemiBold"
-                        Text="Удаление" />
+HorizontalAlignment="Left"
+VerticalAlignment="Center"
+FontSize="22"
+FontWeight="DemiBold"
+Text="Удаление" />
                     <TextBlock
-                        Grid.Row="1"
-                        Padding="0,12"
-                        HorizontalAlignment="Left"
-                        VerticalAlignment="Top"
-                        FontSize="16"
-                        TextWrapping="Wrap"
-                        Text="Вы уверены, что хотите удалить выбранные сообщения?" />
+Grid.Row="1"
+Padding="0,12"
+HorizontalAlignment="Left"
+VerticalAlignment="Top"
+FontSize="16"
+Text="Вы уверены, что хотите удалить выбранные сообщения?"
+TextWrapping="Wrap" />
                     <StackPanel
-                        Grid.Row="2"
-                        Margin="4"
-                        HorizontalAlignment="Right"
-                        Orientation="Horizontal"
-                        Spacing="6">
+Grid.Row="2"
+Margin="4"
+HorizontalAlignment="Right"
+Orientation="Horizontal"
+Spacing="6">
                         <Button
-                            Background="{DynamicResource ErrorLowColor}"
-                            BorderBrush="{DynamicResource SystemErrorTextColor}"
-                            Classes="word-button"
-                            Command="{Binding DeleteMessageCommand}"
-                            Content="Удалить"
-                            Foreground="{DynamicResource SystemErrorTextColor}">
+Background="{DynamicResource ErrorLowColor}"
+BorderBrush="{DynamicResource SystemErrorTextColor}"
+Classes="word-button"
+Command="{Binding DeleteMessageCommand}"
+Content="Удалить"
+Foreground="{DynamicResource SystemErrorTextColor}">
                             <Button.Styles>
                                 <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
                                     <Setter Property="Foreground" Value="{DynamicResource SystemErrorTextColor}" />
@@ -2416,59 +2492,59 @@
                             </Button.Styles>
                         </Button>
                         <Button
-                            Classes="word-button"
-                            Command="{Binding DeletingMessageDialogCommand}"
-                            Content="Отмена" />
+Classes="word-button"
+Command="{Binding DeletingMessageDialogCommand}"
+Content="Отмена" />
                     </StackPanel>
                     <Button
-                        Grid.Row="0"
-                        Grid.RowSpan="2"
-                        HorizontalAlignment="Right"
-                        VerticalAlignment="Top"
-                        Classes="icon-button"
-                        Command="{Binding DeletingMessageDialogCommand}">
+Grid.Row="0"
+Grid.RowSpan="2"
+HorizontalAlignment="Right"
+VerticalAlignment="Top"
+Classes="icon-button"
+Command="{Binding DeletingMessageDialogCommand}">
                         <LucideIcon Kind="X" Size="18" />
                     </Button>
                 </Grid>
             </Border>
-            <!-- Deleting KnowledgeRecord Dialog -->
+            <!--  Deleting KnowledgeRecord Dialog  -->
             <Border
-                MaxWidth="500"
-                MaxHeight="180"
-                Margin="52"
-                Padding="16,12,16,12"
-                Background="{DynamicResource SystemChromeLowColor}"
-                BorderThickness="1"
-                CornerRadius="8"
-                IsVisible="{Binding IsDeletingRecordDialogOpen}">
+MaxWidth="500"
+MaxHeight="180"
+Margin="52"
+Padding="16,12,16,12"
+Background="{DynamicResource SystemChromeLowColor}"
+BorderThickness="1"
+CornerRadius="8"
+IsVisible="{Binding IsDeletingRecordDialogOpen}">
                 <Grid RowDefinitions="Auto,*,Auto">
                     <TextBlock
-                        HorizontalAlignment="Left"
-                        VerticalAlignment="Center"
-                        FontSize="22"
-                        FontWeight="DemiBold"
-                        Text="Удаление" />
+HorizontalAlignment="Left"
+VerticalAlignment="Center"
+FontSize="22"
+FontWeight="DemiBold"
+Text="Удаление" />
                     <TextBlock
-                        Grid.Row="1"
-                        Padding="0,12"
-                        HorizontalAlignment="Left"
-                        VerticalAlignment="Top"
-                        FontSize="16"
-                        TextWrapping="Wrap"
-                        Text="Вы уверены, что хотите удалить выбранную запись из базы знаний?" />
+Grid.Row="1"
+Padding="0,12"
+HorizontalAlignment="Left"
+VerticalAlignment="Top"
+FontSize="16"
+Text="Вы уверены, что хотите удалить выбранную запись из базы знаний?"
+TextWrapping="Wrap" />
                     <StackPanel
-                        Grid.Row="2"
-                        Margin="4"
-                        HorizontalAlignment="Right"
-                        Orientation="Horizontal"
-                        Spacing="6">
+Grid.Row="2"
+Margin="4"
+HorizontalAlignment="Right"
+Orientation="Horizontal"
+Spacing="6">
                         <Button
-                            Background="{DynamicResource ErrorLowColor}"
-                            BorderBrush="{DynamicResource SystemErrorTextColor}"
-                            Classes="word-button"
-                            Command="{Binding DeleteKnowledgeRecordCommand}"
-                            Content="Удалить"
-                            Foreground="{DynamicResource SystemErrorTextColor}">
+Background="{DynamicResource ErrorLowColor}"
+BorderBrush="{DynamicResource SystemErrorTextColor}"
+Classes="word-button"
+Command="{Binding DeleteKnowledgeRecordCommand}"
+Content="Удалить"
+Foreground="{DynamicResource SystemErrorTextColor}">
                             <Button.Styles>
                                 <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
                                     <Setter Property="Foreground" Value="{DynamicResource SystemErrorTextColor}" />
@@ -2483,35 +2559,35 @@
                             </Button.Styles>
                         </Button>
                         <Button
-                            Classes="word-button"
-                            Command="{Binding DeletingRecordDialogCommand}"
-                            Content="Отмена" />
+Classes="word-button"
+Command="{Binding DeletingRecordDialogCommand}"
+Content="Отмена" />
                     </StackPanel>
                     <Button
-                        Grid.Row="0"
-                        Grid.RowSpan="2"
-                        HorizontalAlignment="Right"
-                        VerticalAlignment="Top"
-                        Classes="icon-button"
-                        Command="{Binding DeletingRecordDialogCommand}">
+Grid.Row="0"
+Grid.RowSpan="2"
+HorizontalAlignment="Right"
+VerticalAlignment="Top"
+Classes="icon-button"
+Command="{Binding DeletingRecordDialogCommand}">
                         <LucideIcon Kind="X" Size="18" />
                     </Button>
                 </Grid>
-            </Border>    
+            </Border>
         </Grid>
         <!--  Startup  -->
         <StackPanel
-            VerticalAlignment="Center"
-            IsVisible="{Binding IsAppInitializing, Source={x:Static vm:SettingsVM.Instance}}"
-            Spacing="16">
+VerticalAlignment="Center"
+IsVisible="{Binding IsAppInitializing, Source={x:Static vm:SettingsVM.Instance}}"
+Spacing="16">
             <TextBlock HorizontalAlignment="Center" Text="{Binding InitializingMessage}" />
             <ProgressBar
-                Height="8"
-                MaxWidth="1000"
-                Margin="100,0"
-                CornerRadius="3"
-                IsIndeterminate="{Binding IsAppInitializing, Source={x:Static vm:SettingsVM.Instance}}"
-                IsVisible="{Binding IsAppInitializing, Source={x:Static vm:SettingsVM.Instance}}" />
+Height="8"
+MaxWidth="1000"
+Margin="100,0"
+CornerRadius="3"
+IsIndeterminate="{Binding IsAppInitializing, Source={x:Static vm:SettingsVM.Instance}}"
+IsVisible="{Binding IsAppInitializing, Source={x:Static vm:SettingsVM.Instance}}" />
         </StackPanel>
     </Grid>
 </Window>

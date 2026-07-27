@@ -96,6 +96,8 @@ public partial class SettingsVM : ObservableValidator
         Console.WriteLine("модель 3д есть");
 
         // Personality
+        WaifuName = SettingsModel.WaifuName;
+        Birthday = SettingsModel.Birthday.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
         SelectedArchetype = 
             Archetypes.Find(x => x.Name == SettingsModel.SelectedArchetype) ?? 
             Archetypes[0];
@@ -153,6 +155,8 @@ public partial class SettingsVM : ObservableValidator
         SettingsModel.Model3DFolder = Model3DFolder;
 
         // Personality Settings
+        SettingsModel.WaifuName = WaifuName;
+        SettingsModel.Birthday = DateOnly.ParseExact(Birthday, "yyyy-MM-dd", CultureInfo.InvariantCulture);
         SettingsModel.SelectedArchetype = SelectedArchetype.Name;
 
         var options = new JsonSerializerOptions { WriteIndented = true };
@@ -646,6 +650,32 @@ public partial class SettingsVM : ObservableValidator
     #endregion
 
     #region PersonalitySettings
+
+    [ObservableProperty] private string _waifuName;
+
+    [ObservableProperty] 
+    [RegularExpression(@"^\d{2}\-\d{2}\-\d{4}$", ErrorMessage = "Формат должен быть ГГГГ-ММ-ДД")]
+    [CustomValidation(typeof(SettingsVM), nameof(ValidateRealDate))]
+    private string _birthday;
+
+    public static ValidationResult? ValidateRealDate(string? dateStr, ValidationContext context)
+    {
+        if (string.IsNullOrWhiteSpace(dateStr) || dateStr.Length != 10)
+            return ValidationResult.Success;
+
+        bool isRealDate = DateTime.TryParseExact(
+            dateStr,
+            "yyyy-MM-dd",
+            CultureInfo.InvariantCulture,
+            DateTimeStyles.None,
+            out _
+        );
+
+        if (!isRealDate)
+            return new ValidationResult("Такой даты не существует (например, некорректный день или месяц)");
+
+        return ValidationResult.Success;
+    }
 
     public List<ArchetypeVM> Archetypes { get; } =
     [

@@ -1,3 +1,4 @@
+using System;
 using System.Formats.Asn1;
 
 namespace WaifuAI.Models;
@@ -34,5 +35,7 @@ public class SettingsModel
     public string Model3DFolder { get; set; } = string.Empty;
 
     // Personality Settings
+    public string WaifuName { get; set; } = "Waifu";
+    public DateOnly Birthday { get; set; } = new(2000, 01, 01);
     public string SelectedArchetype { get; set; } = string.Empty;
 }

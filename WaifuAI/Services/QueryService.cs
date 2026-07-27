@@ -67,7 +67,6 @@ public static class QueryService
             WriteIndented = true
         };
         var json = JsonSerializer.Serialize(queryModel, serializeOptions);
-        Console.WriteLine(json);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
         ApiService.HttpClient.DefaultRequestHeaders.Clear();
         ApiService.HttpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {SettingsVM.Instance.ApiKey}");

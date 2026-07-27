@@ -16,13 +16,13 @@ namespace WaifuAI.Services;
 
 public static class VoiceService
 {
-    public static int port = 5050;
+    public static int Port = 5050;
 
     public static Process? PythonProcess;
 
     public static Dictionary<string, List<string>> LanguageModels { get; } = new()
     {
-        ["ru"] = ["v5_cis_base", "v5_cis_ext", "v5_4_ru", "v5_3_ru", "v5_2_ru", "v5_1_ru", "v5_ru", "v4_ru", "v3_1_ru", "ru_v3"],
+        ["ru"] = ["v5_cis_base", "v5_cis_ext", "v5_5_ru", "v5_4_ru", "v5_3_ru", "v5_2_ru", "v5_1_ru", "v5_ru", "v4_ru", "v3_1_ru", "ru_v3"],
         ["en"] = ["v3_en", "v3_en_indic", "lj_v2"],
         ["de"] = ["v3_de", "thorsten_v2"],
         ["es"] = ["v3_es", "tux_v2"],
@@ -33,6 +33,7 @@ public static class VoiceService
     {
         ["v5_cis_base"] = "https://models.silero.ai/models/tts/ru/v5_cis_base.pt",
         ["v5_cis_ext"] = "https://models.silero.ai/models/tts/ru/v5_cis_ext.pt",
+        ["v5_5_ru"] = "https://models.silero.ai/models/tts/ru/v5_5_ru.pt",
         ["v5_4_ru"] = "https://models.silero.ai/models/tts/ru/v5_4_ru.pt",
         ["v5_3_ru"] = "https://models.silero.ai/models/tts/ru/v5_3_ru.pt",
         ["v5_2_ru"] = "https://models.silero.ai/models/tts/ru/v5_2_ru.pt",
@@ -73,12 +74,12 @@ public static class VoiceService
                 WorkingDirectory = baseDir
             };
             PythonProcess = new Process { StartInfo = info, EnableRaisingEvents = true };
-            PythonProcess.OutputDataReceived += (sender, e) =>
+            PythonProcess.OutputDataReceived += (_, e) =>
             {
                 if (!string.IsNullOrEmpty(e.Data))
                     Console.WriteLine($"[Python]: {e.Data}");
             };
-            PythonProcess.ErrorDataReceived += (sender, e) =>
+            PythonProcess.ErrorDataReceived += (_, e) =>
             {
                 if (!string.IsNullOrEmpty(e.Data))
                     Console.Error.WriteLine($"[Python ERROR]: {e.Data}");
@@ -99,7 +100,7 @@ public static class VoiceService
         {
             Process startInfo = new Process();
             startInfo.StartInfo.FileName = "netstat.exe";
-            startInfo.StartInfo.Arguments = $"-a -n -o";
+            startInfo.StartInfo.Arguments = "-a -n -o";
             startInfo.StartInfo.RedirectStandardOutput = true;
             startInfo.StartInfo.UseShellExecute = false;
             startInfo.StartInfo.CreateNoWindow = true;
@@ -109,7 +110,7 @@ public static class VoiceService
             var lines = output.Split('\n');
             foreach (var line in lines)
             {
-                if (line.Contains($":{port}") && line.Contains("LISTENING"))
+                if (line.Contains($":{Port}") && line.Contains("LISTENING"))
                 {
                     var match = Regex.Match(line, @"(\d+)\s*$");
                     if (match.Success)
@@ -125,7 +126,7 @@ public static class VoiceService
             Process.Start(new ProcessStartInfo
             {
                 FileName = "fuser",
-                Arguments = $"-k {port}/tcp",
+                Arguments = $"-k {Port}/tcp",
                 CreateNoWindow = true,
                 UseShellExecute = false
             })?.WaitForExit();
@@ -137,13 +138,16 @@ public static class VoiceService
         var startTime = DateTime.Now;
         while ((DateTime.Now - startTime).TotalSeconds < timeoutSeconds)
         {
-            try 
+            try
             {
                 var response = await ApiService.HttpClient.GetAsync("http://127.0.0.1:5050/health");
-                if (response.IsSuccessStatusCode) 
+                if (response.IsSuccessStatusCode)
                     return;
             }
-            catch {  }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
             await Task.Delay(1000);
         }
     }
@@ -174,7 +178,7 @@ public static class VoiceService
         };
         string jsonParams = JsonSerializer.Serialize(dialogueData);
         var modelPath = Path.Combine(SettingsVM.VoiceModelFolder, $"{modelName}.pt").Replace("\\", "/");
-        string jsCall = $"window.say({jsonParams}, {pitch}, {port}, '{service}', '{modelPath}', '{language}', '{speaker}', {volume}, {bass}, {treble});";
+        string jsCall = $"window.say({jsonParams}, {pitch}, {Port}, '{service}', '{modelPath}', '{language}', '{speaker}', {volume}, {bass}, {treble});";
         WeakReferenceMessenger.Default.Send(new ExecuteScriptMessage(jsCall));
     }
 
@@ -293,10 +297,9 @@ public static class VoiceService
         foreach (char c in currentText)
         {
             string l = c.ToString().ToLower();
-            if (letters.ContainsKey(l))
+            if (letters.TryGetValue(l, out var replacement))
             {
                 bool isUpper = char.IsUpper(c);
-                string replacement = letters[l];
                 sb.Append(isUpper ? replacement.ToUpper() : replacement);
             }
             else
@@ -313,12 +316,12 @@ public static class VoiceService
         language = Uri.EscapeDataString(language);
         string url = $"http://127.0.0.1:5050/speakers?model_path={modelPath}&language={language}";
         var json = await ApiService.HttpClient.GetFromJsonAsync<SpeakerResponce>(url);
-        return json?.Speakers ?? new List<string>();
+        return json?.Speakers ?? [];
     }
 }
 
 public class SpeakerResponce
 {
     [JsonPropertyName("speakers")]
-    public List<string> Speakers { get; set; }
+    public List<string> Speakers { get; set; } = [];
 }
