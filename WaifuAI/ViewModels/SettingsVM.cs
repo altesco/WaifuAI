@@ -668,11 +668,14 @@ public partial class SettingsVM : ObservableValidator
             "yyyy-MM-dd",
             CultureInfo.InvariantCulture,
             DateTimeStyles.None,
-            out _
+            out var parsedDate
         );
 
         if (!isRealDate)
             return new ValidationResult("Такой даты не существует (например, некорректный день или месяц)");
+
+        if (Helper.GetAge(DateOnly.FromDateTime(parsedDate)) < 18)
+            return new ValidationResult("Недопустимый возраст");
 
         return ValidationResult.Success;
     }

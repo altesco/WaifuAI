@@ -132,20 +132,32 @@ public partial class MainVM : ObservableValidator
     {
         if (_history.Count <= 0)
             return new Message();
+        
         var archetypePrompt = SettingsVM.Instance.SelectedArchetype.Prompt;
 
         var now = DateTime.Now;
         string byWho = _history.Last().Role == "user"
             ? "Sempai" : "you";
 
+        var birthday = SettingsVM.Instance.Birthday;
+
         var message = new Message
         {
             Role = "system",
-            Content = $"{archetypePrompt}\n\n" +
-                      $"[Current DateTime: {now.ToString("yyyy-MM-dd HH:mm:ss, dddd")}]\n" +
-                      $"This is Senpai's current time and date. Therefore, it is your current time and date too.\n" +
-                      $"The last message was sent by {byWho} {TimeAgoText(now, _history.Last().Time)}\n\n" +
-                      $"{_history[0].Content}"
+            Content = $"""
+                [Main info]
+                Your name is {SettingsVM.Instance.WaifuName}. Your birthday is {birthday}. 
+                Your age is {Helper.GetAge(DateOnly.ParseExact(birthday, "yyyy-MM-dd"))}
+
+                {archetypePrompt}
+                
+                [Current DateTime: {now:yyyy-MM-dd HH:mm:ss, dddd}]
+                This is Senpai's current time and date. Therefore, it is your current time and date too.
+                "The last message was sent by {byWho} {TimeAgoText(now, _history.Last().Time)}
+
+                [Last messages]
+                {_history[0].Content}
+                """
         };
 
         var header = "[Knowledge Records]";
