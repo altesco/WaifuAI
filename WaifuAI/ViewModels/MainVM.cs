@@ -136,14 +136,15 @@ public partial class MainVM : ObservableValidator
             Dispatcher.UIThread.Post(() => IsMultiSelect = false);
     }
 
-    private readonly List<Message> _history = [
-        new()
-        { 
-            Role = "system",
-            Content = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "prompt.txt"))
-        }];
+    private readonly List<Message> _history = [];
 
-    private async Task<Message> GetSystemPrompt()
+    private readonly Message _baseSystemPrompt = new()
+    {
+        Role = "system",
+        Content = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "prompt.txt"))
+    };
+
+    private async Task<Message> GetFullSystemPrompt()
     {
         if (_history.Count <= 0)
             return new Message();
@@ -170,8 +171,7 @@ public partial class MainVM : ObservableValidator
                 This is Senpai's current time and date. Therefore, it is your current time and date too.
                 "The last message was sent by {byWho} {TimeAgoText(now, _history.Last().Time)}
 
-                [Last messages]
-                {_history[0].Content}
+                {_baseSystemPrompt.Content}
                 """
         };
 
@@ -219,39 +219,28 @@ public partial class MainVM : ObservableValidator
         try
         {
             CloseErrorMessage();
-            var query = new QueryModel();
-            var message = new MessageVM(messageModel: new()
-            {
-                Role = "user",
-                CleanText = Question,
-                Time = timestamp,
-                Tokens = Tokens ?? 0
-            });
 
-            if (ReplyMessage?.IsReplied == true)
-                message.MessageModel.Content +=
-                    $"[Replying to the {ReplyMessage.MessageModel.Role}'s message " +
-                    $"sent {TimeAgoText(timestamp, _history.Last().Time)}: '{Quote}']\n\n" +
-                    $"{Question}";
-            else if (ReplyMessage?.IsReplied == false)
-                message.MessageModel.Content +=
-                    $"[Replying to the {ReplyMessage.MessageModel.Role}'s quote " +
-                    $"in message sent {TimeAgoText(timestamp, _history.Last().Time)}: '{Quote}']\n\n" +
-                    $"{Question}";
-            else
-                message.MessageModel.Content += $"\n{Question}";
+            var query = new RequestModel
+            {
+                Temperature = SettingsVM.Instance.Temperature,
+                MaxTokens = SettingsVM.Instance.MaxTokens
+            };
+
+            var message = GetNewMessage(timestamp);
             _history.Add(message.MessageModel);
 
-            var systemPrompt = await GetSystemPrompt();
-            query.Messages.Add(systemPrompt);
-            query.Messages.AddRange(_history.Skip(1));
+            var systemPrompt = await GetFullSystemPrompt();
+
+            // определяем сколько истории добавить
+            var cuttedHistory = GetCuttedHistory(
+                systemPrompt,
+                _history,
+                SettingsVM.Instance.ContextLength);
+            query.Messages.AddRange(cuttedHistory);
+
             Chat.Add(message);
 
             ReplyMessage?.ReplyingMessages.Add(message);
-            message.ReplyMessage = ReplyMessage;
-            message.Quote = Quote;
-            message.QuoteStart = QuoteStart;
-            message.QuoteEnd = QuoteEnd;
             Quote = null;
             QuoteStart = 0;
             QuoteEnd = 0;
@@ -264,8 +253,8 @@ public partial class MainVM : ObservableValidator
             Chat.Add(tempMessage);
 
             var messageModel = SettingsVM.Instance.IsServerQuery
-                ? await QueryService.DoServerQuery(query)
-                : await QueryService.DoProviderQuery(query);
+                ? await RequestService.DoServerQuery(query)
+                : await RequestService.DoProviderQuery(query);
             var resultMessage = new MessageVM(messageModel);
             Chat.Remove(tempMessage);
 
@@ -307,8 +296,68 @@ public partial class MainVM : ObservableValidator
         }
         catch (Exception e)
         {
-            Console.WriteLine("Ошибка в Query: " + e.Message);
+            Console.WriteLine("Ошибка в запросе: " + e.Message);
         }
+    }
+
+    private MessageVM GetNewMessage(DateTime timestamp)
+    {
+        var message = new MessageVM(messageModel: new()
+        {
+            Role = "user",
+            CleanText = Question,
+            Time = timestamp,
+            Tokens = Tokens ?? 0
+        });
+
+        if (ReplyMessage?.IsReplied == true)
+            message.MessageModel.Content +=
+                $"[Replying to the {ReplyMessage.MessageModel.Role}'s message " +
+                $"sent {TimeAgoText(timestamp, _history.Last().Time)}: '{Quote}']\n\n" +
+                $"{Question}";
+        else if (ReplyMessage?.IsReplied == false)
+            message.MessageModel.Content +=
+                $"[Replying to the {ReplyMessage.MessageModel.Role}'s quote " +
+                $"in message sent {TimeAgoText(timestamp, _history.Last().Time)}: '{Quote}']\n\n" +
+                $"{Question}";
+        else
+            message.MessageModel.Content += $"\n{Question}";
+        
+        message.ReplyMessage = ReplyMessage;
+        message.Quote = Quote;
+        message.QuoteStart = QuoteStart;
+        message.QuoteEnd = QuoteEnd;
+
+        return message;
+    }
+
+    private List<Message> GetCuttedHistory(Message baseSystemPrompt, List<Message> history, int contextLength)
+    {
+        List<Message> result = [baseSystemPrompt];
+        var totalContext = _encoder
+            .Encode(baseSystemPrompt.Content)
+            .Count;
+
+        if (totalContext > contextLength)
+            return [];
+
+        List<Message> collectedMessages = [];
+
+        for (int i = history.Count - 1; i >= 0; i--)
+        {
+            var tokens = _encoder.Encode(history[i].Content);
+            totalContext += tokens.Count;
+
+            if (totalContext <= contextLength)
+                collectedMessages.Add(history[i]);
+            else
+                break;
+        }
+
+        collectedMessages.Reverse();
+        result.AddRange(collectedMessages);
+
+        return result;
     }
 
     [RelayCommand]

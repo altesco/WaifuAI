@@ -9,9 +9,9 @@ using WaifuAI.ViewModels;
 
 namespace WaifuAI.Services;
 
-public static class QueryService
+public static class RequestService
 {   
-    public static async Task<Message> DoServerQuery(QueryModel queryModel)
+    public static async Task<Message> DoServerQuery(RequestModel queryModel)
     {
         try
         {
@@ -58,7 +58,7 @@ public static class QueryService
         }
     }
 
-    public static async Task<Message> DoProviderQuery(QueryModel queryModel)
+    public static async Task<Message> DoProviderQuery(RequestModel queryModel)
     {
         queryModel.Model = SettingsVM.Instance.AiModel;
         var serializeOptions = new JsonSerializerOptions

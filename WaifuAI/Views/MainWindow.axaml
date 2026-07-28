@@ -1806,7 +1806,7 @@
                                             Watermark="0.7" />
                                     </views:SideCard>
                                     <views:SideCard
-                                        Header="Длина ответа"
+                                        Header="Макс. длина ответа"
                                         Icon="{LucideIconContent Ruler, Size=16, StrokeWidth=2}"
                                         Description="Задает жесткий лимит на максимальное количество токенов в одном сообщении"
                                         IsBigTextBox="True">

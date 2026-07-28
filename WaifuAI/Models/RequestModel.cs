@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace WaifuAI.Models;
 
-public class QueryModel
+public class RequestModel
 {
     [JsonPropertyName("model")]
     public string Model { get; set; } = "any";
@@ -12,5 +12,8 @@ public class QueryModel
     public List<Message> Messages { get; set; } = [];
 
     [JsonPropertyName("temperature")]
-    public double Temperature { get; set; } = 0.7;
+    public double Temperature { get; set; }
+
+    [JsonPropertyName("max_tokens")]
+    public int MaxTokens { get; set; }
 }
