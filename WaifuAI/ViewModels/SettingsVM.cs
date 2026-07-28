@@ -60,7 +60,12 @@ public partial class SettingsVM : ObservableValidator
         else
             SettingsModel = new SettingsModel();
 
-        // AI Settings
+        // AI Parameters
+        Temperature = SettingsModel.Temperature;
+        MaxTokens = SettingsModel.MaxTokens;
+        ContextLength = SettingsModel.ContextLength;
+
+        // Server Settings
         Port = SettingsModel.Port; Console.WriteLine("порт есть");
         IpAddress = SettingsModel.IpAddress; Console.WriteLine("ip есть");
         ApiKey = SettingsModel.ApiKey; Console.WriteLine("апи ключ есть");
@@ -110,8 +115,7 @@ public partial class SettingsVM : ObservableValidator
             if (!File.Exists(promptPath))
                 File.Create(promptPath);
             else
-                archetype.Prompt = 
-                    await File.ReadAllTextAsync(promptPath);
+                archetype.Prompt = await File.ReadAllTextAsync(promptPath);
         }
 
         // Servers
@@ -125,7 +129,12 @@ public partial class SettingsVM : ObservableValidator
         if (!Directory.Exists(AppDirectory))
             Directory.CreateDirectory(AppDirectory);
         
-        // AI Settings
+        // AI Parameters
+        SettingsModel.Temperature = Temperature;
+        SettingsModel.MaxTokens = MaxTokens;
+        SettingsModel.ContextLength = ContextLength;
+
+        // Server Settings
         SettingsModel.Port = Port; 
         SettingsModel.IpAddress = IpAddress;       
         SettingsModel.ApiKey = ApiKey;       
@@ -172,7 +181,59 @@ public partial class SettingsVM : ObservableValidator
         Save();
     }
 
-    #region AISettings
+    #region AIParameters
+
+    // [ObservableProperty]
+    // [NotifyDataErrorInfo]
+    // [CustomValidation(typeof(SettingsVM), nameof(ValidateTemperatureInput))]
+    // private string _temperatureInput;
+    
+    [ObservableProperty] 
+    [NotifyDataErrorInfo]
+    [Range(0.0, 1.0)]
+    private double _temperature;
+
+    [ObservableProperty]
+    [NotifyDataErrorInfo]    
+    [Range(0, int.MaxValue)] 
+    private int _maxTokens;
+    
+    [ObservableProperty] 
+    [NotifyDataErrorInfo]
+    [Range(0, int.MaxValue)] 
+    private int _contextLength;
+
+    // public static ValidationResult? ValidateTemperatureInput(string? input, ValidationContext context)
+    // {
+    //     if (string.IsNullOrWhiteSpace(input))
+    //     {
+    //         return new ValidationResult("Поле не должно быть пустым");
+    //     }
+
+    //     if (!double.TryParse(input, NumberStyles.Any, CultureInfo.InvariantCulture, out double value))
+    //     {
+    //         return new ValidationResult("Введите число");
+    //     }
+
+    //     if (value is < 0 or > 1)
+    //     {
+    //         return new ValidationResult("Значение должно быть от 0 до 1");
+    //     }
+
+    //     return ValidationResult.Success;
+    // }
+
+    // partial void OnTemperatureInputChanged(string value)
+    // {
+    //     if (!double.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out double parsed)) 
+    //         return;
+    //     if (parsed is >= 0 and <= 1)
+    //         _temperature = parsed;
+    // }
+
+    #endregion
+
+    #region ServerSettings
 
     [ObservableProperty] private bool _isServerQuery;
     [ObservableProperty] private int _port;
@@ -342,6 +403,7 @@ public partial class SettingsVM : ObservableValidator
     [ObservableProperty] private string _selectedSource;
 
     public ObservableCollection<string> Models { get; set; } = [];
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsSelectedVoiceModelLoaded))]
     private string _selectedVoiceModel;

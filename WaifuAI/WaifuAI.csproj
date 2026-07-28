@@ -48,7 +48,7 @@
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.1" />
     <PackageReference Include="ElBruno.LocalEmbeddings" Version="1.1.5" />
     <PackageReference Include="EmbedIO" Version="3.5.2" />
-    <PackageReference Include="Lucide.Avalonia" Version="0.2.4" />
+    <PackageReference Include="Lucide.Avalonia" Version="0.2.9" />
     <PackageReference Include="SharpToken" Version="2.0.6" />
     <PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
     <PackageReference Include="WebViewControl-Avalonia" Version="3.120.11" />

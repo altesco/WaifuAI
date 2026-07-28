@@ -30,24 +30,32 @@ public partial class MainVM : ObservableValidator
     {
         InitializingMessage = "Загрузка данных...";
         await SettingsVM.Instance.Load();
+
         InitializingMessage = "Запуск веб-сервера...";
         WebAddress = await ModelService.StartWebServer(12347);
         await ModelService.WaitForResponce();
+
         await SettingsVM.Instance.InitializeModel3D();
+
         InitializingMessage = "Запуск звукового сервера...";
         VoiceService.StartPythonServer();
         await VoiceService.WaitForPythonServerAsync();
+
         await SettingsVM.Instance.InitializeSpeakers();
+
         InitializingMessage = "Создание векторного генератора...";
         await MessageParser.CreateVectorGenerator();
+
         InitializingMessage = "Подготовка лингвистических модулей...";
         await Task.Run(() => _encoder = GptEncoding.GetEncoding("cl100k_base"));
+
         InitializingMessage = "Загрузка базы знаний...";
         await DatabaseService.InitializeDatabases();
         var records = 
             await DatabaseService.KnowledgeDb.Table<KnowledgeRecord>().ToListAsync();
         foreach (var record in records)
             KnowledgeBase.Add(record);
+
         InitializingMessage = "Загрузка истории чата...";
         var messages = await DatabaseService.HistoryDb.Table<Message>()
             .OrderBy(m => m.Time)
@@ -66,7 +74,9 @@ public partial class MainVM : ObservableValidator
             msg.ReplyMessage = replyMsg;
             replyMsg.ReplyingMessages.Add(msg);
         }
+
         SettingsVM.Instance.IsAppInitializing = false;
+
         KnowledgeBase.CollectionChanged += OnKnowledgeBaseChanged;
         SelectedMessages.CollectionChanged += OnSelectedMessagesChanged;
     }
@@ -74,12 +84,15 @@ public partial class MainVM : ObservableValidator
     private static GptEncoding _encoder;
 
     public bool IsWindows => OperatingSystem.IsWindows();
+
     [ObservableProperty] private string _initializingMessage;
     [ObservableProperty] private string _webAddress;
     [ObservableProperty] private string _question = string.Empty;
     [ObservableProperty] private int? _tokens;
     [ObservableProperty] private MessageVM? _selectedMessage;
+
     public ObservableCollection<MessageVM> SelectedMessages { get; } = [];
+
     [ObservableProperty] private bool _isMultiSelect;
     [ObservableProperty] private string? _error;
 
@@ -93,8 +106,10 @@ public partial class MainVM : ObservableValidator
     [ObservableProperty] private bool _isPromptEditorOpen;
     [ObservableProperty] private bool _isDeletingMessageDialogOpen;
     [ObservableProperty] private bool _isDeletingRecordDialogOpen;
+
     public ObservableCollection<MessageVM> Chat { get; } = [];
     public ObservableCollection<KnowledgeRecord> KnowledgeBase { get; } = [];
+
     [ObservableProperty] private KnowledgeRecord? _selectedKnowledgeRecord;
 
     partial void OnQuestionChanged(string value)
@@ -122,7 +137,7 @@ public partial class MainVM : ObservableValidator
     }
 
     private readonly List<Message> _history = [
-        new Message 
+        new()
         { 
             Role = "system",
             Content = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "prompt.txt"))
@@ -193,7 +208,7 @@ public partial class MainVM : ObservableValidator
             timeAgo = $"{(int)diff.TotalMinutes} minutes ago";
         else
             timeAgo = "just now";
-        timeAgo += $" (at {lastMessageTime.ToString("yyyy-MM-dd HH:mm:ss, dddd")})";
+        timeAgo += $" (at {lastMessageTime:yyyy-MM-dd HH:mm:ss, dddd})";
         return timeAgo;
     }
 
@@ -282,9 +297,6 @@ public partial class MainVM : ObservableValidator
                 SettingsVM.Instance.Treble);
 
             resultMessage.MessageModel.CleanText = MessageParser.GetCleanText(messageText);
-            // resultMessage.MessageModel.Content =
-            //     $"[Sent at: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss, dddd")}]\n" +
-            //     resultMessage.MessageModel.Content;
 
             _history.Add(resultMessage.MessageModel);
             await DatabaseService.HistoryDb.InsertOrReplaceAsync(message.MessageModel);

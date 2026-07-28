@@ -1,5 +1,4 @@
 using System;
-using System.Formats.Asn1;
 
 namespace WaifuAI.Models;
 
@@ -12,6 +11,11 @@ public class SettingsModel
     public string ApiUrl { get; set; } = string.Empty;
     public string AIModel { get; set; } = string.Empty;
     public bool IsServerQuery { get; set; }
+
+    // AI Parameters
+    public double Temperature { get; set; } = 0.7;
+    public int MaxTokens { get; set; } = 100;
+    public int ContextLength { get; set; } = 120000;
 
     // General Settings
     public int Theme { get; set; }
