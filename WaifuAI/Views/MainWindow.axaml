@@ -7,7 +7,9 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:views="using:WaifuAI.Views"
     xmlns:vm="using:WaifuAI.ViewModels"
+    xmlns:models="using:WaifuAI.Models"
     xmlns:wv="clr-namespace:WebViewControl;assembly=WebViewControl.Avalonia"
+    xmlns:material="using:Material.Icons.Avalonia"
     Title="WaifuAI"
     d:DesignHeight="720"
     d:DesignWidth="1024"
@@ -306,6 +308,243 @@
                             FontWeight="DemiBold"
                             Text="WaifuAI" />
                     </StackPanel>
+
+                    <StackPanel
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Spacing="16"
+                        x:DataType="vm:SettingsVM"
+                        DataContext="{x:Static vm:SettingsVM.Instance}">
+
+                        <!-- Affection -->
+                        <Grid>
+                            <ProgressBar
+                                BorderThickness="2"
+                                BorderBrush="{Binding #AffectionIcon.Foreground}"
+                                Height="8"
+                                Width="100"
+                                MinWidth="0"
+                                MinHeight="0"
+                                CornerRadius="3"
+                                Value="{Binding Affection}"
+                                Foreground="{Binding #AffectionIcon.Foreground}"
+                                Background="Transparent"
+                                Margin="11,0,0,0" 
+                                VerticalAlignment="Center"/>
+                            <material:MaterialIcon
+                                Kind="Favorite"
+                                IconSize="22"
+                                Foreground="{DynamicResource SystemChromeHighColor}"
+                                HorizontalAlignment="Left" 
+                                VerticalAlignment="Center"
+                                Margin="0,2,0,0"/>
+                            <LucideIcon
+                                x:Name="AffectionIcon"
+                                Size="18"
+                                StrokeWidth="2.5"
+                                Margin="2,0,0,2"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                Classes.bad="{Binding AffectionLevel, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:AffectionType.Bad}}"
+                                Classes.normal="{Binding AffectionLevel, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:AffectionType.Normal}}"
+                                Classes.good="{Binding AffectionLevel, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:AffectionType.Good}}"
+                                Classes.love="{Binding AffectionLevel, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:AffectionType.Love}}">
+                                <LucideIcon.Styles>
+                                    <Style Selector="LucideIcon.bad">
+                                        <Setter Property="Foreground" Value="{DynamicResource SystemBaseHighColor}" />
+                                        <Setter Property="Kind" Value="HeartCrack" />
+                                    </Style>
+                                    <Style Selector="LucideIcon.normal">
+                                        <Setter Property="Foreground" Value="#3a85ff" />
+                                        <Setter Property="Kind" Value="Heart" />
+                                    </Style>
+                                    <Style Selector="LucideIcon.good">
+                                        <Setter Property="Foreground" Value="#aa4eff" />
+                                        <Setter Property="Kind" Value="Heart" />
+                                    </Style>
+                                    <Style Selector="LucideIcon.love">
+                                        <Setter Property="Foreground" Value="#ff3737" />
+                                        <Setter Property="Kind" Value="Heart" />
+                                    </Style>
+                                </LucideIcon.Styles>
+                            </LucideIcon>
+                        </Grid>
+
+                        <!-- Engagement -->
+                        <Grid>
+                            <ProgressBar
+                                BorderThickness="2"
+                                BorderBrush="{Binding #EngagementIcon.Foreground}"
+                                Height="8"
+                                Width="100"
+                                MinWidth="0"
+                                MinHeight="0"
+                                CornerRadius="3"
+                                Value="{Binding Engagement}"
+                                Foreground="{Binding #EngagementIcon.Foreground}"
+                                Background="Transparent"
+                                Margin="10,0,0,0" 
+                                VerticalAlignment="Center"/>
+                            <Border
+                                Height="20"
+                                Width="22"
+                                Background="{DynamicResource SystemChromeHighColor}"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                Margin="0,0,0,0"
+                                IsVisible="{Binding EngagementLevel, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:EngagementType.Indifferent}}" />
+                            <Border
+                                Height="20"
+                                Width="20"
+                                Background="{DynamicResource SystemChromeHighColor}"
+                                CornerRadius="0,10,11,0"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                Margin="1,0,0,2"
+                                IsVisible="{Binding EngagementLevel, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:EngagementType.Balanced}}" />
+                            <material:MaterialIcon
+                                Kind="WaterDrop"
+                                IconSize="20"
+                                Foreground="{DynamicResource SystemChromeHighColor}"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                Margin="3,0,0,0"
+                                IsVisible="{Binding EngagementLevel, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:EngagementType.Interested}}"/>
+                            <LucideIcon
+                                x:Name="EngagementIcon"
+                                Size="18"
+                                StrokeWidth="2.5"
+                                Margin="2,0,0,0"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                Classes.indifferent="{Binding EngagementLevel, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:EngagementType.Indifferent}}"
+                                Classes.balanced="{Binding EngagementLevel, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:EngagementType.Balanced}}"
+                                Classes.interested="{Binding EngagementLevel, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:EngagementType.Interested}}">
+                                <LucideIcon.Styles>
+                                    <Style Selector="LucideIcon.indifferent">
+                                        <Setter Property="Foreground" Value="#aaa1ff" />
+                                        <Setter Property="Kind" Value="WavesHorizontal" />
+                                    </Style>
+                                    <Style Selector="LucideIcon.balanced">
+                                        <Setter Property="Foreground" Value="#2f9e44" />
+                                        <Setter Property="Kind" Value="Leaf" />
+                                    </Style>
+                                    <Style Selector="LucideIcon.interested">
+                                        <Setter Property="Foreground" Value="#ff9e37" />
+                                        <Setter Property="Kind" Value="Flame" />
+                                    </Style>
+                                </LucideIcon.Styles>
+                            </LucideIcon>
+                        </Grid>
+
+                        <!-- Mood -->
+                        <Grid>
+                            <ProgressBar
+                                BorderThickness="2"
+                                BorderBrush="{Binding #MoodIcon.Foreground}"
+                                Height="8"
+                                Width="100"
+                                MinWidth="0"
+                                MinHeight="0"
+                                CornerRadius="3"
+                                Value="{Binding Mood}"
+                                Foreground="{Binding #MoodIcon.Foreground}"
+                                Background="Transparent"
+                                Margin="11,0,0,0" 
+                                VerticalAlignment="Center"/>
+                            <Border
+                                Height="22"
+                                Width="22"
+                                CornerRadius="11"
+                                Background="{DynamicResource SystemChromeHighColor}"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"/>
+                            <LucideIcon
+                                x:Name="MoodIcon"
+                                Size="18"
+                                StrokeWidth="2.5"
+                                Margin="2,0,0,0"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                Classes.bad="{Binding MoodLevel, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:MoodType.Bad}}"
+                                Classes.normal="{Binding MoodLevel, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:MoodType.Normal}}"
+                                Classes.best="{Binding MoodLevel, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:MoodType.Best}}">
+                                <LucideIcon.Styles>
+                                    <Style Selector="LucideIcon.bad">
+                                        <Setter Property="Foreground" Value="#ff3a3a" />
+                                        <Setter Property="Kind" Value="Frown" />
+                                    </Style>
+                                    <Style Selector="LucideIcon.normal">
+                                        <Setter Property="Foreground" Value="{DynamicResource SystemBaseHighColor}" />
+                                        <Setter Property="Kind" Value="Meh" />
+                                    </Style>
+                                    <Style Selector="LucideIcon.best">
+                                        <Setter Property="Foreground" Value="#24b55c" />
+                                        <Setter Property="Kind" Value="Smile" />
+                                    </Style>
+                                </LucideIcon.Styles>
+                            </LucideIcon>
+                        </Grid>
+
+                        <!-- Energy -->
+                        <Grid>
+                            <ProgressBar
+                                BorderThickness="2"
+                                BorderBrush="{Binding #EnergyIcon.Foreground}"
+                                Height="8"
+                                Width="100"
+                                MinWidth="0"
+                                MinHeight="0"
+                                CornerRadius="3"
+                                Value="{Binding Energy}"
+                                Foreground="{Binding #EnergyIcon.Foreground}"
+                                Background="Transparent"
+                                Margin="11,0,0,0" 
+                                VerticalAlignment="Center"/>
+                            <Border
+                                Height="24"
+                                Width="12"
+                                Background="{DynamicResource SystemChromeHighColor}"
+                                RenderTransformOrigin="50%,50%"
+                                HorizontalAlignment="Left" 
+                                VerticalAlignment="Center"
+                                Margin="7,2,0,0">
+                                <Border.RenderTransform>
+                                    <RotateTransform Angle="45"/>    
+                                </Border.RenderTransform>    
+                            </Border>
+                            <LucideIcon
+                                x:Name="EnergyIcon"
+                                Size="18"
+                                StrokeWidth="2.5"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                Classes.low="{Binding EnergyLevel, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:EnergyType.Low}}"
+                                Classes.middle="{Binding EnergyLevel, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:EnergyType.Middle}}"
+                                Classes.high="{Binding EnergyLevel, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:EnergyType.High}}">
+                                <LucideIcon.Styles>
+                                    <Style Selector="LucideIcon.low">
+                                        <Setter Property="Foreground" Value="#ff3a3a" />
+                                        <Setter Property="Kind" Value="PlugZap" />
+                                        <Setter Property="Margin" Value="4,0,0,0"/>
+                                    </Style>
+                                    <Style Selector="LucideIcon.middle">
+                                        <Setter Property="Foreground" Value="#ffa11d" />
+                                        <Setter Property="Kind" Value="Zap" />
+                                        <Setter Property="Margin" Value="2,0,0,0" />
+                                    </Style>
+                                    <Style Selector="LucideIcon.high">
+                                        <Setter Property="Foreground" Value="#fff04b" />
+                                        <Setter Property="Kind" Value="Zap" />
+                                        <Setter Property="Margin" Value="2,0,0,0" />
+                                    </Style>
+                                </LucideIcon.Styles>
+                            </LucideIcon>
+                        </Grid>
+
+                    </StackPanel>
+
                     <StackPanel
                         HorizontalAlignment="Right"
                         Orientation="Horizontal"
@@ -1795,6 +2034,7 @@
                                     x:DataType="vm:SettingsVM"
                                     DataContext="{x:Static vm:SettingsVM.Instance}"
                                     Spacing="8">
+
                                     <views:SideCard
                                         Header="Температура"
                                         Icon="{LucideIconContent Thermometer, Size=20}"
@@ -1810,14 +2050,14 @@
                                         Icon="{LucideIconContent Ruler, Size=16, StrokeWidth=2}"
                                         Description="Задает жесткий лимит на максимальное количество токенов в одном сообщении"
                                         IsBigTextBox="True">
-                                        <TextBox Text="{Binding MaxTokens, Mode=TwoWay}"/>
+                                        <TextBox Text="{Binding MaxTokens, Mode=TwoWay}" />
                                     </views:SideCard>
                                     <views:SideCard
                                         Header="Длина контекста"
                                         Icon="{LucideIconContent RulerDimensionLine, Size=16, StrokeWidth=2}"
                                         Description="Определяет объем сохраняемой истории переписки для поддержания связности диалога"
                                         IsBigTextBox="True">
-                                        <TextBox Text="{Binding ContextLength, Mode=TwoWay}"/>
+                                        <TextBox Text="{Binding ContextLength, Mode=TwoWay}" />
                                     </views:SideCard>
                                 </StackPanel>
                             </ScrollViewer>

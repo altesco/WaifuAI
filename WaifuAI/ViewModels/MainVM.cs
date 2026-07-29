@@ -111,6 +111,7 @@ public partial class MainVM : ObservableValidator
     public ObservableCollection<KnowledgeRecord> KnowledgeBase { get; } = [];
 
     [ObservableProperty] private KnowledgeRecord? _selectedKnowledgeRecord;
+    
 
     partial void OnQuestionChanged(string value)
     {
@@ -169,9 +170,11 @@ public partial class MainVM : ObservableValidator
                 
                 [Current DateTime: {now:yyyy-MM-dd HH:mm:ss, dddd}]
                 This is Senpai's current time and date. Therefore, it is your current time and date too.
-                "The last message was sent by {byWho} {TimeAgoText(now, _history.Last().Time)}
+                "The last message was sent by {byWho} {TimeAgoText(now, _history.Last().Time)}. 
 
                 {_baseSystemPrompt.Content}
+
+                
                 """
         };
 

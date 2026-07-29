@@ -182,11 +182,6 @@ public partial class SettingsVM : ObservableValidator
     }
 
     #region AIParameters
-
-    // [ObservableProperty]
-    // [NotifyDataErrorInfo]
-    // [CustomValidation(typeof(SettingsVM), nameof(ValidateTemperatureInput))]
-    // private string _temperatureInput;
     
     [ObservableProperty] 
     [NotifyDataErrorInfo]
@@ -202,34 +197,6 @@ public partial class SettingsVM : ObservableValidator
     [NotifyDataErrorInfo]
     [Range(0, int.MaxValue)] 
     private int _contextLength;
-
-    // public static ValidationResult? ValidateTemperatureInput(string? input, ValidationContext context)
-    // {
-    //     if (string.IsNullOrWhiteSpace(input))
-    //     {
-    //         return new ValidationResult("Поле не должно быть пустым");
-    //     }
-
-    //     if (!double.TryParse(input, NumberStyles.Any, CultureInfo.InvariantCulture, out double value))
-    //     {
-    //         return new ValidationResult("Введите число");
-    //     }
-
-    //     if (value is < 0 or > 1)
-    //     {
-    //         return new ValidationResult("Значение должно быть от 0 до 1");
-    //     }
-
-    //     return ValidationResult.Success;
-    // }
-
-    // partial void OnTemperatureInputChanged(string value)
-    // {
-    //     if (!double.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out double parsed)) 
-    //         return;
-    //     if (parsed is >= 0 and <= 1)
-    //         _temperature = parsed;
-    // }
 
     #endregion
 
@@ -839,4 +806,53 @@ public partial class SettingsVM : ObservableValidator
     [ObservableProperty] private ArchetypeVM _selectedArchetype;
 
     #endregion
+
+    #region MoodSettings
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(AffectionLevel))]
+    private int _affection = 50;
+
+    public AffectionType AffectionLevel => Affection switch
+    {
+        <= 25 => AffectionType.Bad,
+        <= 50 => AffectionType.Normal,
+        <= 75 => AffectionType.Good,
+        _ => AffectionType.Love
+    };
+
+    [ObservableProperty] 
+    [NotifyPropertyChangedFor(nameof(EnergyLevel))]
+    private int _energy = 50;
+
+    public EnergyType EnergyLevel => Energy switch
+    {
+        <= 20 => EnergyType.Low,
+        <= 50 => EnergyType.Middle,
+        _ => EnergyType.High
+    };
+    
+    [ObservableProperty] 
+    [NotifyPropertyChangedFor(nameof(EngagementLevel))]
+    private int _engagement = 50;
+
+    public EngagementType EngagementLevel => Engagement switch
+    {
+        <= 30 => EngagementType.Indifferent,
+        <= 70 => EngagementType.Balanced,
+        _ => EngagementType.Interested
+    };
+    
+    [ObservableProperty] 
+    [NotifyPropertyChangedFor(nameof(MoodLevel))]
+    private int _mood = 50;
+
+    public MoodType MoodLevel => Mood switch
+    {
+        <= 25 => MoodType.Bad,
+        <= 65 => MoodType.Normal,
+        _ => MoodType.Best
+    };
+
+    #endregion    
 }
