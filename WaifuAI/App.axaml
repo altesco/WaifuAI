@@ -1,4 +1,4 @@
-<Application 
+<Application
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     x:Class="WaifuAI.App"
@@ -6,45 +6,47 @@
     RequestedThemeVariant="Default">
     <Application.Resources>
         <ResourceDictionary>
-            <SolidColorBrush x:Key="ButtonBackgroundDisabled" Color="Transparent"/>
-            <SolidColorBrush x:Key="ListBoxBorderThemeBrush" Color="{DynamicResource SystemBaseLowColor}"/>
+            <SolidColorBrush x:Key="ButtonBackgroundDisabled" Color="Transparent" />
+            <SolidColorBrush x:Key="ListBoxBorderThemeBrush" Color="{DynamicResource SystemBaseLowColor}" />
             <FontFamily x:Key="CascadiaCode">avares://WaifuAI/Assets/Fonts/#Cascadia Code</FontFamily>
             <FontFamily x:Key="JetBrainsMono">avares://WaifuAI/Assets/Fonts/#JetBrains Mono</FontFamily>
-            <SolidColorBrush x:Key="ComboBoxDropDownBackground" Color="{DynamicResource SystemChromeHighColor}"/>
-            <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="{DynamicResource SystemChromeHighColor}"/>
-            <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="{DynamicResource SystemBaseMediumColor}"/>
-            <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="{DynamicResource SystemChromeHighColor}"/>
-            <SolidColorBrush x:Key="ComboBoxBackground" Color="{DynamicResource SystemChromeHighColor}"/>
-            <SolidColorBrush x:Key="ComboBoxBackgroundPointerOver" Color="{DynamicResource SystemChromeHighColor}"/>
-            <SolidColorBrush x:Key="ComboBoxBackgroundPressed" Color="{DynamicResource SystemChromeHighColor}"/>
-            <SolidColorBrush x:Key="ComboBoxBorderBrush" Color="{DynamicResource SystemBaseMediumLowColor}"/>
-            <SolidColorBrush x:Key="ComboBoxBorderBrushPointerOver" Color="{DynamicResource SystemBaseMediumColor}"/>
-            <SolidColorBrush x:Key="ComboBoxBorderBrushPressed" Color="{DynamicResource SystemBaseMediumColor}"/>
-            <SolidColorBrush x:Key="TextControlPlaceholderForeground" Color="{DynamicResource SystemBaseMediumColor}"/>
-            <SolidColorBrush x:Key="TextControlPlaceholderForegroundPointerOver" Color="{DynamicResource SystemBaseMediumColor}"/>
-            <SolidColorBrush x:Key="TextControlPlaceholderForegroundFocused" Color="{DynamicResource SystemBaseMediumColor}"/>
-            <SolidColorBrush x:Key="TextControlPlaceholderForegroundDisabled" Color="{DynamicResource SystemBaseLowColor}"/>
-            <SolidColorBrush x:Key="TextControlBackgroundDisabled" Color="{DynamicResource SystemChromeHighColor}"/>
-            <SolidColorBrush x:Key="ErrorColor" Color="#FF848A"/>
-            <SolidColorBrush x:Key="ErrorLowColor" Color="#FF979C"/>
+            <SolidColorBrush x:Key="ComboBoxDropDownBackground" Color="{DynamicResource SystemChromeHighColor}" />
+            <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="{DynamicResource SystemChromeHighColor}" />
+            <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="{DynamicResource SystemBaseMediumColor}" />
+            <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="{DynamicResource SystemChromeHighColor}" />
+            <SolidColorBrush x:Key="ComboBoxBackground" Color="{DynamicResource SystemChromeHighColor}" />
+            <SolidColorBrush x:Key="ComboBoxBackgroundPointerOver" Color="{DynamicResource SystemChromeHighColor}" />
+            <SolidColorBrush x:Key="ComboBoxBackgroundPressed" Color="{DynamicResource SystemChromeHighColor}" />
+            <SolidColorBrush x:Key="ComboBoxBorderBrush" Color="{DynamicResource SystemBaseMediumLowColor}" />
+            <SolidColorBrush x:Key="ComboBoxBorderBrushPointerOver" Color="{DynamicResource SystemBaseMediumColor}" />
+            <SolidColorBrush x:Key="ComboBoxBorderBrushPressed" Color="{DynamicResource SystemBaseMediumColor}" />
+            <SolidColorBrush x:Key="TextControlPlaceholderForeground" Color="{DynamicResource SystemBaseMediumColor}" />
+            <SolidColorBrush x:Key="TextControlPlaceholderForegroundPointerOver"
+                             Color="{DynamicResource SystemBaseMediumColor}" />
+            <SolidColorBrush x:Key="TextControlPlaceholderForegroundFocused"
+                             Color="{DynamicResource SystemBaseMediumColor}" />
+            <SolidColorBrush x:Key="TextControlPlaceholderForegroundDisabled"
+                             Color="{DynamicResource SystemBaseLowColor}" />
+            <SolidColorBrush x:Key="TextControlBackgroundDisabled" Color="{DynamicResource SystemChromeHighColor}" />
+            <SolidColorBrush x:Key="ErrorColor" Color="#FF848A" />
+            <SolidColorBrush x:Key="ErrorLowColor" Color="#FF979C" />
             <ResourceDictionary.ThemeDictionaries>
                 <ResourceDictionary x:Key="Light">
-                    <SolidColorBrush x:Key="TextControlSelectionHighlightColor" Color="{DynamicResource SystemAccentColorLight2}" />
+                    <SolidColorBrush x:Key="TextControlSelectionHighlightColor"
+                                     Color="{DynamicResource SystemAccentColorLight2}" />
                 </ResourceDictionary>
                 <ResourceDictionary x:Key="Dark">
-                    <SolidColorBrush x:Key="TextControlSelectionHighlightColor" Color="{DynamicResource SystemAccentColorDark2}" />
+                    <SolidColorBrush x:Key="TextControlSelectionHighlightColor"
+                                     Color="{DynamicResource SystemAccentColorDark2}" />
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
         </ResourceDictionary>
     </Application.Resources>
-    <!-- <Application.DataTemplates>
-        <local:ViewLocator/>
-    </Application.DataTemplates> -->
     <Application.Styles>
         <FluentTheme>
             <FluentTheme.Palettes>
-                <ColorPaletteResources 
-                    x:Key="Light" 
+                <ColorPaletteResources
+                    x:Key="Light"
                     ErrorText="#842426"
                     RegionColor="#eef1f5"
                     ListLow="#ced4de"
@@ -58,9 +60,9 @@
                     BaseMediumHigh="#696c82"
                     BaseMedium="#84889a"
                     BaseMediumLow="#a0a4b3"
-                    BaseLow="#bbbfcb"/>
-                <ColorPaletteResources 
-                    x:Key="Dark" 
+                    BaseLow="#bbbfcb" />
+                <ColorPaletteResources
+                    x:Key="Dark"
                     ErrorText="#842426"
                     RegionColor="#232332"
                     ListLow="#2a2a3d"
@@ -74,13 +76,13 @@
                     BaseMediumHigh="#a1a9ca"
                     BaseMedium="#7d829e"
                     BaseMediumLow="#595c72"
-                    BaseLow="#343546"/>
+                    BaseLow="#343546" />
             </FluentTheme.Palettes>
         </FluentTheme>
         <materialIcons:MaterialIconStyles />
-        <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml"/>
+        <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml" />
         <StyleInclude Source="/Views/SettingsCard.axaml" />
-        <StyleInclude Source="/Views/SideCard.axaml"/>
-        <StyleInclude Source="/Views/SidePanel.axaml"/>
+        <StyleInclude Source="/Views/SideCard.axaml" />
+        <StyleInclude Source="/Views/SidePanel.axaml" />
     </Application.Styles>
 </Application>

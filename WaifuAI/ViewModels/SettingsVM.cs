@@ -213,7 +213,7 @@ public partial class SettingsVM : ObservableValidator
 
     #region GeneralSettings
     
-    [ObservableProperty] private int _selectedTheme;
+    [ObservableProperty] private int _selectedTheme = -1;
 
     [ObservableProperty] 
     [NotifyDataErrorInfo]
@@ -823,7 +823,7 @@ public partial class SettingsVM : ObservableValidator
 
     [ObservableProperty] 
     [NotifyPropertyChangedFor(nameof(EnergyLevel))]
-    private int _energy = 50;
+    private int _energy = 0;
 
     public EnergyType EnergyLevel => Energy switch
     {
