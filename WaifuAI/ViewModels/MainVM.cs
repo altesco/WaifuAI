@@ -158,6 +158,20 @@ public partial class MainVM : ObservableValidator
 
         var birthday = SettingsVM.Instance.Birthday;
 
+        var basePrompt = _baseSystemPrompt.Content;
+
+        var affection = SettingsVM.Instance.AffectionLevel;
+        var engagement = SettingsVM.Instance.EngagementLevel;
+        var mood = SettingsVM.Instance.MoodLevel;
+        var energy = SettingsVM.Instance.EnergyLevel;
+
+        var dynamicDirectives =
+            $"{MoodInstructions.GetAffectionInstruction(affection, mood, energy)}\n" +
+            $"{MoodInstructions.GetEngagementInstruction(engagement, energy, mood)}\n" +
+            $"{MoodInstructions.GetMoodInstruction(mood, engagement, energy)}\n" +
+            $"{MoodInstructions.GetEnergyInstruction(energy, affection)}";
+        basePrompt = basePrompt.Replace("{{EMOTIONAL_DIRECTIVES}}", dynamicDirectives);
+
         var message = new Message
         {
             Role = "system",
@@ -172,9 +186,7 @@ public partial class MainVM : ObservableValidator
                 This is Senpai's current time and date. Therefore, it is your current time and date too.
                 "The last message was sent by {byWho} {TimeAgoText(now, _history.Last().Time)}. 
 
-                {_baseSystemPrompt.Content}
-
-                
+                {basePrompt}
                 """
         };
 
@@ -216,7 +228,7 @@ public partial class MainVM : ObservableValidator
     }
 
     [RelayCommand]
-    private async Task Query()
+    private async Task Request()
     {
         var timestamp = DateTime.Now;
         try
@@ -296,6 +308,8 @@ public partial class MainVM : ObservableValidator
             Chat.Add(resultMessage);
             
             await MessageParser.ParseTextForKnowledgeUpdates(messageText, KnowledgeBase);
+
+            UpdateEmotionalStates(messageText);
         }
         catch (Exception e)
         {
@@ -361,6 +375,18 @@ public partial class MainVM : ObservableValidator
         result.AddRange(collectedMessages);
 
         return result;
+    }
+
+    private void UpdateEmotionalStates(string text)
+    {
+        var deltas = MessageParser.ExtractDeltas(text);
+        if (deltas is null)
+            return;
+
+        SettingsVM.Instance.Affection += deltas.AffectionDelta;
+        SettingsVM.Instance.Engagement += deltas.EngagementDelta;
+        SettingsVM.Instance.Mood += deltas.MoodDelta;
+        SettingsVM.Instance.Energy += deltas.EnergyDelta;
     }
 
     [RelayCommand]

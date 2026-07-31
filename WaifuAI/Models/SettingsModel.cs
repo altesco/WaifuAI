@@ -42,4 +42,10 @@ public class SettingsModel
     public string WaifuName { get; set; } = "Waifu";
     public DateOnly Birthday { get; set; } = new(2000, 01, 01);
     public string SelectedArchetype { get; set; } = string.Empty;
+
+    // Emotional State System
+    public int Affection { get; set; } = 50;
+    public int Engagement { get; set; } = 50;
+    public int Mood { get; set; } = 50;
+    public int Energy { get; set; } = 50;
 }

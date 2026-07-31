@@ -106,6 +106,12 @@ public partial class SettingsVM : ObservableValidator
         SelectedArchetype = 
             Archetypes.Find(x => x.Name == SettingsModel.SelectedArchetype) ?? 
             Archetypes[0];
+        
+        // Emotional State System
+        Affection = SettingsModel.Affection;
+        Engagement = SettingsModel.Engagement;
+        Mood = SettingsModel.Mood;
+        Energy = SettingsModel.Energy;
 
         // Prompts
         Directory.CreateDirectory(PromptsPath);
@@ -167,6 +173,12 @@ public partial class SettingsVM : ObservableValidator
         SettingsModel.WaifuName = WaifuName;
         SettingsModel.Birthday = DateOnly.ParseExact(Birthday, "yyyy-MM-dd", CultureInfo.InvariantCulture);
         SettingsModel.SelectedArchetype = SelectedArchetype.Name;
+
+        // Emotional State System
+        SettingsModel.Affection = Affection;
+        SettingsModel.Engagement = Engagement;
+        SettingsModel.Mood = Mood;
+        SettingsModel.Energy = Energy;
 
         var options = new JsonSerializerOptions { WriteIndented = true };
         var json = JsonSerializer.Serialize(SettingsModel, options);
@@ -811,7 +823,7 @@ public partial class SettingsVM : ObservableValidator
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(AffectionLevel))]
-    private int _affection = 50;
+    private int _affection;
 
     public AffectionType AffectionLevel => Affection switch
     {
@@ -823,7 +835,7 @@ public partial class SettingsVM : ObservableValidator
 
     [ObservableProperty] 
     [NotifyPropertyChangedFor(nameof(EnergyLevel))]
-    private int _energy = 0;
+    private int _energy;
 
     public EnergyType EnergyLevel => Energy switch
     {
@@ -834,7 +846,7 @@ public partial class SettingsVM : ObservableValidator
     
     [ObservableProperty] 
     [NotifyPropertyChangedFor(nameof(EngagementLevel))]
-    private int _engagement = 50;
+    private int _engagement;
 
     public EngagementType EngagementLevel => Engagement switch
     {
@@ -845,7 +857,7 @@ public partial class SettingsVM : ObservableValidator
     
     [ObservableProperty] 
     [NotifyPropertyChangedFor(nameof(MoodLevel))]
-    private int _mood = 50;
+    private int _mood;
 
     public MoodType MoodLevel => Mood switch
     {

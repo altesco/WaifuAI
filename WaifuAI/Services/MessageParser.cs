@@ -1,10 +1,12 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Avalonia.Threading;
 using ElBruno.LocalEmbeddings;
+using WaifuAI.DTOs;
 using WaifuAI.Models;
 
 namespace WaifuAI.Services;
@@ -73,8 +75,20 @@ public class MessageParser
     {
         var clean = Regex.Replace(text, @"\*.*?\*", "");
         clean = Regex.Replace(clean, @"\[UPDATE:.*?\]", "");
+        clean = Regex.Replace(clean, @"```json\s*(\{[\s\S]*?\})\s*```", "");
         return Regex.Replace(clean, @"\s+", " ").Trim();
     }
         
-    
+    public static EmotionDeltasDto? ExtractDeltas(string text)
+    {
+        var match = Regex.Match(text, @"```json\s*(\{[\s\S]*?\})\s*```", RegexOptions.IgnoreCase);
+
+        if (match.Success)
+        {
+            var jsonString = match.Groups[1].Value;
+            return JsonSerializer.Deserialize<EmotionDeltasDto>(jsonString);
+        }
+
+        return null; 
+    }
 }
