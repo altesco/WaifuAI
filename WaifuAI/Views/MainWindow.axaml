@@ -44,22 +44,37 @@
         </ControlTheme>
         <sys:Double x:Key="SettingsPopupEdgeWidth">680</sys:Double>
         <sys:Double x:Key="TopPanelEdgeWidth">740</sys:Double>
+
+        <!-- Цвет бегунка в обычном (сплюснутом) состоянии -->
+        <SolidColorBrush x:Key="ScrollBarThumbForeground">Red</SolidColorBrush>
+
+        <!-- Цвета для остальных состояний (опционально, чтобы не ломался визуал) -->
+        <!-- При наведении на бегунок -->
+        <SolidColorBrush x:Key="ScrollBarThumbForegroundPointerOver">DarkRed</SolidColorBrush>
+        <!-- При нажатии на бегунок -->
+        <SolidColorBrush x:Key="ScrollBarThumbForegroundPressed">Orange</SolidColorBrush>
+
     </Window.Resources>
     <Grid
         x:Name="RootPanel"
         Margin="{Binding $parent[Window].OffScreenMargin}"
         Focusable="True"
+        Background="{DynamicResource Scroll}"
         PointerPressed="OnBackgroundPointerPressed">
         <Grid.Styles>
+
             <Style Selector="TextBlock:disabled">
                 <Setter Property="Foreground" Value="{DynamicResource SystemBaseMediumLowColor}" />
             </Style>
+
             <Style Selector="Border">
                 <Setter Property="BorderBrush" Value="{DynamicResource SystemBaseLowColor}" />
             </Style>
+            
             <Style Selector="ListBox">
                 <Setter Property="BorderBrush" Value="{DynamicResource SystemBaseLowColor}" />
             </Style>
+
             <Style Selector="Button.icon-button">
                 <Setter Property="Width" Value="28" />
                 <Setter Property="Height" Value="28" />
@@ -71,6 +86,7 @@
                     <Setter Property="Background" Value="{DynamicResource ButtonBackgroundPointerOver}" />
                 </Style>
             </Style>
+
             <Style Selector="Button.word-button">
                 <Setter Property="Width" Value="NaN" />
                 <Setter Property="Height" Value="32" />
@@ -89,6 +105,7 @@
                     <Setter Property="BorderThickness" Value="1" />
                 </Style>
             </Style>
+
             <Style Selector="ToggleButton">
                 <Setter Property="Width" Value="28" />
                 <Setter Property="Height" Value="28" />
@@ -113,6 +130,7 @@
                     <Setter Property="Foreground" Value="{DynamicResource AccentButtonBackground}" />
                 </Style>
             </Style>
+
             <Style Selector="ContextMenu">
                 <Setter Property="CornerRadius" Value="7" />
                 <Setter Property="Background" Value="{DynamicResource SystemChromeMediumColor}" />
@@ -127,9 +145,11 @@
                 Selector="MenuItem:pointerover /template/ Border#PART_LayoutRoot, MenuItem:selected /template/ Border#PART_LayoutRoot">
                 <Setter Property="Background" Value="{DynamicResource ButtonBackgroundPointerOver}" />
             </Style>
+
             <Style Selector="LucideIcon:disabled">
                 <Setter Property="Opacity" Value="0.5" />
             </Style>
+
             <Style Selector="TextBox">
                 <Setter Property="Background" Value="{DynamicResource SystemChromeHighColor}" />
                 <Setter Property="BorderBrush" Value="{DynamicResource SystemBaseMediumLowColor}" />
@@ -181,6 +201,7 @@
                     <Setter Property="Foreground" Value="{DynamicResource SystemBaseMediumLowColor}" />
                 </Style>
             </Style>
+
             <Style Selector="Slider">
                 <Style.Resources>
                     <sys:Double x:Key="SliderHorizontalThumbWidth">16</sys:Double>
@@ -235,6 +256,7 @@
                     </Setter.Value>
                 </Setter>
             </Style>
+
             <Style Selector="Arc.loading">
                 <Style.Animations>
                     <Animation IterationCount="Infinite" Duration="0:0:1">
@@ -264,6 +286,7 @@
                     </Animation>
                 </Style.Animations>
             </Style>
+
             <Style Selector="ToolTip">
                 <Setter Property="Opacity" Value="0" />
                 <Setter Property="Padding" Value="8,4" />
@@ -290,6 +313,7 @@
                 <Setter Property="RenderTransform" Value="scale(0.8)" />
                 <Setter Property="RenderTransformOrigin" Value="50%,50%" />
             </Style>
+
         </Grid.Styles>
 
 

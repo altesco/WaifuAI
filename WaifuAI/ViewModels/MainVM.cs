@@ -63,7 +63,7 @@ public partial class MainVM : ObservableValidator
         foreach (var msg in messages)
         {
             _history.Add(msg);
-            Chat.Add(new MessageVM(msg));
+            Chat.Add(new MessageVM(msg, isSavedInDb: true));
         }
         var messageMap = Chat.ToDictionary(m => m.MessageModel.Id);
         foreach (var msg in Chat)
@@ -307,8 +307,12 @@ public partial class MainVM : ObservableValidator
             resultMessage.MessageModel.CleanText = MessageParser.GetCleanText(messageText);
 
             _history.Add(resultMessage.MessageModel);
+
             await DatabaseService.HistoryDb.InsertOrReplaceAsync(message.MessageModel);
             await DatabaseService.HistoryDb.InsertOrReplaceAsync(resultMessage.MessageModel);
+            message.IsSavedInDb = true;
+            resultMessage.IsSavedInDb = true;
+
             Chat.Add(resultMessage);
             
             await MessageParser.ParseTextForKnowledgeUpdates(messageText, KnowledgeBase);

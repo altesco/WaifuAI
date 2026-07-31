@@ -8,9 +8,10 @@ namespace WaifuAI.ViewModels;
 
 public partial class MessageVM : ObservableObject
 {
-    public MessageVM(Message messageModel)
+    public MessageVM(Message messageModel, bool isSavedInDb = false)
     {
         MessageModel = messageModel;
+        IsSavedInDb = isSavedInDb;
         Quote = messageModel.Quote;
         QuoteStart = messageModel.QuoteStart;
         QuoteEnd = messageModel.QuoteEnd;
@@ -18,6 +19,8 @@ public partial class MessageVM : ObservableObject
     }
 
     public Message MessageModel { get; set; }
+
+    [ObservableProperty] private bool _isSavedInDb;
     
     // свойства того что было процитировано из другого сообщения
     [ObservableProperty] private string? _quote;
@@ -42,6 +45,7 @@ public partial class MessageVM : ObservableObject
     {
         base.OnPropertyChanged(e);
         if (SettingsVM.Instance.IsAppInitializing || 
+            !IsSavedInDb ||
             IsFailed ||
             e.PropertyName is 
                 nameof(SelectionStart) or
