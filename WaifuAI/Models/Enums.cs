@@ -1,5 +1,7 @@
 namespace WaifuAI.Models;
 
+#region MoodSystem
+
 public enum AffectionType
 {
     Bad,
@@ -28,4 +30,20 @@ public enum MoodType
     Normal,
     Best
 }
+
+#endregion
+
+
+#region AnswerLength
+
+public enum ResponseLength
+{
+    Short,
+    MediumShort,
+    Medium,
+    MediumLong,
+    Long
+}
+
+#endregion
 

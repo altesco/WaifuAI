@@ -166,11 +166,14 @@ public partial class MainVM : ObservableValidator
         var energy = SettingsVM.Instance.EnergyLevel;
 
         var dynamicDirectives =
-            $"{MoodInstructions.GetAffectionInstruction(affection, mood, energy)}\n" +
-            $"{MoodInstructions.GetEngagementInstruction(engagement, energy, mood)}\n" +
-            $"{MoodInstructions.GetMoodInstruction(mood, engagement, energy)}\n" +
-            $"{MoodInstructions.GetEnergyInstruction(energy, affection)}";
+            $"{PromptService.GetAffectionInstruction(affection, mood, energy)}\n" +
+            $"{PromptService.GetEngagementInstruction(engagement, energy, mood)}\n" +
+            $"{PromptService.GetMoodInstruction(mood, engagement, energy)}\n" +
+            $"{PromptService.GetEnergyInstruction(energy, affection)}";
         basePrompt = basePrompt.Replace("{{EMOTIONAL_DIRECTIVES}}", dynamicDirectives);
+
+        var responseLengthDirective = PromptService.GetResponseLengthInstruction(SettingsVM.Instance.ResponseLength);
+        basePrompt = basePrompt.Replace("{{RESPONSE_LENGTH_DIRECTIVE}}", responseLengthDirective);
 
         var message = new Message
         {

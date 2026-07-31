@@ -2,8 +2,10 @@ using WaifuAI.Models;
 
 namespace WaifuAI.Services;
 
-public static class MoodInstructions
+public static class PromptService
 {
+    #region MoodInstructions
+
     public static string GetAffectionInstruction(AffectionType affection, MoodType mood, EnergyType energy)
     {
         return affection switch
@@ -158,4 +160,37 @@ public static class MoodInstructions
             }
         };
     }
+
+    #endregion
+
+
+    #region ResponseLengthInstruction
+
+    public static string GetResponseLengthInstruction(ResponseLength length)
+    {
+        var result = length switch
+        {
+            ResponseLength.Short => 
+                "Keep your spoken dialogue extremely brief and snappy (1 sentence maximum, under " +
+                "15 words). One quick, direct reaction only.",
+            ResponseLength.MediumShort =>
+                "Keep your spoken dialogue short and concise (1-2 sentences, around 15-35 words). Answer directly " +
+                "without expanding further.",
+            ResponseLength.Medium =>
+                "Keep your spoken dialogue medium-length and balanced (2-4 sentences, around 35-70 words). Express " +
+                "your thoughts naturally without being too brief or overly verbose.",
+            ResponseLength.MediumLong =>
+                "Provide a fuller, more open response (4-6 sentences, around 70-110 words). Expand on your reasoning, " +
+                "add extra details, or ask a relevant follow-up question.",
+            _ =>
+                "Provide a highly detailed, comprehensive response (6 or more sentences, over 120 words). Thoroughly " +
+                "elaborate on your thoughts, tell full stories, or dive deeply into the topic."
+        };
+
+        result += "\nCount spoken text only, excluding tags and JSON.";
+
+        return result;
+    }
+
+    #endregion
 }

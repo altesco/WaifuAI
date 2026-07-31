@@ -183,15 +183,15 @@
             </Style>
             <Style Selector="Slider">
                 <Style.Resources>
-                    <sys:Double x:Key="SliderHorizontalThumbWidth">14</sys:Double>
-                    <sys:Double x:Key="SliderHorizontalThumbHeight">14</sys:Double>
+                    <sys:Double x:Key="SliderHorizontalThumbWidth">16</sys:Double>
+                    <sys:Double x:Key="SliderHorizontalThumbHeight">16</sys:Double>
 
-                    <CornerRadius x:Key="SliderThumbCornerRadius">7</CornerRadius>
+                    <CornerRadius x:Key="SliderThumbCornerRadius">8</CornerRadius>
 
                     <sys:Double x:Key="SliderHorizontalHeight">22</sys:Double>
 
-                    <GridLength x:Key="SliderPreContentMargin">7</GridLength>
-                    <GridLength x:Key="SliderPostContentMargin">7</GridLength>
+                    <GridLength x:Key="SliderPreContentMargin">8</GridLength>
+                    <GridLength x:Key="SliderPostContentMargin">8</GridLength>
                 </Style.Resources>
                 <Setter Property="VerticalAlignment" Value="Center" />
 
@@ -199,27 +199,15 @@
                     <Setter Property="Template">
                         <ControlTemplate>
                             <Border
-                                Width="14"
-                                Height="14"
+                                Width="16"
+                                Height="16"
                                 Background="{DynamicResource SliderThumbBackground}"
-                                CornerRadius="7" />
+                                BorderBrush="{DynamicResource SystemChromeMediumColor}"
+                                BorderThickness="1"
+                                CornerRadius="8" />
                         </ControlTemplate>
                     </Setter>
                 </Style>
-
-                <!-- Исправление: стабильный зазор 1px без дребезжания -->
-                <Style Selector="^ /template/ RepeatButton#PART_DecreaseButton /template/ Border">
-                    <Setter Property="Margin" Value="0" />
-                    <Setter Property="BorderThickness" Value="0,0,1,0" />
-                    <Setter Property="BorderBrush" Value="Transparent" />
-                </Style>
-
-                <Style Selector="^ /template/ RepeatButton#PART_IncreaseButton /template/ Border">
-                    <Setter Property="Margin" Value="0" />
-                    <Setter Property="BorderThickness" Value="1,0,0,0" />
-                    <Setter Property="BorderBrush" Value="Transparent" />
-                </Style>
-
             </Style>
 
             <Style Selector="ComboBox">
@@ -345,7 +333,7 @@
 
                     <Border
                         x:Name="FakeTopBorder"
-                        MaxWidth="{StaticResource TopPanelEdgeWidth}"/>
+                        MaxWidth="{StaticResource TopPanelEdgeWidth}" />
 
                     <StackPanel
                         Orientation="Horizontal"
@@ -362,7 +350,7 @@
                                 <Setter Property="Background" Value="Transparent" />
                                 <Setter Property="VerticalAlignment" Value="Center" />
                                 <Setter Property="BorderThickness" Value="2" />
-                                <Setter Property="Margin" Value="11,0,0,0"/>
+                                <Setter Property="Margin" Value="11,0,0,0" />
                             </Style>
                             <Style Selector="ProgressBar.mini-style">
                                 <Setter Property="Height" Value="16" />
@@ -383,14 +371,14 @@
                                 Foreground="{Binding #AffectionIcon.Foreground}"
                                 MinHeight="0"
                                 MinWidth="0"
-                                Classes.mini-style="{Binding #FakeTopBorder.Bounds.Width, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter={StaticResource TopPanelEdgeWidth}}"/>
+                                Classes.mini-style="{Binding #FakeTopBorder.Bounds.Width, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter={StaticResource TopPanelEdgeWidth}}" />
                             <material:MaterialIcon
                                 Kind="Favorite"
                                 IconSize="22"
                                 Foreground="{DynamicResource SystemChromeHighColor}"
-                                HorizontalAlignment="Left" 
+                                HorizontalAlignment="Left"
                                 VerticalAlignment="Center"
-                                Margin="0,2,0,0"/>
+                                Margin="0,2,0,0" />
                             <LucideIcon
                                 x:Name="AffectionIcon"
                                 Size="18"
@@ -431,7 +419,7 @@
                                 Foreground="{Binding #EngagementIcon.Foreground}"
                                 MinHeight="0"
                                 MinWidth="0"
-                                Classes.mini-style="{Binding #FakeTopBorder.Bounds.Width, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter={StaticResource TopPanelEdgeWidth}}"/>
+                                Classes.mini-style="{Binding #FakeTopBorder.Bounds.Width, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter={StaticResource TopPanelEdgeWidth}}" />
                             <Border
                                 Height="20"
                                 Width="22"
@@ -456,7 +444,7 @@
                                 HorizontalAlignment="Left"
                                 VerticalAlignment="Center"
                                 Margin="3,0,0,0"
-                                IsVisible="{Binding EngagementLevel, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:EngagementType.Interested}}"/>
+                                IsVisible="{Binding EngagementLevel, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:EngagementType.Interested}}" />
                             <LucideIcon
                                 x:Name="EngagementIcon"
                                 Size="18"
@@ -492,14 +480,14 @@
                                 Foreground="{Binding #MoodIcon.Foreground}"
                                 MinHeight="0"
                                 MinWidth="0"
-                                Classes.mini-style="{Binding #FakeTopBorder.Bounds.Width, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter={StaticResource TopPanelEdgeWidth}}"/>
+                                Classes.mini-style="{Binding #FakeTopBorder.Bounds.Width, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter={StaticResource TopPanelEdgeWidth}}" />
                             <Border
                                 Height="22"
                                 Width="22"
                                 CornerRadius="11"
                                 Background="{DynamicResource SystemChromeHighColor}"
                                 HorizontalAlignment="Left"
-                                VerticalAlignment="Center"/>
+                                VerticalAlignment="Center" />
                             <LucideIcon
                                 x:Name="MoodIcon"
                                 Size="18"
@@ -535,26 +523,26 @@
                                 Foreground="{Binding #EnergyIcon.Foreground}"
                                 MinHeight="0"
                                 MinWidth="0"
-                                Classes.mini-style="{Binding #FakeTopBorder.Bounds.Width, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter={StaticResource TopPanelEdgeWidth}}"/>
+                                Classes.mini-style="{Binding #FakeTopBorder.Bounds.Width, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter={StaticResource TopPanelEdgeWidth}}" />
                             <Border
                                 Height="24"
                                 Width="12"
                                 Background="{DynamicResource SystemChromeHighColor}"
                                 RenderTransformOrigin="50%,50%"
-                                HorizontalAlignment="Left" 
+                                HorizontalAlignment="Left"
                                 VerticalAlignment="Center"
                                 Classes.not-low="{Binding EnergyLevel, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter={x:Static models:EnergyType.Low}}">
                                 <Border.RenderTransform>
-                                    <RotateTransform Angle="45"/>    
-                                </Border.RenderTransform>   
+                                    <RotateTransform Angle="45" />
+                                </Border.RenderTransform>
                                 <Border.Styles>
                                     <Style Selector="Border">
                                         <Setter Property="CornerRadius" Value="0,0,0,0" />
                                         <Setter Property="Margin" Value="5,2,0,0" />
                                     </Style>
                                     <Style Selector="Border.not-low">
-                                        <Setter Property="CornerRadius" Value="0,8,0,0"/>
-                                        <Setter Property="Margin" Value="7,2,0,0"/>
+                                        <Setter Property="CornerRadius" Value="0,8,0,0" />
+                                        <Setter Property="Margin" Value="7,2,0,0" />
                                     </Style>
                                 </Border.Styles>
                             </Border>
@@ -571,7 +559,7 @@
                                     <Style Selector="LucideIcon.low">
                                         <Setter Property="Foreground" Value="#ff3a3a" />
                                         <Setter Property="Kind" Value="PlugZap" />
-                                        <Setter Property="Margin" Value="4,0,0,0"/>
+                                        <Setter Property="Margin" Value="4,0,0,0" />
                                     </Style>
                                     <Style Selector="LucideIcon.middle">
                                         <Setter Property="Foreground" Value="#ffa11d" />
@@ -2089,13 +2077,86 @@
                                             HorizontalContentAlignment="Center"
                                             Watermark="0.7" />
                                     </views:SideCard>
+
+                                    <views:SideCard
+                                        Header="Длина ответа"
+                                        Icon="{LucideIconContent Ruler, Size=16, StrokeWidth=2}"
+                                        Description="Задает желаемую длину ответа"
+                                        IsBigTextBox="True">
+                                        <StackPanel>
+                                            <Slider
+                                                Width="NaN"
+                                                Value="{Binding ResponseLengthValue, Mode=TwoWay}"
+                                                Minimum="0"
+                                                Maximum="4"
+                                                TickFrequency="1"
+                                                SmallChange="1"
+                                                IsSnapToTickEnabled="True" 
+                                                Margin="0,-11,0,-4"/>
+                                            <Grid ColumnDefinitions="16,*,16,*,16" >
+                                                <Border
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Top"
+                                                    Width="1"
+                                                    Height="14"
+                                                    Background="{DynamicResource SystemBaseLowColor}" />
+                                                <Border
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Top"
+                                                    Width="1"
+                                                    Height="10"
+                                                    Grid.Column="1"
+                                                    Background="{DynamicResource SystemBaseLowColor}" />
+                                                <Border
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Top"
+                                                    Width="1"
+                                                    Height="14"
+                                                    Grid.Column="2"
+                                                    Background="{DynamicResource SystemBaseLowColor}" />
+                                                <Border
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Top"
+                                                    Width="1"
+                                                    Height="10"
+                                                    Grid.Column="3"
+                                                    Background="{DynamicResource SystemBaseLowColor}" />
+                                                <Border
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Top"
+                                                    Width="1"
+                                                    Height="14"
+                                                    Grid.Column="4"
+                                                    Background="{DynamicResource SystemBaseLowColor}" />
+                                            </Grid>
+                                            <Grid Margin="0,2,0,0">
+                                                <TextBlock
+                                                    FontSize="12"
+                                                    Text="Short"
+                                                    Foreground="{DynamicResource SystemBaseMediumColor}"
+                                                    HorizontalAlignment="Left"/>
+                                                <TextBlock
+                                                    FontSize="12"
+                                                    Text="Medium"
+                                                    Foreground="{DynamicResource SystemBaseMediumColor}"
+                                                    HorizontalAlignment="Center"/>
+                                                <TextBlock
+                                                    FontSize="12"
+                                                    Text="Long"
+                                                    Foreground="{DynamicResource SystemBaseMediumColor}"
+                                                    HorizontalAlignment="Right"/>
+                                            </Grid>
+                                        </StackPanel>
+                                    </views:SideCard>
+
                                     <views:SideCard
                                         Header="Макс. длина ответа"
-                                        Icon="{LucideIconContent Ruler, Size=16, StrokeWidth=2}"
+                                        Icon="{LucideIconContent OctagonMinus, Size=16, StrokeWidth=2}"
                                         Description="Задает жесткий лимит на максимальное количество токенов в одном сообщении"
                                         IsBigTextBox="True">
                                         <TextBox Text="{Binding MaxTokens, Mode=TwoWay}" />
                                     </views:SideCard>
+
                                     <views:SideCard
                                         Header="Длина контекста"
                                         Icon="{LucideIconContent RulerDimensionLine, Size=16, StrokeWidth=2}"
@@ -2103,6 +2164,7 @@
                                         IsBigTextBox="True">
                                         <TextBox Text="{Binding ContextLength, Mode=TwoWay}" />
                                     </views:SideCard>
+
                                 </StackPanel>
                             </ScrollViewer>
                         </views:SidePanel>
@@ -2273,7 +2335,7 @@
                         x:Name="FakeBorder"
                         Grid.ColumnSpan="2"
                         Grid.RowSpan="2"
-                        MaxWidth="{StaticResource SettingsPopupEdgeWidth}"/>
+                        MaxWidth="{StaticResource SettingsPopupEdgeWidth}" />
 
                     <LucideIcon
                         Grid.Column="0"
@@ -2285,7 +2347,7 @@
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
                         Margin="10,0,0,0"
-                        IsVisible="{Binding #FakeBorder.Bounds.Width, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter={StaticResource SettingsPopupEdgeWidth}}"/>
+                        IsVisible="{Binding #FakeBorder.Bounds.Width, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter={StaticResource SettingsPopupEdgeWidth}}" />
                     <Border Grid.Column="0"
                             Grid.Row="0"
                             Margin="16,0"
@@ -2308,8 +2370,8 @@
                                 <Setter Property="Margin" Value="0,0,-10,0" />
                             </Style>
                             <Style Selector="ListBox.mini-style">
-                                <Setter Property="Width" Value="56"/>
-                                <Setter Property="Padding" Value="10,0,0,10"/>
+                                <Setter Property="Width" Value="56" />
+                                <Setter Property="Padding" Value="10,0,0,10" />
                             </Style>
                             <Style Selector="ListBoxItem">
                                 <Setter Property="CornerRadius" Value="4" />
@@ -2887,7 +2949,7 @@
                             </StackPanel>
                         </Grid>
                     </ScrollViewer>
-                    
+
                     <Button
                         Grid.Row="0"
                         Grid.RowSpan="2"

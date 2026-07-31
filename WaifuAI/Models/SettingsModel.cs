@@ -14,6 +14,7 @@ public class SettingsModel
 
     // AI Parameters
     public double Temperature { get; set; } = 0.7;
+    public ResponseLength ResponseLength = ResponseLength.Medium;
     public int MaxTokens { get; set; } = 1000;
     public int ContextLength { get; set; } = 120000;
 

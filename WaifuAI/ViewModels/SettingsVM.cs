@@ -62,6 +62,7 @@ public partial class SettingsVM : ObservableValidator
 
         // AI Parameters
         Temperature = SettingsModel.Temperature;
+        ResponseLength = SettingsModel.ResponseLength;
         MaxTokens = SettingsModel.MaxTokens;
         ContextLength = SettingsModel.ContextLength;
 
@@ -137,6 +138,7 @@ public partial class SettingsVM : ObservableValidator
         
         // AI Parameters
         SettingsModel.Temperature = Temperature;
+        SettingsModel.ResponseLength = ResponseLength;
         SettingsModel.MaxTokens = MaxTokens;
         SettingsModel.ContextLength = ContextLength;
 
@@ -199,6 +201,26 @@ public partial class SettingsVM : ObservableValidator
     [NotifyDataErrorInfo]
     [Range(0.0, 1.0)]
     private double _temperature;
+
+    [ObservableProperty] 
+    [NotifyPropertyChangedFor(nameof(ResponseLengthValue))]
+    private ResponseLength _responseLength;
+
+    public double ResponseLengthValue
+    {
+        get => (double)ResponseLength;
+        set
+        {
+            var intValue = (int)Math.Round(value);
+
+            if (!Enum.IsDefined(typeof(ResponseLength), intValue)) 
+                return;
+            
+            var newLength = (ResponseLength)intValue;
+            if (ResponseLength != newLength)
+                ResponseLength = newLength;
+        }
+    }
 
     [ObservableProperty]
     [NotifyDataErrorInfo]    

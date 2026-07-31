@@ -165,8 +165,6 @@ public static class VoiceService
     {
         var parsedResult = MessageParser.ParseTextForEmotions(text);
         parsedResult.CleanText = parsedResult.CleanText.ToPhoneticCyrillic();
-        Console.WriteLine(text);
-        Console.WriteLine(parsedResult.CleanText);
         var dialogueData = new
         {
             cleanText = parsedResult.CleanText,
@@ -177,8 +175,23 @@ public static class VoiceService
             }).ToList()
         };
         string jsonParams = JsonSerializer.Serialize(dialogueData);
-        var modelPath = Path.Combine(SettingsVM.VoiceModelFolder, $"{modelName}.pt").Replace("\\", "/");
-        string jsCall = $"window.say({jsonParams}, {pitch}, {Port}, '{service}', '{modelPath}', '{language}', '{speaker}', {volume}, {bass}, {treble});";
+        var modelPath = Path.Combine(
+            SettingsVM.VoiceModelFolder, 
+            $"{modelName}.pt").Replace("\\", "/"
+        );
+        string jsCall = 
+            $"window.say(" +
+            $"{jsonParams}, " +
+            $"{pitch}, " +
+            $"{Port}, " +
+            $"'{service}', " +
+            $"'{modelPath}', " +
+            $"'{language}', " +
+            $"'{speaker}', " +
+            $"{volume}, " +
+            $"{bass}, " +
+            $"{treble}" +
+            $");";
         WeakReferenceMessenger.Default.Send(new ExecuteScriptMessage(jsCall));
     }
 
