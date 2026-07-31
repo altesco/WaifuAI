@@ -744,28 +744,12 @@
                                     SelectedItems="{Binding SelectedMessages}"
                                     SelectionMode="{Binding IsMultiSelect, Converter={StaticResource BoolToSelectionModeConverter}}"
                                     Tag="{Binding IsMultiSelect}">
-                                    <!-- <ListBox.Styles>
-                                        <Style Selector="ListBox /template/ ItemsPresenter">
-                                            <Setter Property="MaxWidth" Value="720" />
-                                        </Style>
-                                    </ListBox.Styles>-->
                                     <ListBox.ItemContainerTheme>
                                         <ControlTheme x:DataType="vm:MessageVM" TargetType="ListBoxItem">
                                             <Setter Property="Background" Value="Transparent" />
-                                            <Setter Property="IsHitTestVisible"
-                                                    Value="{Binding MessageModel.Role, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter=temp}" />
-                                            <!-- <Setter Property="(Interaction.Behaviors)">
-                                                <BehaviorCollectionTemplate>
-                                                    <BehaviorCollection>
-                                                        <EventTriggerBehavior EventName="DoubleTapped">
-                                                            <InvokeCommandAction
-                                                                x:DataType="vm:MainVM"
-                                                                Command="{Binding MakeReplyCommand}"
-                                                                DataContext="{Binding $parent[ListBox].DataContext}" />
-                                                        </EventTriggerBehavior>
-                                                    </BehaviorCollection>
-                                                </BehaviorCollectionTemplate>
-                                            </Setter>-->
+                                            <Setter 
+                                                Property="IsHitTestVisible"
+                                                Value="{Binding MessageModel.Role, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter=temp}" />
                                         </ControlTheme>
                                     </ListBox.ItemContainerTheme>
                                     <ListBox.ItemTemplate>

@@ -15,6 +15,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using ElBruno.LocalEmbeddings;
 using ElBruno.LocalEmbeddings.Extensions;
 using SharpToken;
+using WaifuAI.CustomClasses;
 
 namespace WaifuAI.ViewModels;
 
@@ -51,21 +52,17 @@ public partial class MainVM : ObservableValidator
 
         InitializingMessage = "Загрузка базы знаний...";
         await DatabaseService.InitializeDatabases();
-        var records = 
-            await DatabaseService.KnowledgeDb.Table<KnowledgeRecord>().ToListAsync();
-        foreach (var record in records)
-            KnowledgeBase.Add(record);
+        var records = await DatabaseService.KnowledgeDb.Table<KnowledgeRecord>().ToListAsync();
+        KnowledgeBase.AddRange(records);
 
         InitializingMessage = "Загрузка истории чата...";
         var messages = await DatabaseService.HistoryDb.Table<Message>()
             .OrderBy(m => m.Time)
             .ToListAsync();
-        foreach (var msg in messages)
-        {
-            _history.Add(msg);
-            Chat.Add(new MessageVM(msg, isSavedInDb: true));
-        }
+
+        var messageVMs = messages.Select(msg => new MessageVM(msg, isSavedInDb: true)).ToList();
         var messageMap = Chat.ToDictionary(m => m.MessageModel.Id);
+
         foreach (var msg in Chat)
         {
             if (msg.MessageModel.ReplyMessageId == null ||
@@ -74,6 +71,12 @@ public partial class MainVM : ObservableValidator
             msg.ReplyMessage = replyMsg;
             replyMsg.ReplyingMessages.Add(msg);
         }
+
+        _history.AddRange(messages);
+
+        // скипнуть последний и добавить его отдельно чтобы к нему проскроллилось
+        Chat.AddRange(messageVMs.SkipLast(1));
+        Chat.Add(messageVMs.Last());
 
         SettingsVM.Instance.IsAppInitializing = false;
 
@@ -107,8 +110,8 @@ public partial class MainVM : ObservableValidator
     [ObservableProperty] private bool _isDeletingMessageDialogOpen;
     [ObservableProperty] private bool _isDeletingRecordDialogOpen;
 
-    public ObservableCollection<MessageVM> Chat { get; } = [];
-    public ObservableCollection<KnowledgeRecord> KnowledgeBase { get; } = [];
+    public BulkObservableCollection<MessageVM> Chat { get; } = [];
+    public BulkObservableCollection<KnowledgeRecord> KnowledgeBase { get; } = [];
 
     [ObservableProperty] private KnowledgeRecord? _selectedKnowledgeRecord;
     
