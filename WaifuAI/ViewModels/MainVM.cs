@@ -285,9 +285,9 @@ public partial class MainVM : ObservableValidator
                 _history.Remove(_history.Last());
                 if (ReplyMessage is null)
                     return;    
-                Quote = ReplyMessage.Quote;
-                QuoteStart = ReplyMessage.QuoteStart;
-                QuoteEnd = ReplyMessage.QuoteEnd;
+                Quote = message.Quote;
+                QuoteStart = message.QuoteStart;
+                QuoteEnd = message.QuoteEnd;
                 return;
             }
 
@@ -301,7 +301,8 @@ public partial class MainVM : ObservableValidator
                 SettingsVM.Instance.Volume, 
                 SettingsVM.Instance.Pitch,
                 SettingsVM.Instance.Bass, 
-                SettingsVM.Instance.Treble);
+                SettingsVM.Instance.Treble,
+                SettingsVM.Instance.IsStream);
 
             resultMessage.MessageModel.CleanText = MessageParser.GetCleanText(messageText);
 

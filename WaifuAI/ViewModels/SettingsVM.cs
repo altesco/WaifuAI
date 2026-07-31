@@ -67,31 +67,32 @@ public partial class SettingsVM : ObservableValidator
         ContextLength = SettingsModel.ContextLength;
 
         // Server Settings
-        Port = SettingsModel.Port; Console.WriteLine("порт есть");
-        IpAddress = SettingsModel.IpAddress; Console.WriteLine("ip есть");
-        ApiKey = SettingsModel.ApiKey; Console.WriteLine("апи ключ есть");
-        ApiUrl = SettingsModel.ApiUrl; Console.WriteLine("апи урл есть");
-        AiModel = SettingsModel.AIModel; Console.WriteLine("модель ии есть");
-        IsServerQuery = SettingsModel.IsServerQuery; Console.WriteLine("бул есть");
+        Port = SettingsModel.Port; 
+        IpAddress = SettingsModel.IpAddress;
+        ApiKey = SettingsModel.ApiKey; 
+        ApiUrl = SettingsModel.ApiUrl; 
+        AiModel = SettingsModel.AIModel;
+        IsServerQuery = SettingsModel.IsServerQuery;
         
         // General Settings
-        SelectedTheme = SettingsModel.Theme; Console.WriteLine("тема есть");
-        SelectedColor = SettingsModel.AccentColor; Console.WriteLine("цвет есть");
-        RefreshFonts(); Console.WriteLine("шрифт есть");
-        RefreshMonoFonts(); Console.WriteLine("моношрифт есть");
-        SelectedAppLanguage = SettingsModel.AppLanguage; Console.WriteLine("язык приложения есть");
-        SelectedLanguage = SettingsModel.Language; Console.WriteLine("язык ии есть");
+        SelectedTheme = SettingsModel.Theme;
+        SelectedColor = SettingsModel.AccentColor;
+        RefreshFonts(); 
+        RefreshMonoFonts(); 
+        SelectedAppLanguage = SettingsModel.AppLanguage; 
+        SelectedLanguage = SettingsModel.Language;
 
         // Voice Settings
-        SelectedSource = SettingsModel.Source; Console.WriteLine("источник звука есть");
-        SelectedVoiceModel = VoiceService.LanguageModels[SelectedLanguage].Contains(SettingsModel.VoiceModel) ?
-            SettingsModel.VoiceModel : VoiceService.LanguageModels[SelectedLanguage][0];
-        Console.WriteLine("модель звука есть");
-        SelectedSpeaker = SettingsModel.Speaker; Console.WriteLine("спикер есть");
-        Volume = SettingsModel.Volume; Console.WriteLine("звук есть");
-        Bass = SettingsModel.Bass; Console.WriteLine("бас есть");
-        Treble = SettingsModel.Treble; Console.WriteLine("требл есть");
-        Pitch = SettingsModel.Pitch; Console.WriteLine("питч есть");
+        SelectedSource = SettingsModel.Source; 
+        SelectedVoiceModel = VoiceService.LanguageModels[SelectedLanguage].Contains(SettingsModel.VoiceModel) 
+            ? SettingsModel.VoiceModel 
+            : VoiceService.LanguageModels[SelectedLanguage][0];
+        SelectedSpeaker = SettingsModel.Speaker; 
+        Volume = SettingsModel.Volume; 
+        Bass = SettingsModel.Bass; 
+        Treble = SettingsModel.Treble; 
+        Pitch = SettingsModel.Pitch; 
+        IsStream = SettingsModel.IsStream;
 
         // 3D Model Settings
         if (Directory.Exists(SettingsModel.Model3DFolder))
@@ -99,7 +100,6 @@ public partial class SettingsVM : ObservableValidator
         else
             Directory.CreateDirectory(Model3DFolder);
         RefreshModels3D();
-        Console.WriteLine("модель 3д есть");
 
         // Personality
         WaifuName = SettingsModel.WaifuName;
@@ -165,7 +165,8 @@ public partial class SettingsVM : ObservableValidator
         SettingsModel.Volume = Volume;      
         SettingsModel.Bass = Bass;       
         SettingsModel.Treble = Treble;       
-        SettingsModel.Pitch = Pitch;       
+        SettingsModel.Pitch = Pitch;
+        SettingsModel.IsStream = IsStream;
 
         // 3D Model Settings
         SettingsModel.SelectedModel3D = SelectedModel3D;       
@@ -258,10 +259,8 @@ public partial class SettingsVM : ObservableValidator
     {
         var app = Application.Current;
         var theme = app?.Styles.OfType<FluentTheme>().FirstOrDefault();
-        Console.WriteLine("зашел");
         if (HasErrors || app is null || theme is null || !Color.TryParse(value, out var color))
             return;
-        Console.WriteLine("ошибок нет, тема не налл, значение распарсил");
         if (theme.Palettes.TryGetValue(ThemeVariant.Light, out var lightPalette) &&
             lightPalette is { } light)
             light.Accent = color;
@@ -436,6 +435,9 @@ public partial class SettingsVM : ObservableValidator
     [ObservableProperty] [Range(-10, 10)] private double _treble;
     [ObservableProperty] [Range(-10, 10)] private double _bass;
     [ObservableProperty] [Range(0, 2)] private double _pitch;
+
+    [ObservableProperty] private bool _isStream;
+
     [ObservableProperty] private bool _isSpeakersLoading;
     [ObservableProperty] private long _voiceModelSize;
     [ObservableProperty] private bool _isDownloading;

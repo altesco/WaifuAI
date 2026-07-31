@@ -14,7 +14,7 @@ public class SettingsModel
 
     // AI Parameters
     public double Temperature { get; set; } = 0.7;
-    public ResponseLength ResponseLength = ResponseLength.Medium;
+    public ResponseLength ResponseLength { get; set; } = ResponseLength.Medium;
     public int MaxTokens { get; set; } = 1000;
     public int ContextLength { get; set; } = 120000;
 
@@ -34,6 +34,7 @@ public class SettingsModel
     public double Bass { get; set; }
     public double Treble { get; set; }
     public double Pitch { get; set; } = 1.0;
+    public bool IsStream { get; set; }
 
     // 3D Model Settings
     public string SelectedModel3D { get; set; } = string.Empty;

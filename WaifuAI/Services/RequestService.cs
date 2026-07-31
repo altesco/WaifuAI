@@ -58,27 +58,39 @@ public static class RequestService
         }
     }
 
-    public static async Task<Message> DoProviderQuery(RequestModel queryModel)
+    public static async Task<Message> DoProviderQuery(RequestModel requestModel)
     {
-        queryModel.Model = SettingsVM.Instance.AiModel;
+        requestModel.Model = SettingsVM.Instance.AiModel;
+
         var serializeOptions = new JsonSerializerOptions
         {
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
             WriteIndented = true
         };
-        var json = JsonSerializer.Serialize(queryModel, serializeOptions);
+
+        var json = JsonSerializer.Serialize(requestModel, serializeOptions);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
+
         ApiService.HttpClient.DefaultRequestHeaders.Clear();
         ApiService.HttpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {SettingsVM.Instance.ApiKey}");
+
         try
         {
             var response = await ApiService.HttpClient.PostAsync(SettingsVM.Instance.ApiUrl, content);
             var resJson = await response.Content.ReadAsStringAsync();
+
             Console.WriteLine(resJson);
+
             if (!response.IsSuccessStatusCode)
             {
                 using var doc = JsonDocument.Parse(resJson);
-                if (doc.RootElement.TryGetProperty("error", out var errorElement) &&
+                var root = doc.RootElement;
+
+                if (root.ValueKind == JsonValueKind.Array && root.GetArrayLength() > 0)
+                    root = root[0];
+
+                if (root.ValueKind == JsonValueKind.Object &&
+                    root.TryGetProperty("error", out var errorElement) &&
                     errorElement.TryGetProperty("message", out var messageElement))
                 {
                     return new Message
@@ -87,14 +99,18 @@ public static class RequestService
                         Content = $"Ошибка {(int)response.StatusCode}: {messageElement.GetString()}"
                     };
                 }
+                
                 return new Message { Role = "system", Content = $"Ошибка {(int)response.StatusCode}" };
             }
+
             var deserializeOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             var result = JsonSerializer.Deserialize<ResponseModel>(resJson, deserializeOptions);
             var message = result?.Choices[0].Message ?? 
                           new Message { Role = "assistant", Content = "wtf something is wrong" };
+
             message.Time = DateTime.Now;
             message.Tokens = result?.Usage.CompletionTokens ?? 0;
+
             return message;
         }
         catch (Exception ex)

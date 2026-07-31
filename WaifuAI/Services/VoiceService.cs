@@ -161,7 +161,8 @@ public static class VoiceService
         double volume, 
         double pitch,
         double bass, 
-        double treble)
+        double treble,
+        bool isStream)
     {
         var parsedResult = MessageParser.ParseTextForEmotions(text);
         parsedResult.CleanText = parsedResult.CleanText.ToPhoneticCyrillic();
@@ -190,7 +191,8 @@ public static class VoiceService
             $"'{speaker}', " +
             $"{volume}, " +
             $"{bass}, " +
-            $"{treble}" +
+            $"{treble}, " +
+            $"{(isStream ? "true" : "false")}" +
             $");";
         WeakReferenceMessenger.Default.Send(new ExecuteScriptMessage(jsCall));
     }

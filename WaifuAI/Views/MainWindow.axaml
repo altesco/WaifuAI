@@ -2091,9 +2091,9 @@
                                                 Maximum="4"
                                                 TickFrequency="1"
                                                 SmallChange="1"
-                                                IsSnapToTickEnabled="True" 
-                                                Margin="0,-11,0,-4"/>
-                                            <Grid ColumnDefinitions="16,*,16,*,16" >
+                                                IsSnapToTickEnabled="True"
+                                                Margin="0,-11,0,-4" />
+                                            <Grid ColumnDefinitions="16,*,16,*,16">
                                                 <Border
                                                     HorizontalAlignment="Center"
                                                     VerticalAlignment="Top"
@@ -2134,17 +2134,17 @@
                                                     FontSize="12"
                                                     Text="Short"
                                                     Foreground="{DynamicResource SystemBaseMediumColor}"
-                                                    HorizontalAlignment="Left"/>
+                                                    HorizontalAlignment="Left" />
                                                 <TextBlock
                                                     FontSize="12"
                                                     Text="Medium"
                                                     Foreground="{DynamicResource SystemBaseMediumColor}"
-                                                    HorizontalAlignment="Center"/>
+                                                    HorizontalAlignment="Center" />
                                                 <TextBlock
                                                     FontSize="12"
                                                     Text="Long"
                                                     Foreground="{DynamicResource SystemBaseMediumColor}"
-                                                    HorizontalAlignment="Right"/>
+                                                    HorizontalAlignment="Right" />
                                             </Grid>
                                         </StackPanel>
                                     </views:SideCard>
@@ -2817,6 +2817,23 @@
                                             </StackPanel>
                                         </views:SettingsCard>
                                     </StackPanel>
+                                </Border>
+                                <TextBlock
+                                    Margin="24,0,0,0"
+                                    FontSize="15"
+                                    FontWeight="Bold"
+                                    Text="Расширенные настройки" />
+                                <Border Theme="{DynamicResource SettingsGroup}">
+                                    <views:SettingsCard
+                                        Description="Включает потоковое воспроизведение речи, позволяя генерировать звук на лету.&#x0a;Примечание: на некоторых провайдерах может ухудшиться качество воспроизведения"
+                                        Header="Потоковое воспроизведение"
+                                        Icon="{LucideIconContent WavesVertical,
+                                                                     20}">
+                                        <ToggleSwitch
+                                            OffContent=""
+                                            OnContent=""
+                                            IsChecked="{Binding IsStream, Mode=TwoWay}" />
+                                    </views:SettingsCard>
                                 </Border>
                             </StackPanel>
                             <StackPanel Margin="24,12" IsVisible="{Binding #ModelAppearence.IsSelected}">

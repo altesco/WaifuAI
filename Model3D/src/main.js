@@ -368,63 +368,148 @@ let audioStartTime = 0;
 let currentAudioSource = null;
 
 // --- Speech & Emotions ---
-window.say = async (data, pitch, port, service, model, language, speaker, volume, bass, treble) => {
-  const response = await fetch(`http://127.0.0.1:${port}/${service}?text=${encodeURIComponent(data.cleanText)}&model_path=${encodeURIComponent(model)}&language=${language}&speaker=${speaker}`);
-  const audioBuffer = await audioContext.decodeAudioData(await response.arrayBuffer());
-  
-  if (currentAudioSource) {
-    try { currentAudioSource.stop(); } catch (e) { }
+// Храним активные ноды для возможности остановки речи
+let activeSources = [];
+
+// Вспомогательная функция: превращаем сырые PCM (16-bit Int) байты в Float32 AudioBuffer
+function pcmToAudioBuffer(ctx, bytes, sampleRate = 48000) {
+  const int16Array = new Int16Array(bytes.buffer, bytes.byteOffset, Math.floor(bytes.byteLength / 2));
+  const float32Array = new Float32Array(int16Array.length);
+
+  for (let i = 0; i < int16Array.length; i++) {
+    float32Array[i] = int16Array[i] / 32768.0;
   }
-  
-  const sourceNode = audioContext.createBufferSource();
-  sourceNode.buffer = audioBuffer;
-  sourceNode.playbackRate.value = pitch;
-  currentAudioSource = sourceNode;
 
-  const gainNode = audioContext.createGain();
-  gainNode.gain.value = volume;
-  sourceNode.connect(lipSync.analyser);
-  sourceNode.connect(gainNode);
-  gainNode.connect(audioContext.destination);
-  audioStartTime = audioContext.currentTime;
-  sourceNode.start(audioStartTime);
+  const buffer = ctx.createBuffer(1, float32Array.length, sampleRate);
+  buffer.getChannelData(0).set(float32Array);
+  return buffer;
+}
 
-  setEmotions(data, audioBuffer.duration);
+window.say = async (
+  data, pitch, port, service, model, language, speaker, volume, bass, treble,
+  isStream = false
+) => {
+  // 1. Останавливаем предыдущую речь, если она ещё идёт
+  activeSources.forEach(source => {
+    try { source.stop(); } catch (e) { }
+  });
+  activeSources = [];
+
+  // 2. Потоковая генерация (isStream = true)
+  if (isStream) {
+    const url = `http://127.0.0.1:${port}/silero_tts_stream?text=${encodeURIComponent(data.cleanText)}&model_path=${encodeURIComponent(model)}&language=${language}&speaker=${speaker}&sample_rate=48000`;
+    const response = await fetch(url);
+
+    if (!response.body) return;
+
+    const reader = response.body.getReader();
+    let nextStartTime = audioContext.currentTime;
+    let leftoverBytes = new Uint8Array(0);
+    let emotionsTriggered = false;
+
+    // Оценка длительности для расчета тайминга эмоций в потоке
+    const estimatedDuration = data.cleanText.length * 0.072;
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      const chunk = new Uint8Array(leftoverBytes.length + value.length);
+      chunk.set(leftoverBytes);
+      chunk.set(value, leftoverBytes.length);
+
+      const remainder = chunk.length % 2;
+      const processableLength = chunk.length - remainder;
+      leftoverBytes = chunk.slice(processableLength);
+
+      if (processableLength === 0) continue;
+
+      const processableBytes = chunk.slice(0, processableLength);
+      const audioBuffer = pcmToAudioBuffer(audioContext, processableBytes, 48000);
+
+      const sourceNode = audioContext.createBufferSource();
+      sourceNode.buffer = audioBuffer;
+      sourceNode.playbackRate.value = pitch;
+
+      const gainNode = audioContext.createGain();
+      gainNode.gain.value = volume;
+
+      sourceNode.connect(lipSync.analyser);
+      sourceNode.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+
+      const startTime = Math.max(audioContext.currentTime, nextStartTime);
+      sourceNode.start(startTime);
+      activeSources.push(sourceNode);
+
+      if (!emotionsTriggered) {
+        emotionsTriggered = true;
+        setEmotions(data, estimatedDuration, startTime, pitch);
+      }
+
+      const chunkDuration = audioBuffer.duration / pitch;
+      nextStartTime = startTime + chunkDuration;
+    }
+  }
+  // 3. Генерация целиком "всё за раз" (isStream = false)
+  else {
+    const url = `http://127.0.0.1:${port}/${service}?text=${encodeURIComponent(data.cleanText)}&model_path=${encodeURIComponent(model)}&language=${language}&speaker=${speaker}`;
+    const response = await fetch(url);
+    const audioBuffer = await audioContext.decodeAudioData(await response.arrayBuffer());
+
+    const sourceNode = audioContext.createBufferSource();
+    sourceNode.buffer = audioBuffer;
+    sourceNode.playbackRate.value = pitch;
+
+    const gainNode = audioContext.createGain();
+    gainNode.gain.value = volume;
+
+    sourceNode.connect(lipSync.analyser);
+    sourceNode.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    const startTime = audioContext.currentTime;
+    sourceNode.start(startTime);
+    activeSources.push(sourceNode);
+
+    // В монолитном режиме передаем ТОЧНУЮ реальную длину полученного аудиофайла
+    setEmotions(data, audioBuffer.duration, startTime, pitch);
+  }
 };
 
-async function setEmotions(data, duration) {
+async function setEmotions(data, duration, startTime, pitch) {
   if (!data.emotions || !currentVrm) return;
   const vrm = currentVrm;
   const realCharSpeed = (duration / data.cleanText.length);
 
   data.emotions.forEach((item) => {
     const emotionTimeOffset = item.pos * realCharSpeed;
-    const exactStartTime = audioStartTime + (emotionTimeOffset / currentAudioSource.playbackRate.value);
+    const exactStartTime = startTime + (emotionTimeOffset / pitch);
     const now = audioContext.currentTime;
     const timeToWait = (exactStartTime - now) * 1000;
 
     setTimeout(() => {
-      if (!vrm || currentAudioSource?.playbackRate.value === 0) return;
+      if (!vrm) return;
 
-      // 1. Обработка MOTION
+      // 1. Обработка MOTION (Анимации и позы)
       if (item.name.startsWith('motion:')) {
         const animName = item.name.replace('motion:', '');
+        console.log(`[Motion Event] Запуск позы/анимации: ${animName}`);
         loadFBX(`/animations/${animName}.fbx`, false);
       }
 
-      // 2. Обработка MOOD
+      // 2. Обработка MOOD (Эмоции лица)
       else if (item.name.startsWith('mood:')) {
         const rawName = item.name.replace('mood:', '').toLowerCase();
 
-        // Маппинг подмены
         let emotionName = (rawName === 'happy') ? 'relaxed' : rawName;
         if (emotionName === 'surprised') {
           emotionName = 'Surprised';
         }
 
-        console.log(`[Mood Event] Активация: ${emotionName}`);
+        console.log(`[Mood Event] Активация эмоции: ${emotionName}`);
 
-        // Сброс старых
+        // Сброс старых эмоций
         vrm.expressionManager.expressions.forEach((ex) => {
           const name = ex.expressionName.toLowerCase();
           if (name !== emotionName && !['aa', 'ee', 'ih', 'oh', 'ou', 'blink'].includes(name)) {
@@ -438,7 +523,7 @@ async function setEmotions(data, duration) {
           }
         });
 
-        // Включение новой
+        // Включение новой эмоции
         const targetVal = (emotionName === 'Surprised') ? 0.3 : 1.0;
         const currentVal = vrm.expressionManager.getValue(emotionName) || 0;
 
@@ -446,7 +531,6 @@ async function setEmotions(data, duration) {
           .to({ w: targetVal }, 400)
           .onUpdate(o => {
             vrm.expressionManager.setValue(emotionName, o.w);
-            // Принудительно заставляем VRM пересчитать меш
             vrm.expressionManager.update();
           })
           .start();
@@ -454,6 +538,9 @@ async function setEmotions(data, duration) {
     }, Math.max(0, timeToWait));
   });
 }
+
+
+
 
 window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
