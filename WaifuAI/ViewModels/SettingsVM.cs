@@ -120,7 +120,11 @@ public partial class SettingsVM : ObservableValidator
         {
             var promptPath = Path.Combine(PromptsPath, $"{archetype.Name}.txt");
             if (!File.Exists(promptPath))
+            {
                 File.Create(promptPath);
+                var prompt = PromptService.GetArchetypePrompt(archetype);
+                await File.WriteAllTextAsync(promptPath, prompt);
+            }
             else
                 archetype.Prompt = await File.ReadAllTextAsync(promptPath);
         }

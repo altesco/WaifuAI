@@ -11,6 +11,7 @@
     xmlns:wv="clr-namespace:WebViewControl;assembly=WebViewControl.Avalonia"
     xmlns:material="using:Material.Icons.Avalonia"
     xmlns:sys="clr-namespace:System;assembly=System.Runtime"
+    xmlns:ia="using:Avalonia.Xaml.Interactions.Animated"
     Title="WaifuAI"
     d:DesignHeight="720"
     d:DesignWidth="1024"
@@ -44,15 +45,6 @@
         </ControlTheme>
         <sys:Double x:Key="SettingsPopupEdgeWidth">680</sys:Double>
         <sys:Double x:Key="TopPanelEdgeWidth">740</sys:Double>
-
-        <!-- Цвет бегунка в обычном (сплюснутом) состоянии -->
-        <SolidColorBrush x:Key="ScrollBarThumbForeground">Red</SolidColorBrush>
-
-        <!-- Цвета для остальных состояний (опционально, чтобы не ломался визуал) -->
-        <!-- При наведении на бегунок -->
-        <SolidColorBrush x:Key="ScrollBarThumbForegroundPointerOver">DarkRed</SolidColorBrush>
-        <!-- При нажатии на бегунок -->
-        <SolidColorBrush x:Key="ScrollBarThumbForegroundPressed">Orange</SolidColorBrush>
 
     </Window.Resources>
     <Grid
@@ -313,6 +305,16 @@
                 <Setter Property="RenderTransform" Value="scale(0.8)" />
                 <Setter Property="RenderTransformOrigin" Value="50%,50%" />
             </Style>
+
+            <!-- <Style Selector="ScrollViewer">
+                <Setter Property="Interaction.Behaviors">
+                    <BehaviorCollectionTemplate>
+                        <BehaviorCollection>
+                            <ia:VerticalScrollViewerAnimatedBehavior/>
+                        </BehaviorCollection>
+                    </BehaviorCollectionTemplate>
+                </Setter>
+            </Style> -->
 
         </Grid.Styles>
 
@@ -744,6 +746,7 @@
                                     SelectedItems="{Binding SelectedMessages}"
                                     SelectionMode="{Binding IsMultiSelect, Converter={StaticResource BoolToSelectionModeConverter}}"
                                     Tag="{Binding IsMultiSelect}">
+                                    
                                     <ListBox.ItemContainerTheme>
                                         <ControlTheme x:DataType="vm:MessageVM" TargetType="ListBoxItem">
                                             <Setter Property="Background" Value="Transparent" />
@@ -1632,7 +1635,7 @@
                                             <Button
                                                 Margin="3"
                                                 Classes="icon-button"
-                                                Command="{Binding RequestCommand}"
+                                                Command="{Binding RunQaTestCommand}"
                                                 CommandParameter="{Binding #MyWebView}"
                                                 IsDefault="True"
                                                 IsEnabled="{Binding Question, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">

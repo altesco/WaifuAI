@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Threading;
@@ -75,8 +76,11 @@ public partial class MainVM : ObservableValidator
         _history.AddRange(messages);
 
         // скипнуть последний и добавить его отдельно чтобы к нему проскроллилось
-        Chat.AddRange(messageVMs.SkipLast(1));
-        Chat.Add(messageVMs.Last());
+        if (messageVMs.Count > 0)
+        {
+            Chat.AddRange(messageVMs.SkipLast(1));
+            Chat.Add(messageVMs.Last());
+        }
 
         SettingsVM.Instance.IsAppInitializing = false;
 
@@ -578,4 +582,135 @@ public partial class MainVM : ObservableValidator
     }
     
     [ObservableProperty] private bool _isMaximized;
+
+
+
+
+
+    [RelayCommand]
+    private async Task RunQaTest()
+    {
+        var logPath = Path.Combine(SettingsVM.AppDirectory, "logs.txt");
+
+        // 1. Набор тестовых запросов
+        string[] testPrompts =
+        [
+            "Привет! Чем занимаешься?",
+            "Ты сегодня выглядишь невероятно мило. Я принёс твои любимые сладости!",
+            "Слушай, а расскажи честно, что ты обо мне думаешь и почему ты со мной общаешься?"
+        ];
+
+        // 2. Получаем все файлы промптов архетипов из PromptsPath
+        var promptFiles = Directory.GetFiles(SettingsVM.PromptsPath, "*.txt");
+
+        await using var sw = File.AppendText(logPath);
+
+        await sw.WriteLineAsync("\n==================================================");
+        await sw.WriteLineAsync($"🧪 СТАРТ QA БЕНЧМАРКА ({promptFiles.Length} АРХЕТИПОВ)");
+        await sw.WriteLineAsync("==================================================\n");
+
+        try
+        {
+            foreach (var filePath in promptFiles)
+            {
+                string archetypeName = Path.GetFileNameWithoutExtension(filePath);
+                string archetypePrompt = await File.ReadAllTextAsync(filePath);
+
+                await sw.WriteLineAsync($"--------------------------------------------------");
+                await sw.WriteLineAsync($"🔍 ТЕСТИРУЕМ АРХЕТИП: [{archetypeName.ToUpper()}]");
+                await sw.WriteLineAsync($"--------------------------------------------------");
+
+                foreach (var userPrompt in testPrompts)
+                {
+                    // Изолированно собираем системный промпт без обращения к _history и БД
+                    var systemPrompt = BuildQaSystemPrompt(archetypePrompt);
+
+                    var query = new RequestModel
+                    {
+                        Temperature = SettingsVM.Instance.Temperature,
+                        MaxTokens = SettingsVM.Instance.MaxTokens
+                    };
+
+                    query.Messages.Add(systemPrompt);
+                    query.Messages.Add(new Message { Role = "user", Content = userPrompt });
+
+                    // Выполняем запрос через текущий активный сервер/провайдер
+                    var resultMessage = SettingsVM.Instance.IsServerQuery
+                        ? await RequestService.DoServerQuery(query)
+                        : await RequestService.DoProviderQuery(query);
+
+                    string responseText = resultMessage.Content ?? string.Empty;
+
+                    // --- ВАЛИДАЦИЯ ---
+                    bool hasMoodTag = Regex.IsMatch(responseText, @"\*mood:\w+\*");
+                    bool hasMotionTag = Regex.IsMatch(responseText, @"\*motion:\w+\*");
+                    bool hasForbiddenMarkdown = Regex.IsMatch(responseText, @"\*\*[^*]+\*\*"); // Проверка на **жирный**
+                    bool hasJsonDelta = responseText.Contains("affection_delta") && responseText.Contains("mood_delta");
+
+                    await sw.WriteLineAsync($"[Юзер]: {userPrompt}");
+                    await sw.WriteLineAsync($"[Вайфу]: {responseText}\n");
+                    await sw.WriteLineAsync($"   --> 3D Mood Тег:   {(hasMoodTag ? "✅ OK" : "❌ ОШИБКА")}");
+                    await sw.WriteLineAsync($"   --> 3D Motion Тег: {(hasMotionTag ? "✅ OK" : "❌ ОШИБКА")}");
+                    await sw.WriteLineAsync(
+                        $"   --> Без Markdown **: {(!hasForbiddenMarkdown ? "✅ OK" : "❌ ОШИБКА (содержит **)")}");
+                    await sw.WriteLineAsync($"   --> JSON Дельты:   {(hasJsonDelta ? "✅ OK" : "❌ ОШИБКА")}");
+                    await sw.WriteLineAsync(new string('-', 30));
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            await sw.WriteLineAsync($"❌ Ошибка во время QA бенчмарка: {ex.Message}");
+        }
+
+        await sw.WriteLineAsync("\n=== QA ТЕСТИРОВАНИЕ ЗАВЕРШЕНО ===");
+    }
+
+    /// <summary>
+    /// Вспомогательный метод для генерации системного промпта без привязки к активной истории и БД.
+    /// </summary>
+    private Message BuildQaSystemPrompt(string archetypePrompt)
+    {
+        var now = DateTime.Now;
+        var birthday = SettingsVM.Instance.Birthday;
+        var basePrompt = _baseSystemPrompt.Content;
+
+        var affection = SettingsVM.Instance.AffectionLevel;
+        var engagement = SettingsVM.Instance.EngagementLevel;
+        var mood = SettingsVM.Instance.MoodLevel;
+        var energy = SettingsVM.Instance.EnergyLevel;
+
+        var dynamicDirectives =
+            $"{PromptService.GetAffectionInstruction(affection, mood, energy)}\n" +
+            $"{PromptService.GetEngagementInstruction(engagement, energy, mood)}\n" +
+            $"{PromptService.GetMoodInstruction(mood, engagement, energy)}\n" +
+            $"{PromptService.GetEnergyInstruction(energy, affection)}";
+
+        basePrompt = basePrompt.Replace("{{EMOTIONAL_DIRECTIVES}}", dynamicDirectives);
+
+        var responseLengthDirective = PromptService.GetResponseLengthInstruction(SettingsVM.Instance.ResponseLength);
+        basePrompt = basePrompt.Replace("{{RESPONSE_LENGTH_DIRECTIVE}}", responseLengthDirective);
+
+        return new Message
+        {
+            Role = "system",
+            Content = $"""
+                       [Main info]
+                       Your name is {SettingsVM.Instance.WaifuName}. Your birthday is {birthday}. 
+                       Your age is {Helper.GetAge(DateOnly.ParseExact(birthday, "yyyy-MM-dd"))}
+
+                       {archetypePrompt}
+
+                       [Current DateTime: {now:yyyy-MM-dd HH:mm:ss, dddd}]
+                       This is Senpai's current time and date. Therefore, it is your current time and date too.
+                       The last message was sent by Sempai just now.
+
+                       {basePrompt}
+                       """
+        };
+    }
+
+
+
+    
 }
