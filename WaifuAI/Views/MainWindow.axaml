@@ -2858,7 +2858,7 @@
                                 <Border Theme="{DynamicResource SettingsGroup}">
                                     <StackPanel>
                                         <views:SettingsCard
-                                            Description="Выбор модели персонажа с устройства. Скачанные .vrm файлы моделей доступны по пути /какой-то/путь. В эту же директорию файл модели скопируется при добавлении"
+                                            Description="Выбор модели персонажа с устройства. Скачанные .vrm файлы моделей доступны по пути /какой-то/путь. В эту же директорию файл модели копируется при добавлении"
                                             Header="Модель персонажа"
                                             Icon="{LucideIconContent Box,
                                                                      Size=20}">
@@ -2948,6 +2948,7 @@
                                                 </ItemsPanelTemplate>
                                             </ListBox.ItemsPanel>
                                         </ListBox>
+                                        
                                         <Separator />
                                         <views:SettingsCard
                                             Description="Путь к папке, в которую должны добавляться модели"
@@ -2974,6 +2975,20 @@
                                                     Content="Изменить" />
                                             </StackPanel>
                                         </views:SettingsCard>
+
+                                        <Separator />
+                                        <views:SettingsCard
+                                            Description="Устанавливает, как делеко персонаж находится от экрана"
+                                            Header="Дальность камеры"
+                                            Icon="{LucideIconContent ScanEye,
+                                                                     Size=20}">
+                                            <ComboBox SelectedIndex="{Binding Camera, Mode=TwoWay}">
+                                                <ComboBoxItem Content="Близко"/>
+                                                <ComboBoxItem Content="Средне" />
+                                                <ComboBoxItem Content="Далеко" />
+                                            </ComboBox>
+                                        </views:SettingsCard>
+
                                     </StackPanel>
                                 </Border>
                             </StackPanel>

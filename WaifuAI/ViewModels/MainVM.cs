@@ -483,7 +483,9 @@ public partial class MainVM : ObservableValidator
     [RelayCommand]
     private void DeletingMessageDialog()
     {
-        WeakReferenceMessenger.Default.Send(new SnapshotMessage(!IsDeletingMessageDialogOpen));
+        WeakReferenceMessenger.Default.Send(
+            new SnapshotMessage(!IsDeletingMessageDialogOpen)
+        );
         IsDeletingMessageDialogOpen = !IsDeletingMessageDialogOpen;
     }
     

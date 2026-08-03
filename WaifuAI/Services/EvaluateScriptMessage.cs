@@ -1,11 +1,9 @@
 using CommunityToolkit.Mvvm.Messaging.Messages;
 
-namespace WaifuAI.Services;
-
-// Сообщение-запрос: отправляем строку (скрипт), ожидаем Task<object>
-public class EvaluateScriptMessage : AsyncRequestMessage<object?>
+public class EvaluateScriptMessage<T> : AsyncRequestMessage<T>
 {
     public string Script { get; }
+
     public EvaluateScriptMessage(string script)
     {
         Script = script;

@@ -7,6 +7,7 @@ using Avalonia;
 using Avalonia.Themes.Fluent;
 using CommunityToolkit.Mvvm.Messaging;
 using EmbedIO;
+using WaifuAI.Models;
 
 namespace WaifuAI.Services;
 
@@ -37,16 +38,15 @@ public static class ModelService
         int attempts = 0;
         while (jsStatus == 0 && attempts < 20) 
         {
-            var message = new EvaluateScriptMessage("return (typeof window.vrmApp !== 'undefined') ? 1 : 0;");
-            await WeakReferenceMessenger.Default.Send(message);
-            var responce = await message.Response;
-            if (responce is Task<int> internalTask)
-            {
-                jsStatus = await internalTask;
-                Console.WriteLine(jsStatus);
-                if (jsStatus == 1)
-                    return true;
-            }
+            var message = new EvaluateScriptMessage<int>("return (typeof window.vrmApp !== 'undefined') ? 1 : 0;");
+
+            jsStatus = await WeakReferenceMessenger.Default.Send(message);
+            
+            Console.WriteLine(jsStatus);
+            
+            if (jsStatus == 1)
+                return true;
+
             await Task.Delay(200);
             attempts++;
             Console.WriteLine($"Попытка номер {attempts}");
@@ -67,6 +67,13 @@ public static class ModelService
         var color = colors.ChromeLow;
         string hexColor = $"#{color.R:X2}{color.G:X2}{color.B:X2}";
         string script = $"window.vrmApp.setBackground('{hexColor}');";
+        WeakReferenceMessenger.Default.Send(new ExecuteScriptMessage(script));
+    }
+
+    public static void SetCamera(CameraVariant camera)
+    {
+        var view = camera.ToString().ToLower();
+        var script = $"window.vrmApp.setCameraMode('{view}');";
         WeakReferenceMessenger.Default.Send(new ExecuteScriptMessage(script));
     }
 }

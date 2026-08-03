@@ -192,6 +192,8 @@ function loadVRM(modelUrl) {
 
           console.log("JS: Внутренняя логика загрузки завершена");
           resolve(); // ТОЛЬКО ТЕПЕРЬ Promise считается выполненным
+
+          setCameraMode(currentCameraMode, 0);
         } catch (err) {
           reject(err);
         }
@@ -242,7 +244,7 @@ let smoothedVowels = { aa: 0, ee: 0, oh: 0 };
 
 function animate() {
   requestAnimationFrame(animate);
-  const deltaTime = clock.getDelta();
+  const deltaTime = Math.min(clock.getDelta(), 0.05); //const deltaTime = clock.getDelta();
   debugTimer += deltaTime;
   if (debugTimer > 0.1) { // Вывод каждые 100мс
     const sync = lipSync.update();
@@ -301,7 +303,7 @@ function animate() {
       const swaySpeed = 0.8;
       const swayAmount = 0.012;
       const swayZ = Math.sin(time * swaySpeed) * swayAmount;
-      const swayX = Math.cos(time * (swaySpeed * 0.7)) * (swayAmount * 0.7);
+      const swayX = Math.cos(time * (swaySpeed * 0.2)) * (swayAmount * 0.2);
 
       // Применяем к сцене плавно
       currentVrm.scene.rotation.z = swayZ * proceduralWeight;
@@ -623,3 +625,65 @@ window.vrmApp.takePrintscreen = () => {
     window.vrmApp.printscreen = e.toString();
   }
 };
+
+
+
+
+
+// --- НАСТРОЙКИ КАМЕРЫ (Крути как душе угодно!) ---
+const CAMERA_CONFIG = {
+  portrait: {
+    targetYOffset: -0.03,  // Куда смотрит точка взгляда (плюс = выше, минус = ниже уровня головы)
+    cameraYOffset: -0.03,  // Высота самой камеры относительно головы
+    distance: 1.0,       // Дальность камеры по оси Z (чем меньше, тем ближе к лицу)
+  },
+  medium: {
+    targetYOffset: -0.1,
+    cameraYOffset: -0.1,  
+    distance: 1.35,  
+  },
+  full: {
+    targetYFactor: 0.75,  // Куда смотрит камера (процент от роста: 0.5 = середина тела, 0.4 = ниже пояса)
+    cameraYFactor: 0.75,  // Высота самой камеры (процент от роста)
+    distance: 2.2,        // Дальность камеры по оси Z (чем больше, тем дальше отодвигается)
+  }
+};
+
+let currentCameraMode = 'portrait';
+
+function setCameraMode(mode) {
+  if (!currentVrm) return;
+  currentCameraMode = mode;
+  window.vrmApp.currentCameraMode = mode;
+
+  const headNode = currentVrm.humanoid.getRawBoneNode('head');
+  const headWorldPos = new THREE.Vector3();
+
+  if (headNode) {
+    headNode.getWorldPosition(headWorldPos);
+  } else {
+    headWorldPos.set(0, 1.4, 0);
+  }
+
+  const headY = headWorldPos.y;
+  const cfg = CAMERA_CONFIG[mode] || CAMERA_CONFIG.portrait;
+
+  let targetPos = new THREE.Vector3();
+  let camPos = new THREE.Vector3();
+
+  if (mode === 'portrait' || mode === 'medium') {
+    targetPos.set(0, headY + cfg.targetYOffset, 0);
+    camPos.set(0, headY + cfg.cameraYOffset, cfg.distance);
+  } else {
+    targetPos.set(0, headY * cfg.targetYFactor, 0);
+    camPos.set(0, headY * cfg.cameraYFactor, cfg.distance);
+  }
+
+  // Мгновенно выставляем позиции без всяких анимаций
+  controls.target.copy(targetPos);
+  camera.position.copy(camPos);
+  controls.update();
+}
+
+window.vrmApp.setCameraMode = setCameraMode;
+window.vrmApp.currentCameraMode = currentCameraMode;

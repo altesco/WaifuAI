@@ -100,6 +100,7 @@ public partial class SettingsVM : ObservableValidator
         else
             Directory.CreateDirectory(Model3DFolder);
         RefreshModels3D();
+        Camera = SettingsModel.Camera;
 
         // Personality
         WaifuName = SettingsModel.WaifuName;
@@ -175,6 +176,7 @@ public partial class SettingsVM : ObservableValidator
         // 3D Model Settings
         SettingsModel.SelectedModel3D = SelectedModel3D;       
         SettingsModel.Model3DFolder = Model3DFolder;
+        SettingsModel.Camera = Camera;
 
         // Personality Settings
         SettingsModel.WaifuName = WaifuName;
@@ -574,6 +576,7 @@ public partial class SettingsVM : ObservableValidator
     {
         ModelService.SetBackground();
         await ChangeModel3D(SelectedModel3D);
+        ModelService.SetCamera(Camera);
         _ = RefreshVoiceModelInfo();
     }
 
@@ -586,6 +589,8 @@ public partial class SettingsVM : ObservableValidator
 
     public ObservableCollection<string> Models3D { get; } = [];
     [ObservableProperty] private string _selectedModel3D;
+
+    [ObservableProperty] private CameraVariant _camera;
 
     [RelayCommand]
     private async Task OpenModel3DFile()
@@ -646,6 +651,21 @@ public partial class SettingsVM : ObservableValidator
         _ = ChangeModel3D(value);
     }
 
+    partial void OnCameraChanged(CameraVariant value)
+    {
+        if (IsSettingsLoading)
+            return;
+        
+        _ = Task.Run(async () =>
+        {
+            ModelService.SetCamera(value);
+
+            await Task.Delay(30);
+
+            WeakReferenceMessenger.Default.Send(new SnapshotMessage(true));
+        });
+    }
+
     private async Task ChangeModel3D(string modelFileName)
     {
         IsModel3DLoading = true;
@@ -664,38 +684,40 @@ public partial class SettingsVM : ObservableValidator
         }
         else
             url = $"./models/{modelFileName}";
+
         string script = $"window.vrmApp.changeModel('{url}')";
         WeakReferenceMessenger.Default.Send(new ExecuteScriptMessage(script));
+
         while (IsModel3DLoading)
         {
             await Task.Delay(2000);
             try
             {
-                var message = new EvaluateScriptMessage("return window.vrmApp.isModelLoaded");
-                await WeakReferenceMessenger.Default.Send(message);
-                var responce = await message.Response;
-                if (responce is Task<int> internalTask)
+                var message = new EvaluateScriptMessage<int>("return window.vrmApp.isModelLoaded");
+                int status = await WeakReferenceMessenger.Default.Send(message);
+
+                if (status == 0)
+                    continue;
+                
+                IsModel3DLoading = false;
+
+                if (Model3DFolder == BaseModel3DFolder)
+                    continue;
+
+                // remove old or new temp
+                var files = Directory.GetFiles(BaseModel3DFolder, "temp_*.vrm");
+                if (files.Length <= 0)
+                    continue;
+
+                if (status == 1)
                 {
-                    int status = await internalTask;
-                    if (status == 0)
-                        continue;
-                    IsModel3DLoading = false;
-                    if (Model3DFolder == BaseModel3DFolder)
-                        continue;
-                    // remove old or new temp
-                    var files = Directory.GetFiles(BaseModel3DFolder, "temp_*.vrm");
-                    if (files.Length <= 0)
-                        continue;
-                    if (status == 1)
-                    {
-                        foreach (var file in files)
-                            if (Path.GetFileName(file) != newFileName)
-                                File.Delete(file); 
-                    }  
-                    else if (status == -1)
-                        foreach (var file in files)
-                            File.Delete(file); 
+                    foreach (var file in files)
+                        if (Path.GetFileName(file) != newFileName)
+                            File.Delete(file);
                 }
+                else if (status == -1)
+                    foreach (var file in files)
+                        File.Delete(file);
             }
             catch (Exception ex)
             {

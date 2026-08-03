@@ -25,55 +25,85 @@ namespace WaifuAI.Views
             _lastRightBarWidth = MainGrid.ColumnDefinitions[3].Width;
             ChatButton.IsChecked = true;
             ModelButton.IsChecked = true;
+
             WeakReferenceMessenger.Default.Register<ExecuteScriptMessage>(this, (_, m) =>
             {
                 MyWebView.ExecuteScript(m.Value);
             });
-            WeakReferenceMessenger.Default.Register<MainWindow, EvaluateScriptMessage>(this, (_, m) =>
+
+            WeakReferenceMessenger.Default.Register<MainWindow, EvaluateScriptMessage<int>>(this, (recipient, m) =>
             {
-                var evalTask = Task.Run(async () =>
+                m.Reply(Task.Run(async () =>
                 {
                     try
                     {
-                        var result = await MyWebView.EvaluateScript<int>(m.Script);
-                        Console.WriteLine(result);
-                        return result;
+                        return await recipient.MyWebView.EvaluateScript<int>(m.Script);
                     }
                     catch
                     {
                         return -1;
                     }
-                });
-                m.Reply(evalTask);
+                }));
             });
+
+            WeakReferenceMessenger.Default.Register<MainWindow, EvaluateScriptMessage<bool>>(this, (recipient, m) =>
+            {
+                m.Reply(Task.Run(async () =>
+                {
+                    try
+                    {
+                        return await recipient.MyWebView.EvaluateScript<bool>(m.Script);
+                    }
+                    catch
+                    {
+                        return false;
+                    }
+                }));
+            });
+
             WeakReferenceMessenger.Default.Register<MainWindow, SnapshotMessage>(this, (_, m) =>
             {
                 Task.Run(async () =>
                 {
                     try
                     {
-                        if (MyWebView.Bounds.Width == 0 || 
+                        if (MyWebView.Bounds.Width == 0 ||
                             MyWebView.Bounds.Height == 0 ||
                             !m.Value)
                             return;
+
+                        // 1. Делаем скриншот
                         MyWebView.ExecuteScript("window.vrmApp.takePrintscreen()");
+
                         string jsCode = @"return window.vrmApp.printscreen";
                         string base64Data = string.Empty;
                         int attempts = 0;
+
                         while (string.IsNullOrEmpty(base64Data) && attempts < 200)
                         {
                             base64Data = await MyWebView.EvaluateScript<string>(jsCode);
                             await Task.Delay(10);
                             attempts++;
                         }
-                        string base64 = base64Data.Contains(",") 
-                            ? base64Data.Substring(base64Data.IndexOf(',') + 1) 
-                            : base64Data;
+
+                        if (string.IsNullOrEmpty(base64Data)) return;
+
+                        // 2. Очищаем память в JS сразу после получения
+                        MyWebView.ExecuteScript("window.vrmApp.printscreen = ''");
+
+                        int commaIndex = base64Data.IndexOf(',');
+                        string base64 = commaIndex >= 0 ? base64Data.Substring(commaIndex + 1) : base64Data;
                         byte[] bytes = Convert.FromBase64String(base64);
-                        Dispatcher.UIThread.Post(() => 
+
+                        Dispatcher.UIThread.Post(() =>
                         {
                             using var ms = new MemoryStream(bytes);
-                            WebViewSnapshot.Source = new Bitmap(ms);
+                            var newBitmap = new Bitmap(ms);
+
+                            // 3. ОСВОБОЖДАЕМ СТАРЫЙ BITMAP перед установкой нового
+                            var oldBitmap = WebViewSnapshot.Source as IDisposable;
+                            WebViewSnapshot.Source = newBitmap;
+                            oldBitmap?.Dispose();
                         });
                     }
                     catch (Exception ex)
@@ -82,6 +112,7 @@ namespace WaifuAI.Views
                     }
                 });
             });
+
             WeakReferenceMessenger.Default.Register<MainWindow, ScrollMessage>(this, (_, m) =>
             {
                 Dispatcher.UIThread.Post(async () =>
@@ -99,6 +130,7 @@ namespace WaifuAI.Views
                     replyMsg.SelectionEnd = 0;
                 });
             });
+
             AddHandler(Button.ClickEvent, (_, e) =>
             {
                 if (e.Source is not Button btn || string.IsNullOrEmpty(btn.Name))

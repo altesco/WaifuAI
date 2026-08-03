@@ -39,6 +39,7 @@ public class SettingsModel
     // 3D Model Settings
     public string SelectedModel3D { get; set; } = string.Empty;
     public string Model3DFolder { get; set; } = string.Empty;
+    public CameraVariant Camera { get; set; } = CameraVariant.Medium;
 
     // Personality Settings
     public string WaifuName { get; set; } = "Waifu";

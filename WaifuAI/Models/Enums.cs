@@ -47,3 +47,14 @@ public enum ResponseLength
 
 #endregion
 
+
+#region Model3D
+
+public enum CameraVariant
+{
+    Portrait,
+    Medium,
+    Full
+}
+
+#endregion
