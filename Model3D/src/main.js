@@ -141,7 +141,7 @@ async function loadFBX(animationUrl, isLooped = false) {
   }
 
   currentAction = newAction;
-  proceduralWeight = 0;
+  //proceduralWeight = 0;
 }
 
 function loadVRM(modelUrl) {
@@ -266,38 +266,66 @@ function animate() {
   TWEEN.update();
 
   if (currentMixer) {
+    // --- Сброс костей перед миксером (чтобы += не накапливался) ---
+    if (currentVrm) {
+      const chest = currentVrm.humanoid.getRawBoneNode('chest') ||
+        currentVrm.humanoid.getRawBoneNode('upperChest') ||
+        currentVrm.humanoid.getRawBoneNode('spine');
+      if (chest) chest.rotation.set(0, 0, 0);
+
+      const head = currentVrm.humanoid.getRawBoneNode('head');
+      if (head) head.rotation.set(0, 0, 0);
+    }
+
     currentMixer.update(deltaTime);
   }
 
   if (currentVrm) {
     currentVrm.update(deltaTime);
 
-    // --- Логика Sway/Breathing (твой код) ---
-    const isStationary = currentAction && !currentAction.isRunning();
-    if (isStationary) {
-      proceduralWeight = THREE.MathUtils.lerp(proceduralWeight, 1, 2.0 * deltaTime);
+    // --- Логика Sway/Breathing ---
+    // Определяем, находится ли модель в покое (Idle или анимация завершена)
+    const isIdleState = !currentAction || currentAction === idleAction || !currentAction.isRunning();
+
+    // Скорость 3.0 совпадает с длительностью crossFade (0.4 сек) для идеального сглаживания
+    if (isIdleState) {
+      proceduralWeight = THREE.MathUtils.lerp(proceduralWeight, 1, 3.0 * deltaTime);
     } else {
-      proceduralWeight = THREE.MathUtils.lerp(proceduralWeight, 0, 10.0 * deltaTime);
+      proceduralWeight = THREE.MathUtils.lerp(proceduralWeight, 0, 3.0 * deltaTime);
     }
 
     if (proceduralWeight > 0.001) {
       const time = Date.now() * 0.001;
-      const swayZ = Math.sin(time * 0.5) * 0.012;
-      const swayX = Math.cos(time * 0.4) * 0.012;
+
+      // 1. Медленное покачивание (Sway)
+      const swaySpeed = 0.8;
+      const swayAmount = 0.012;
+      const swayZ = Math.sin(time * swaySpeed) * swayAmount;
+      const swayX = Math.cos(time * (swaySpeed * 0.7)) * (swayAmount * 0.7);
+
+      // Применяем к сцене плавно
       currentVrm.scene.rotation.z = swayZ * proceduralWeight;
       currentVrm.scene.rotation.x = swayX * proceduralWeight;
-      currentVrm.scene.position.y = (-Math.abs(swayZ) * 0.2) * proceduralWeight;
+      currentVrm.scene.position.y = (-Math.abs(swayZ) * 0.15) * proceduralWeight;
 
-      const spine = currentVrm.humanoid.getRawBoneNode('spine');
-      if (spine) {
-        spine.rotation.z += (-swayZ * 1.2) * proceduralWeight;
-        spine.rotation.x += (-swayX * 0.8) * proceduralWeight;
+      // 2. Ритм дыхания (Breathing)
+      const breathSpeed = 2.2;
+      const breathAmount = 0.04;
+      const breath = Math.sin(time * breathSpeed) * breathAmount;
+
+      // Грудная клетка (ВАЖНО: используем += вместо =)
+      const chest = currentVrm.humanoid.getRawBoneNode('chest') ||
+        currentVrm.humanoid.getRawBoneNode('upperChest') ||
+        currentVrm.humanoid.getRawBoneNode('spine');
+      if (chest) {
+        chest.rotation.x += (breath - swayX * 0.5) * proceduralWeight;
       }
 
+      // Голова (ВАЖНО: используем += вместо =)
       const head = currentVrm.humanoid.getRawBoneNode('head');
       if (head) {
-        head.rotation.z += (-swayZ * 0.6) * proceduralWeight;
-        head.rotation.x += (-swayX * 0.6) * proceduralWeight;
+        head.rotation.z += (-swayZ * 0.7) * proceduralWeight;
+        head.rotation.x += (-swayX * 0.5 - breath * 0.3) * proceduralWeight;
       }
     }
 

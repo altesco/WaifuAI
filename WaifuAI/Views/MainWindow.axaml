@@ -1635,7 +1635,7 @@
                                             <Button
                                                 Margin="3"
                                                 Classes="icon-button"
-                                                Command="{Binding RunQaTestCommand}"
+                                                Command="{Binding RequestCommand}"
                                                 CommandParameter="{Binding #MyWebView}"
                                                 IsDefault="True"
                                                 IsEnabled="{Binding Question, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
