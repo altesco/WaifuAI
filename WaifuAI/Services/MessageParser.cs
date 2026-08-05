@@ -15,6 +15,11 @@ public class MessageParser
 {
     public static LocalEmbeddingGenerator VectorGenerator; 
 
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true
+    };
+
     public static async Task CreateVectorGenerator()
     {
         VectorGenerator = await LocalEmbeddingGenerator.CreateAsync();
@@ -73,22 +78,60 @@ public class MessageParser
 
     public static string GetCleanText(string text)
     {
-        var clean = Regex.Replace(text, @"\*.*?\*", "");
-        clean = Regex.Replace(clean, @"\[UPDATE:.*?\]", "");
-        clean = Regex.Replace(clean, @"```json\s*(\{[\s\S]*?\})\s*```", "");
-        return Regex.Replace(clean, @"\s+", " ").Trim();
+        var clean = Regex.Replace(text, @"\*.*?\*", "", RegexOptions.Singleline);
+        clean = Regex.Replace(clean, @"\[UPDATE:.*?\]", "", RegexOptions.IgnoreCase);
+        clean = Regex.Replace(clean, @"```json\s*\{[\s\S]*?\}\s*```", "", RegexOptions.IgnoreCase);
+
+        // если модель не закрыла бэктики ```json
+        clean = Regex.Replace(clean, @"\{[\s\S]*?""AffectionDelta""[\s\S]*?\}", "", RegexOptions.IgnoreCase);
+
+        clean = Regex.Replace(clean, @"\[LEARNED_NAME:\s*([^\]]+)\]", "", RegexOptions.IgnoreCase);
+        clean = Regex.Replace(clean, @"\[RELATIONSHIP:\s*([^\]]+)\]", "", RegexOptions.IgnoreCase);
+
+        // лишние пробелы
+        clean = Regex.Replace(clean, @"[ \t]+", " ");
+        clean = Regex.Replace(clean, @"\n\s*\n", "\n\n");
+
+        return clean.Trim();
     }
-        
+
     public static EmotionDeltasDto? ExtractDeltas(string text)
     {
-        var match = Regex.Match(text, @"```json\s*(\{[\s\S]*?\})\s*```", RegexOptions.IgnoreCase);
+        var match = Regex.Match(
+            text,
+            @"```json\s*(\{[\s\S]*?\})\s*```|(\{[\s\S]*?""AffectionDelta""[\s\S]*?\})",
+            RegexOptions.IgnoreCase);
 
-        if (match.Success)
+        if (!match.Success)
+            return null;
+
+        var jsonString = match.Groups[1].Success ? match.Groups[1].Value : match.Groups[2].Value;
+
+        try
         {
-            var jsonString = match.Groups[1].Value;
-            return JsonSerializer.Deserialize<EmotionDeltasDto>(jsonString);
+            return JsonSerializer.Deserialize<EmotionDeltasDto>(jsonString, JsonOptions);
         }
+        catch (JsonException)
+        {
+            return null;
+        }
+    }
 
-        return null; 
+    public static string? ParseTextForLearnedName(string text)
+    {
+        var match = Regex.Match(text, @"\[LEARNED_NAME:\s*([^\]]+)\]", RegexOptions.IgnoreCase);
+
+        return match.Success ? match.Groups[1].Value.Trim() : null;
+    }
+
+    public static bool? ParseTextForDatingChange(string text)
+    {
+        if (Regex.IsMatch(text, @"\[RELATIONSHIP:\s*DATING_START\]", RegexOptions.IgnoreCase))
+            return true;
+
+        if (Regex.IsMatch(text, @"\[RELATIONSHIP:\s*BREAKUP\]", RegexOptions.IgnoreCase))
+            return false;
+
+        return null;
     }
 }

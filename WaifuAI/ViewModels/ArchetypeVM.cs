@@ -1,5 +1,6 @@
 using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
+using WaifuAI.Models;
 
 namespace WaifuAI.ViewModels;
 
@@ -11,4 +12,7 @@ public partial class ArchetypeVM : ObservableObject
     public Color Color { get; set; } = Colors.Blue;
     
     [ObservableProperty] private string _prompt = string.Empty;
+
+    public MoodVector BaseMoodVector { get; set; }
+    public ArchetypeSensitivity Sensitivity { get; set; }
 }

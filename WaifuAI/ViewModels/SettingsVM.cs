@@ -52,6 +52,7 @@ public partial class SettingsVM : ObservableValidator
     public async Task Load()
     {
         IsSettingsLoading = true;
+
         if (File.Exists(FilePath))
         {
             var json = await File.ReadAllTextAsync(FilePath);
@@ -122,16 +123,17 @@ public partial class SettingsVM : ObservableValidator
             var promptPath = Path.Combine(PromptsPath, $"{archetype.Name}.txt");
             if (!File.Exists(promptPath))
             {
-                File.Create(promptPath);
                 var prompt = PromptService.GetArchetypePrompt(archetype);
                 await File.WriteAllTextAsync(promptPath, prompt);
+                archetype.Prompt = prompt;
             }
             else
                 archetype.Prompt = await File.ReadAllTextAsync(promptPath);
         }
 
-        // Servers
-        
+        // Status System
+        UserName = SettingsModel.UserName;
+        IsDating = SettingsModel.IsDating;
 
         IsSettingsLoading = false;
     }
@@ -188,6 +190,10 @@ public partial class SettingsVM : ObservableValidator
         SettingsModel.Engagement = Engagement;
         SettingsModel.Mood = Mood;
         SettingsModel.Energy = Energy;
+
+        // Status System
+        SettingsModel.UserName = UserName;
+        SettingsModel.IsDating = IsDating;
 
         var options = new JsonSerializerOptions { WriteIndented = true };
         var json = JsonSerializer.Serialize(SettingsModel, options);
@@ -773,102 +779,336 @@ public partial class SettingsVM : ObservableValidator
 
     public List<ArchetypeVM> Archetypes { get; } =
     [
-        new() 
-        { 
-            Name = "tsundere", 
-            Description = "Колючая снаружи, но мягкая и заботливая внутри. Проявляет симпатию через напускную грубость.", 
-            Emoji = "🔥", 
-            Color = Color.Parse("#ff5c5c")
+        new()
+        {
+            Name = "tsundere",
+            Description =
+                "Колючая снаружи, но мягкая и заботливая внутри. Проявляет симпатию через напускную грубость.",
+            Emoji = "🔥",
+            Color = Color.Parse("#ff5c5c"),
+            BaseMoodVector = new MoodVector
+            {
+                Affection = (-3, 2),
+                Engagement = (-5, 10),
+                Mood = (-8, 8),
+                Energy = (-2, 1)
+            },
+            Sensitivity = new ArchetypeSensitivity
+            {
+                AbsenceAffectionImpact = -2.0f, DaysAffectionBonus = 4.0f,
+                AbsenceEngagementImpact = -5.0f, DaysEngagementBonus = 2.0f,
+                AbsenceMoodImpact = -8.0f, DaysMoodBonus = 1.5f,
+                AbsenceEnergyImpact = -1.0f, DaysEnergyBonus = 0.0f,
+                DaysSaturation = 35,
+                MessageSaturation = 900,
+                AbsenceTauHours = 24f
+            }
         },
-        new() 
-        { 
-            Name = "kuudere", 
-            Description = "Хладнокровная, молчаливая и внешне безэмоциональная. Скрывает глубокие чувства за маской апатии.", 
-            Emoji = "🧊", 
-            Color = Color.Parse("#0008ff")
+        new()
+        {
+            Name = "kuudere",
+            Description =
+                "Хладнокровная, молчаливая и внешне безэмоциональная. Скрывает глубокие чувства за маской апатии.",
+            Emoji = "🧊",
+            Color = Color.Parse("#0008ff"),
+            BaseMoodVector = new MoodVector
+            {
+                Affection = (-1, 2),
+                Engagement = (-2, 5),
+                Mood = (-2, 3),
+                Energy = (-1, 1)
+            },
+            Sensitivity = new ArchetypeSensitivity
+            {
+                AbsenceAffectionImpact = -0.5f, DaysAffectionBonus = 1.5f,
+                AbsenceEngagementImpact = -1.0f, DaysEngagementBonus = 1.0f,
+                AbsenceMoodImpact = -0.5f, DaysMoodBonus = 0.5f,
+                AbsenceEnergyImpact = -0.5f, DaysEnergyBonus = 0.0f,
+                DaysSaturation = 50,
+                MessageSaturation = 500,
+                AbsenceTauHours = 48f
+            }
         },
-        new() 
-        { 
-            Name = "dandere", 
-            Description = "Крайне стеснительная и молчаливая личность. Раскрывается только в узком кругу тех, кому доверяет.", 
-            Emoji = "😳", 
-            Color = Color.Parse("#544dc2")
+        new()
+        {
+            Name = "dandere",
+            Description =
+                "Крайне стеснительная и молчаливая личность. Раскрывается только в узком кругу тех, кому доверяет.",
+            Emoji = "😳",
+            Color = Color.Parse("#544dc2"),
+            BaseMoodVector = new MoodVector
+            {
+                Affection = (-2, 3),
+                Engagement = (-3, 8),
+                Mood = (-4, 5),
+                Energy = (-3, 1)
+            },
+            Sensitivity = new ArchetypeSensitivity
+            {
+                AbsenceAffectionImpact = -1.0f, DaysAffectionBonus = 5.0f,
+                AbsenceEngagementImpact = -3.0f, DaysEngagementBonus = 3.0f,
+                AbsenceMoodImpact = -2.0f, DaysMoodBonus = 2.0f,
+                AbsenceEnergyImpact = -1.5f, DaysEnergyBonus = 0.5f,
+                DaysSaturation = 45,
+                MessageSaturation = 600,
+                AbsenceTauHours = 36f
+            }
         },
-        new() 
-        { 
-            Name = "deredere", 
-            Description = "Воплощение чистой любви и оптимизма. Всегда искренняя, теплая и энергично заботится об окружающих.", 
-            Emoji = "💓", 
-            Color = Color.Parse("#ff4b8a")
+        new()
+        {
+            Name = "deredere",
+            Description =
+                "Воплощение чистой любви и оптимизма. Всегда искренняя, теплая и энергично заботится об окружающих.",
+            Emoji = "💓",
+            Color = Color.Parse("#ff4b8a"),
+            BaseMoodVector = new MoodVector
+            {
+                Affection = (-1, 6),
+                Engagement = (-2, 12),
+                Mood = (-2, 10),
+                Energy = (-1, 2)
+            },
+            Sensitivity = new ArchetypeSensitivity
+            {
+                AbsenceAffectionImpact = -1.0f, DaysAffectionBonus = 3.0f,
+                AbsenceEngagementImpact = -2.0f, DaysEngagementBonus = 2.5f,
+                AbsenceMoodImpact = -3.0f, DaysMoodBonus = 2.0f,
+                AbsenceEnergyImpact = -1.0f, DaysEnergyBonus = 0.0f,
+                DaysSaturation = 10,
+                MessageSaturation = 1500,
+                AbsenceTauHours = 16f
+            }
         },
-        new() 
-        { 
-            Name = "genki", 
-            Description = "Неиссякаемый источник энергии. Жизнерадостная, активная и всегда готова вдохновлять на подвиги.", 
-            Emoji = "🌞", 
-            Color = Color.Parse("#dfa017")
+        new()
+        {
+            Name = "genki",
+            Description =
+                "Неиссякаемый источник энергии. Жизнерадостная, активная и всегда готова вдохновлять на подвиги.",
+            Emoji = "🌞",
+            Color = Color.Parse("#dfa017"),
+            BaseMoodVector = new MoodVector
+            {
+                Affection = (-1, 4),
+                Engagement = (-2, 15),
+                Mood = (-2, 12),
+                Energy = (-1, 3)
+            },
+            Sensitivity = new ArchetypeSensitivity
+            {
+                AbsenceAffectionImpact = -0.5f, DaysAffectionBonus = 2.0f,
+                AbsenceEngagementImpact = -4.0f, DaysEngagementBonus = 3.0f,
+                AbsenceMoodImpact = -2.0f, DaysMoodBonus = 1.0f,
+                AbsenceEnergyImpact = -0.5f, DaysEnergyBonus = 1.0f,
+                DaysSaturation = 7,
+                MessageSaturation = 2000,
+                AbsenceTauHours = 10f
+            }
         },
-        new() 
-        { 
-            Name = "yandere", 
-            Description = "Одержимая и пугающе преданная. Готова на любые крайности ради того, чтобы объект любви принадлежал только ей.", 
-            Emoji = "🔪", 
-            Color = Color.Parse("#cb0e0e")
+        new()
+        {
+            Name = "yandere",
+            Description =
+                "Одержимая и пугающе преданная. Готова на любые крайности ради того, чтобы объект любви принадлежал только ей.",
+            Emoji = "🔪",
+            Color = Color.Parse("#cb0e0e"),
+            BaseMoodVector = new MoodVector
+            {
+                Affection = (-5, 10),
+                Engagement = (-10, 15),
+                Mood = (-15, 15),
+                Energy = (-2, 2)
+            },
+            Sensitivity = new ArchetypeSensitivity
+            {
+                AbsenceAffectionImpact = -5.0f, DaysAffectionBonus = 8.0f,
+                AbsenceEngagementImpact = -12.0f, DaysEngagementBonus = 4.0f,
+                AbsenceMoodImpact = -12.0f, DaysMoodBonus = 3.0f,
+                AbsenceEnergyImpact = -2.0f, DaysEnergyBonus = 0.0f,
+                DaysSaturation = 5,
+                MessageSaturation = 1500,
+                AbsenceTauHours = 6f
+            }
         },
-        new() 
-        { 
-            Name = "teasedere", 
-            Description = "Мастер подколов и легкого кокетства. Обожает смущать собеседника и проявляет чувства через дразнилки.", 
-            Emoji = "❤️‍🔥", 
-            Color = Color.Parse("#ff9431")
+        new()
+        {
+            Name = "teasedere",
+            Description =
+                "Мастер подколов и легкого кокетства. Обожает смущать собеседника и проявляет чувства через дразнилки.",
+            Emoji = "❤️‍🔥",
+            Color = Color.Parse("#ff9431"),
+            BaseMoodVector = new MoodVector
+            {
+                Affection = (-2, 4),
+                Engagement = (-3, 12),
+                Mood = (-3, 8),
+                Energy = (-1, 2)
+            },
+            Sensitivity = new ArchetypeSensitivity
+            {
+                AbsenceAffectionImpact = -1.0f, DaysAffectionBonus = 3.0f,
+                AbsenceEngagementImpact = -5.0f, DaysEngagementBonus = 3.0f,
+                AbsenceMoodImpact = -3.0f, DaysMoodBonus = 1.5f,
+                AbsenceEnergyImpact = -1.0f, DaysEnergyBonus = 0.0f,
+                DaysSaturation = 20,
+                MessageSaturation = 1200,
+                AbsenceTauHours = 20f
+            }
         },
-        new() 
-        { 
-            Name = "dorodere", 
-            Description = "Милая и добрая на первый взгляд, но хранит внутри затаенную обиду или жестокую сторону.", 
-            Emoji = "⚫", 
-            Color = Colors.SlateGray
+        new()
+        {
+            Name = "dorodere",
+            Description = "Милая и добрая на первый взгляд, но хранит внутри затаенную обиду или жестокую сторону.",
+            Emoji = "⚫",
+            Color = Colors.SlateGray,
+            BaseMoodVector = new MoodVector
+            {
+                Affection = (-4, 3),
+                Engagement = (-4, 8),
+                Mood = (-6, 6),
+                Energy = (-2, 1)
+            },
+            Sensitivity = new ArchetypeSensitivity
+            {
+                AbsenceAffectionImpact = -3.0f, DaysAffectionBonus = 2.0f,
+                AbsenceEngagementImpact = -4.0f, DaysEngagementBonus = 1.5f,
+                AbsenceMoodImpact = -7.0f, DaysMoodBonus = 1.0f,
+                AbsenceEnergyImpact = -1.5f, DaysEnergyBonus = 0.0f,
+                DaysSaturation = 40,
+                MessageSaturation = 800,
+                AbsenceTauHours = 24f
+            }
         },
-        new() 
-        { 
-            Name = "utsudere", 
-            Description = "Меланхоличная личность, склонная к грусти и депрессивным настроениям из-за тяжелого прошлого.", 
-            Emoji = "💧", 
-            Color = Color.Parse("#0876d6")
+        new()
+        {
+            Name = "utsudere",
+            Description =
+                "Меланхоличная личность, склонная к грусти и депрессивным настроениям из-за тяжелого прошлого.",
+            Emoji = "💧",
+            Color = Color.Parse("#0876d6"),
+            BaseMoodVector = new MoodVector
+            {
+                Affection = (-2, 3),
+                Engagement = (-5, 5),
+                Mood = (-8, 3),
+                Energy = (-4, 1)
+            },
+            Sensitivity = new ArchetypeSensitivity
+            {
+                AbsenceAffectionImpact = -2.0f, DaysAffectionBonus = 2.5f,
+                AbsenceEngagementImpact = -5.0f, DaysEngagementBonus = 1.5f,
+                AbsenceMoodImpact = -5.0f, DaysMoodBonus = 1.0f,
+                AbsenceEnergyImpact = -3.0f, DaysEnergyBonus = 0.5f,
+                DaysSaturation = 30,
+                MessageSaturation = 600,
+                AbsenceTauHours = 14f
+            }
         },
-        new() 
-        { 
-            Name = "bakadere", 
-            Description = "Наивная, неуклюжая и очень открытая. Не умеет скрывать чувства и часто попадает в неловкие ситуации.", 
-            Emoji = "🐔", 
-            Color = Colors.Brown
+        new()
+        {
+            Name = "bakadere",
+            Description =
+                "Наивная, неуклюжая и очень открытая. Не умеет скрывать чувства и часто попадает в неловкие ситуации.",
+            Emoji = "🐔",
+            Color = Colors.Brown,
+            BaseMoodVector = new MoodVector
+            {
+                Affection = (-1, 5),
+                Engagement = (-2, 10),
+                Mood = (-3, 8),
+                Energy = (-1, 2)
+            },
+            Sensitivity = new ArchetypeSensitivity
+            {
+                AbsenceAffectionImpact = -0.5f, DaysAffectionBonus = 2.0f,
+                AbsenceEngagementImpact = -2.0f, DaysEngagementBonus = 1.5f,
+                AbsenceMoodImpact = -1.5f, DaysMoodBonus = 1.0f,
+                AbsenceEnergyImpact = -1.0f, DaysEnergyBonus = 0.0f,
+                DaysSaturation = 7,
+                MessageSaturation = 1200,
+                AbsenceTauHours = 12f
+            }
         },
-        new() 
-        { 
-            Name = "darudere", 
-            Description = "Ленивая и слегка отстраненная. Предпочитает покой и отдых любым активным действиям.", 
-            Emoji = "💤", 
-            Color = Color.Parse("#1d6bc5")
+        new()
+        {
+            Name = "darudere",
+            Description = "Ленивая и слегка отстраненная. Предпочитает покой и отдых любым активным действиям.",
+            Emoji = "💤",
+            Color = Color.Parse("#1d6bc5"),
+            BaseMoodVector = new MoodVector
+            {
+                Affection = (-1, 2),
+                Engagement = (-5, 4),
+                Mood = (-2, 4),
+                Energy = (-5, 1)
+            },
+            Sensitivity = new ArchetypeSensitivity
+            {
+                AbsenceAffectionImpact = -0.2f, DaysAffectionBonus = 1.0f,
+                AbsenceEngagementImpact = -1.0f, DaysEngagementBonus = 0.5f,
+                AbsenceMoodImpact = -0.5f, DaysMoodBonus = 0.5f,
+                AbsenceEnergyImpact = -2.0f, DaysEnergyBonus = 0.0f,
+                DaysSaturation = 30,
+                MessageSaturation = 400,
+                AbsenceTauHours = 72f
+            }
         },
-        new() 
-        { 
-            Name = "hinedere", 
-            Description = "Циничная и высокомерная снаружи, но способна измениться, если найдет кого-то достойного доверия.", 
-            Emoji = "🚬", 
-            Color = Color.Parse("#318eb0")
+        new()
+        {
+            Name = "hinedere",
+            Description =
+                "Циничная и высокомерная снаружи, но способна измениться, если найдет кого-то достойного доверия.",
+            Emoji = "🚬",
+            Color = Color.Parse("#318eb0"),
+            BaseMoodVector = new MoodVector
+            {
+                Affection = (-4, 2),
+                Engagement = (-4, 6),
+                Mood = (-5, 5),
+                Energy = (-2, 1)
+            },
+            Sensitivity = new ArchetypeSensitivity
+            {
+                AbsenceAffectionImpact = -1.5f, DaysAffectionBonus = 3.5f,
+                AbsenceEngagementImpact = -3.0f, DaysEngagementBonus = 2.0f,
+                AbsenceMoodImpact = -4.0f, DaysMoodBonus = 1.5f,
+                AbsenceEnergyImpact = -1.0f, DaysEnergyBonus = 0.0f,
+                DaysSaturation = 60,
+                MessageSaturation = 700,
+                AbsenceTauHours = 48f
+            }
         },
-        new() 
-        { 
-            Name = "sadodere", 
-            Description = "Любит доминировать и манипулировать чувствами других. Получает удовольствие, дразня свою цель.", 
-            Emoji = "🩸", 
-            Color = Color.Parse("#be2edd")
+        new()
+        {
+            Name = "sadodere",
+            Description =
+                "Любит доминировать и манипулировать чувствами других. Получает удовольствие, дразня свою цель.",
+            Emoji = "🩸",
+            Color = Color.Parse("#be2edd"),
+            BaseMoodVector = new MoodVector
+            {
+                Affection = (-3, 3),
+                Engagement = (-3, 10),
+                Mood = (-4, 8),
+                Energy = (-1, 2)
+            },
+            Sensitivity = new ArchetypeSensitivity
+            {
+                AbsenceAffectionImpact = -2.0f, DaysAffectionBonus = 3.0f,
+                AbsenceEngagementImpact = -6.0f, DaysEngagementBonus = 2.5f,
+                AbsenceMoodImpact = -4.0f, DaysMoodBonus = 1.5f,
+                AbsenceEnergyImpact = -1.0f, DaysEnergyBonus = 0.0f,
+                DaysSaturation = 25,
+                MessageSaturation = 1000,
+                AbsenceTauHours = 18f
+            }
         }
     ];
+
     [ObservableProperty] private ArchetypeVM _selectedArchetype;
 
     #endregion
 
+    
     #region MoodSettings
 
     [ObservableProperty]
@@ -916,5 +1156,13 @@ public partial class SettingsVM : ObservableValidator
         _ => MoodType.Best
     };
 
-    #endregion    
+    #endregion
+
+
+    #region StatusSystem
+
+    [ObservableProperty] private string? _userName;
+    [ObservableProperty] private bool _isDating;
+
+    #endregion
 }

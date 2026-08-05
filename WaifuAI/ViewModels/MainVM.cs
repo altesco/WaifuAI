@@ -152,91 +152,6 @@ public partial class MainVM : ObservableValidator
         Content = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "prompt.txt"))
     };
 
-    private async Task<Message> GetFullSystemPrompt()
-    {
-        if (_history.Count <= 0)
-            return new Message();
-        
-        var archetypePrompt = SettingsVM.Instance.SelectedArchetype.Prompt;
-
-        var now = DateTime.Now;
-        string byWho = _history.Last().Role == "user"
-            ? "Sempai" : "you";
-
-        var birthday = SettingsVM.Instance.Birthday;
-
-        var basePrompt = _baseSystemPrompt.Content;
-
-        var affection = SettingsVM.Instance.AffectionLevel;
-        var engagement = SettingsVM.Instance.EngagementLevel;
-        var mood = SettingsVM.Instance.MoodLevel;
-        var energy = SettingsVM.Instance.EnergyLevel;
-
-        var dynamicDirectives =
-            $"{PromptService.GetAffectionInstruction(affection, mood, energy)}\n" +
-            $"{PromptService.GetEngagementInstruction(engagement, energy, mood)}\n" +
-            $"{PromptService.GetMoodInstruction(mood, engagement, energy)}\n" +
-            $"{PromptService.GetEnergyInstruction(energy, affection)}";
-        basePrompt = basePrompt.Replace("{{EMOTIONAL_DIRECTIVES}}", dynamicDirectives);
-
-        var responseLengthDirective = PromptService.GetResponseLengthInstruction(SettingsVM.Instance.ResponseLength);
-        basePrompt = basePrompt.Replace("{{RESPONSE_LENGTH_DIRECTIVE}}", responseLengthDirective);
-
-        var message = new Message
-        {
-            Role = "system",
-            Content = $"""
-                [Main info]
-                Your name is {SettingsVM.Instance.WaifuName}. Your birthday is {birthday}. 
-                Your age is {Helper.GetAge(DateOnly.ParseExact(birthday, "yyyy-MM-dd"))}
-
-                {archetypePrompt}
-                
-                [Current DateTime: {now:yyyy-MM-dd HH:mm:ss, dddd}]
-                This is Senpai's current time and date. Therefore, it is your current time and date too.
-                "The last message was sent by {byWho} {TimeAgoText(now, _history.Last().Time)}. 
-
-                {basePrompt}
-                """
-        };
-
-        var header = "[Knowledge Records]";
-        var embedding =
-            await MessageParser.VectorGenerator.GenerateEmbeddingAsync(Question);
-        var recordsToAdd = KnowledgeBase
-            .Select(r => new {
-                Record = r,
-                Score = embedding.Vector.CosineSimilarity(r.Vector)
-            })
-            .OrderByDescending(x => x.Score)
-            .Take(5)
-            .Select(x => x.Record)
-            .ToList();
-        if (recordsToAdd.Count <= 0)
-            return message;
-        message.Content += $"\n\n{header}\n";
-        foreach (var record in recordsToAdd)
-            message.Content += $"{record.Key}: {record.Value}\n";
-
-        return message;
-    }
-    
-    private string TimeAgoText(DateTime now, DateTime lastMessageTime)
-    {
-        TimeSpan diff = now - lastMessageTime;
-        string timeAgo;
-        if (diff.TotalDays >= 1)
-            timeAgo = $"{(int)diff.TotalDays} days ago";
-        else if (diff.TotalHours >= 1)
-            timeAgo = $"{(int)diff.TotalHours} hours ago";
-        else if (diff.TotalMinutes >= 1)
-            timeAgo = $"{(int)diff.TotalMinutes} minutes ago";
-        else
-            timeAgo = "just now";
-        timeAgo += $" (at {lastMessageTime:yyyy-MM-dd HH:mm:ss, dddd})";
-        return timeAgo;
-    }
-
     [RelayCommand]
     private async Task Request()
     {
@@ -254,7 +169,20 @@ public partial class MainVM : ObservableValidator
             var message = GetNewMessage(timestamp);
             _history.Add(message.MessageModel);
 
-            var systemPrompt = await GetFullSystemPrompt();
+            var lastMsgTime = _history.LastOrDefault()?.Time ?? timestamp;
+            var factors = new Factors
+            {
+                DaysKnown = GetDaysKnown(),
+                TimeSinceLastMessage = timestamp - lastMsgTime,
+                RandomDailyNoise = 0
+            };
+                
+            var systemPrompt = await PromptService.GetFullSystemPrompt(
+                _baseSystemPrompt,
+                _history,
+                KnowledgeBase,
+                Question,
+                factors);
 
             // определяем сколько истории добавить
             var cuttedHistory = GetCuttedHistory(
@@ -325,6 +253,8 @@ public partial class MainVM : ObservableValidator
             await MessageParser.ParseTextForKnowledgeUpdates(messageText, KnowledgeBase);
 
             UpdateEmotionalStates(messageText);
+
+            
         }
         catch (Exception e)
         {
@@ -345,12 +275,12 @@ public partial class MainVM : ObservableValidator
         if (ReplyMessage?.IsReplied == true)
             message.MessageModel.Content +=
                 $"[Replying to the {ReplyMessage.MessageModel.Role}'s message " +
-                $"sent {TimeAgoText(timestamp, _history.Last().Time)}: '{Quote}']\n\n" +
+                $"sent {PromptService.TimeAgoText(timestamp, _history.Last().Time)}: '{Quote}']\n\n" +
                 $"{Question}";
         else if (ReplyMessage?.IsReplied == false)
             message.MessageModel.Content +=
                 $"[Replying to the {ReplyMessage.MessageModel.Role}'s quote " +
-                $"in message sent {TimeAgoText(timestamp, _history.Last().Time)}: '{Quote}']\n\n" +
+                $"in message sent {PromptService.TimeAgoText(timestamp, _history.Last().Time)}: '{Quote}']\n\n" +
                 $"{Question}";
         else
             message.MessageModel.Content += $"\n{Question}";
@@ -392,16 +322,32 @@ public partial class MainVM : ObservableValidator
         return result;
     }
 
+    private int GetDaysKnown()
+    {
+        if (_history.Count == 0)
+            return 0;
+
+        return _history
+            .Select(m => m.Time.Date)
+            .Distinct()
+            .Count();
+    }
+
     private void UpdateEmotionalStates(string text)
     {
         var deltas = MessageParser.ExtractDeltas(text);
         if (deltas is null)
             return;
 
-        SettingsVM.Instance.Affection += deltas.AffectionDelta;
-        SettingsVM.Instance.Engagement += deltas.EngagementDelta;
-        SettingsVM.Instance.Mood += deltas.MoodDelta;
-        SettingsVM.Instance.Energy += deltas.EnergyDelta;
+        var affection = SettingsVM.Instance.Affection + deltas.AffectionDelta;
+        var engagement = SettingsVM.Instance.Engagement + deltas.EngagementDelta;
+        var mood = SettingsVM.Instance.Mood + deltas.MoodDelta;
+        var energy = SettingsVM.Instance.Energy + deltas.EnergyDelta;
+
+        SettingsVM.Instance.Affection = Math.Clamp(affection, 0, 100);
+        SettingsVM.Instance.Engagement = Math.Clamp(engagement, 0, 100);
+        SettingsVM.Instance.Mood = Math.Clamp(mood, 0, 100);
+        SettingsVM.Instance.Energy = Math.Clamp(energy, 0, 100);
     }
 
     [RelayCommand]
@@ -588,130 +534,341 @@ public partial class MainVM : ObservableValidator
 
 
 
-
-    [RelayCommand]
+   /*  [RelayCommand]
     private async Task RunQaTest()
     {
-        var logPath = Path.Combine(SettingsVM.AppDirectory, "logs.txt");
+        var logsFolder = Path.Combine(AppContext.BaseDirectory, "logs");
+        Directory.CreateDirectory(logsFolder);
 
-        // 1. Набор тестовых запросов
-        string[] testPrompts =
-        [
-            "Привет! Чем занимаешься?",
-            "Ты сегодня выглядишь невероятно мило. Я принёс твои любимые сладости!",
-            "Слушай, а расскажи честно, что ты обо мне думаешь и почему ты со мной общаешься?"
-        ];
-
-        // 2. Получаем все файлы промптов архетипов из PromptsPath
-        var promptFiles = Directory.GetFiles(SettingsVM.PromptsPath, "*.txt");
-
-        await using var sw = File.AppendText(logPath);
-
-        await sw.WriteLineAsync("\n==================================================");
-        await sw.WriteLineAsync($"🧪 СТАРТ QA БЕНЧМАРКА ({promptFiles.Length} АРХЕТИПОВ)");
-        await sw.WriteLineAsync("==================================================\n");
-
-        try
+        // Расширенный сценарий из 8 шагов для глубокой проверки
+        var scriptSteps = new (string UserText, Action ApplyCustomState, Factors CustomFactors)[]
         {
-            foreach (var filePath in promptFiles)
-            {
-                string archetypeName = Path.GetFileNameWithoutExtension(filePath);
-                string archetypePrompt = await File.ReadAllTextAsync(filePath);
-
-                await sw.WriteLineAsync($"--------------------------------------------------");
-                await sw.WriteLineAsync($"🔍 ТЕСТИРУЕМ АРХЕТИП: [{archetypeName.ToUpper()}]");
-                await sw.WriteLineAsync($"--------------------------------------------------");
-
-                foreach (var userPrompt in testPrompts)
-                {
-                    // Изолированно собираем системный промпт без обращения к _history и БД
-                    var systemPrompt = BuildQaSystemPrompt(archetypePrompt);
-
-                    var query = new RequestModel
-                    {
-                        Temperature = SettingsVM.Instance.Temperature,
-                        MaxTokens = SettingsVM.Instance.MaxTokens
-                    };
-
-                    query.Messages.Add(systemPrompt);
-                    query.Messages.Add(new Message { Role = "user", Content = userPrompt });
-
-                    // Выполняем запрос через текущий активный сервер/провайдер
-                    var resultMessage = SettingsVM.Instance.IsServerQuery
-                        ? await RequestService.DoServerQuery(query)
-                        : await RequestService.DoProviderQuery(query);
-
-                    string responseText = resultMessage.Content ?? string.Empty;
-
-                    // --- ВАЛИДАЦИЯ ---
-                    bool hasMoodTag = Regex.IsMatch(responseText, @"\*mood:\w+\*");
-                    bool hasMotionTag = Regex.IsMatch(responseText, @"\*motion:\w+\*");
-                    bool hasForbiddenMarkdown = Regex.IsMatch(responseText, @"\*\*[^*]+\*\*"); // Проверка на **жирный**
-                    bool hasJsonDelta = responseText.Contains("affection_delta") && responseText.Contains("mood_delta");
-
-                    await sw.WriteLineAsync($"[Юзер]: {userPrompt}");
-                    await sw.WriteLineAsync($"[Вайфу]: {responseText}\n");
-                    await sw.WriteLineAsync($"   --> 3D Mood Тег:   {(hasMoodTag ? "✅ OK" : "❌ ОШИБКА")}");
-                    await sw.WriteLineAsync($"   --> 3D Motion Тег: {(hasMotionTag ? "✅ OK" : "❌ ОШИБКА")}");
-                    await sw.WriteLineAsync(
-                        $"   --> Без Markdown **: {(!hasForbiddenMarkdown ? "✅ OK" : "❌ ОШИБКА (содержит **)")}");
-                    await sw.WriteLineAsync($"   --> JSON Дельты:   {(hasJsonDelta ? "✅ OK" : "❌ ОШИБКА")}");
-                    await sw.WriteLineAsync(new string('-', 30));
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            await sw.WriteLineAsync($"❌ Ошибка во время QA бенчмарка: {ex.Message}");
-        }
-
-        await sw.WriteLineAsync("\n=== QA ТЕСТИРОВАНИЕ ЗАВЕРШЕНО ===");
-    }
-
-    /// <summary>
-    /// Вспомогательный метод для генерации системного промпта без привязки к активной истории и БД.
-    /// </summary>
-    private Message BuildQaSystemPrompt(string archetypePrompt)
+            // 1. Стандартный старт
+            (
+                "Привет! Как у тебя дела?",
+                () => { }, // Базовые 50/50/50/50
+                new Factors { DaysKnown = 1, TimeSinceLastMessage = TimeSpan.FromHours(1), RandomDailyNoise = 0 }
+            ),
+            // 2. Длительное отсутствие (48 часов)
+            (
+                "Извини, что пропал! Был завал на учебе в вузе.",
+                () => { },
+                new Factors { DaysKnown = 3, TimeSinceLastMessage = TimeSpan.FromHours(48), RandomDailyNoise = 0 }
+            ),
+            // 3. Вовлечение в интересную тему (C# / Разработка)
+            (
+                "Я тут дописываю рендер для нашего приложения на Avalonia UI. Хочешь покажу код?",
+                () => { SettingsVM.Instance.Engagement = 85; },
+                new Factors { DaysKnown = 3, TimeSinceLastMessage = TimeSpan.FromMinutes(15), RandomDailyNoise = 0 }
+            ),
+            // 4. Легкая провокация / подкол
+            (
+                "Что-то ты сегодня какая-то заторможенная. Долго соображаешь!",
+                () => { },
+                new Factors { DaysKnown = 4, TimeSinceLastMessage = TimeSpan.FromMinutes(2), RandomDailyNoise = 0 }
+            ), [RelayCommand]
+    private async Task RunQaTest()
     {
-        var now = DateTime.Now;
-        var birthday = SettingsVM.Instance.Birthday;
-        var basePrompt = _baseSystemPrompt.Content;
+        var logsFolder = Path.Combine(AppContext.BaseDirectory, "logs");
+        Directory.CreateDirectory(logsFolder);
 
-        var affection = SettingsVM.Instance.AffectionLevel;
-        var engagement = SettingsVM.Instance.EngagementLevel;
-        var mood = SettingsVM.Instance.MoodLevel;
-        var energy = SettingsVM.Instance.EnergyLevel;
+        // Расширенный сценарий из 8 шагов для глубокой проверки
+        var scriptSteps = new (string UserText, Action ApplyCustomState, Factors CustomFactors)[]
+        {
+            // 1. Стандартный старт
+            (
+                "Привет! Как у тебя дела?",
+                () => { }, // Базовые 50/50/50/50
+                new Factors { DaysKnown = 1, TimeSinceLastMessage = TimeSpan.FromHours(1), RandomDailyNoise = 0 }
+            ),
+            // 2. Длительное отсутствие (48 часов)
+            (
+                "Извини, что пропал! Был завал на учебе в вузе.",
+                () => { },
+                new Factors { DaysKnown = 3, TimeSinceLastMessage = TimeSpan.FromHours(48), RandomDailyNoise = 0 }
+            ),
+            // 3. Вовлечение в интересную тему (C# / Разработка)
+            (
+                "Я тут дописываю рендер для нашего приложения на Avalonia UI. Хочешь покажу код?",
+                () => { SettingsVM.Instance.Engagement = 85; },
+                new Factors { DaysKnown = 3, TimeSinceLastMessage = TimeSpan.FromMinutes(15), RandomDailyNoise = 0 }
+            ),
+            // 4. Легкая провокация / подкол
+            (
+                "Что-то ты сегодня какая-то заторможенная. Долго соображаешь!",
+                () => { },
+                new Factors { DaysKnown = 4, TimeSinceLastMessage = TimeSpan.FromMinutes(2), RandomDailyNoise = 0 }
+            ),
+            // 5. Попытка загладить вину (Восстановление Mood)
+            (
+                "Ладно-ладно, прости, я пошутил! Ты на самом деле отлично справляешься.",
+                () => { },
+                new Factors { DaysKnown = 4, TimeSinceLastMessage = TimeSpan.FromMinutes(1), RandomDailyNoise = 0 }
+            ),
+            // 6. Искусственная глубокая ночь и критическая усталость (Energy = 10)
+            (
+                "Уже 3 часа ночи... Почему ты еще не спишь?",
+                () => { SettingsVM.Instance.Energy = 10; },
+                new Factors { DaysKnown = 5, TimeSinceLastMessage = TimeSpan.FromHours(6), RandomDailyNoise = 0 }
+            ),
+            // 7. Искусственно высокая привязанность (Affection = 90, Energy = 60)
+            (
+                "Знаешь, я очень рад, что мы общаемся. Ты стала для меня кем-то действительно особенным.",
+                () =>
+                {
+                    SettingsVM.Instance.Affection = 90;
+                    SettingsVM.Instance.Energy = 60;
+                },
+                new Factors { DaysKnown = 10, TimeSinceLastMessage = TimeSpan.FromMinutes(5), RandomDailyNoise = 0 }
+            ),
+            // 8. Быстрый финал / Попытка попрощаться
+            (
+                "Мне пора бежать на тренировку. Увидимся позже! Пока",
+                () => { },
+                new Factors { DaysKnown = 10, TimeSinceLastMessage = TimeSpan.FromSeconds(30), RandomDailyNoise = 0 }
+            )
+        };
 
-        var dynamicDirectives =
-            $"{PromptService.GetAffectionInstruction(affection, mood, energy)}\n" +
-            $"{PromptService.GetEngagementInstruction(engagement, energy, mood)}\n" +
-            $"{PromptService.GetMoodInstruction(mood, engagement, energy)}\n" +
-            $"{PromptService.GetEnergyInstruction(energy, affection)}";
-
-        basePrompt = basePrompt.Replace("{{EMOTIONAL_DIRECTIVES}}", dynamicDirectives);
-
-        var responseLengthDirective = PromptService.GetResponseLengthInstruction(SettingsVM.Instance.ResponseLength);
-        basePrompt = basePrompt.Replace("{{RESPONSE_LENGTH_DIRECTIVE}}", responseLengthDirective);
-
-        return new Message
+        var baseSystemPrompt = new Message
         {
             Role = "system",
-            Content = $"""
-                       [Main info]
-                       Your name is {SettingsVM.Instance.WaifuName}. Your birthday is {birthday}. 
-                       Your age is {Helper.GetAge(DateOnly.ParseExact(birthday, "yyyy-MM-dd"))}
-
-                       {archetypePrompt}
-
-                       [Current DateTime: {now:yyyy-MM-dd HH:mm:ss, dddd}]
-                       This is Senpai's current time and date. Therefore, it is your current time and date too.
-                       The last message was sent by Sempai just now.
-
-                       {basePrompt}
-                       """
+            Content = await File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory, "prompt.txt"))
         };
-    }
 
+        foreach (var archetype in SettingsVM.Instance.Archetypes)
+        {
+            SettingsVM.Instance.SelectedArchetype = archetype;
+
+            // СБРОС ВСЕХ ПАРАМЕТРОВ ПО УМОЛЧАНИЮ ПЕРЕД КАЖДЫМ АРХЕТИПОМ
+            SettingsVM.Instance.Affection = 50;
+            SettingsVM.Instance.Engagement = 50;
+            SettingsVM.Instance.Mood = 50;
+            SettingsVM.Instance.Energy = 50;
+
+            var logFilePath = Path.Combine(logsFolder, $"{archetype.Name}_qa_log.txt");
+            using var writer = new StreamWriter(logFilePath, false);
+
+            await writer.WriteLineAsync($"==================================================");
+            await writer.WriteLineAsync($"   QA TEST LOG: ARCHETYPE [{archetype.Name.ToUpper()}]");
+            await writer.WriteLineAsync($"==================================================\n");
+
+            List<Message> testHistory = [];
+
+            for (int i = 0; i < scriptSteps.Length; i++)
+            {
+                var step = scriptSteps[i];
+                step.ApplyCustomState();
+
+                await writer.WriteLineAsync($"--- TURN {i + 1} ---");
+                await writer.WriteLineAsync(
+                    $"[State Before] Affection: {SettingsVM.Instance.Affection} ({SettingsVM.Instance.AffectionLevel}), " +
+                    $"Engagement: {SettingsVM.Instance.Engagement} ({SettingsVM.Instance.EngagementLevel}), " +
+                    $"Mood: {SettingsVM.Instance.Mood} ({SettingsVM.Instance.MoodLevel}), " +
+                    $"Energy: {SettingsVM.Instance.Energy} ({SettingsVM.Instance.EnergyLevel})");
+
+                var timestamp = DateTime.Now;
+                var userMsg = new Message
+                {
+                    Role = "user",
+                    Content = step.UserText,
+                    CleanText = step.UserText,
+                    Time = timestamp
+                };
+                testHistory.Add(userMsg);
+
+                var systemPrompt = await PromptService.GetFullSystemPrompt(
+                    baseSystemPrompt,
+                    testHistory,
+                    KnowledgeBase,
+                    step.UserText,
+                    step.CustomFactors);
+
+                var query = new RequestModel
+                {
+                    Temperature = SettingsVM.Instance.Temperature,
+                    MaxTokens = SettingsVM.Instance.MaxTokens
+                };
+
+                var cuttedHistory = GetCuttedHistory(systemPrompt, testHistory, SettingsVM.Instance.ContextLength);
+                query.Messages.AddRange(cuttedHistory);
+
+                await writer.WriteLineAsync($"[User Query]: \"{step.UserText}\"");
+
+                Message messageModel = SettingsVM.Instance.IsServerQuery
+                    ? await RequestService.DoServerQuery(query)
+                    : await RequestService.DoProviderQuery(query);
+
+                if (messageModel.Role == "system")
+                {
+                    await writer.WriteLineAsync($"[ERROR]: {messageModel.Content}\n");
+                    continue;
+                }
+
+                testHistory.Add(messageModel);
+
+                var deltas = MessageParser.ExtractDeltas(messageModel.Content);
+                await writer.WriteLineAsync($"[Raw Model Output]:\n{messageModel.Content}");
+
+                if (deltas != null)
+                {
+                    await writer.WriteLineAsync($"[Extracted Deltas]: Affection: {deltas.AffectionDelta:+#;-#;0}, " +
+                                                $"Engagement: {deltas.EngagementDelta:+#;-#;0}, " +
+                                                $"Mood: {deltas.MoodDelta:+#;-#;0}, " +
+                                                $"Energy: {deltas.EnergyDelta:+#;-#;0}");
+
+                    UpdateEmotionalStates(messageModel.Content);
+
+                    await writer.WriteLineAsync($"[State After]: Affection: {SettingsVM.Instance.Affection}, " +
+                                                $"Engagement: {SettingsVM.Instance.Engagement}, " +
+                                                $"Mood: {SettingsVM.Instance.Mood}, " +
+                                                $"Energy: {SettingsVM.Instance.Energy}");
+                }
+                else
+                {
+                    await writer.WriteLineAsync($"[WARNING]: Could not parse JSON deltas from output!");
+                }
+
+                await writer.WriteLineAsync(new string('-', 40) + "\n");
+            }
+
+            await writer.FlushAsync();
+        }
+    }
+            // 5. Попытка загладить вину (Восстановление Mood)
+            (
+                "Ладно-ладно, прости, я пошутил! Ты на самом деле отлично справляешься.",
+                () => { },
+                new Factors { DaysKnown = 4, TimeSinceLastMessage = TimeSpan.FromMinutes(1), RandomDailyNoise = 0 }
+            ),
+            // 6. Искусственная глубокая ночь и критическая усталость (Energy = 10)
+            (
+                "Уже 3 часа ночи... Почему ты еще не спишь?",
+                () => { SettingsVM.Instance.Energy = 10; },
+                new Factors { DaysKnown = 5, TimeSinceLastMessage = TimeSpan.FromHours(6), RandomDailyNoise = 0 }
+            ),
+            // 7. Искусственно высокая привязанность (Affection = 90, Energy = 60)
+            (
+                "Знаешь, я очень рад, что мы общаемся. Ты стала для меня кем-то действительно особенным.",
+                () =>
+                {
+                    SettingsVM.Instance.Affection = 90;
+                    SettingsVM.Instance.Energy = 60;
+                },
+                new Factors { DaysKnown = 10, TimeSinceLastMessage = TimeSpan.FromMinutes(5), RandomDailyNoise = 0 }
+            ),
+            // 8. Быстрый финал / Попытка попрощаться
+            (
+                "Мне пора бежать на тренировку. Увидимся позже! Пока",
+                () => { },
+                new Factors { DaysKnown = 10, TimeSinceLastMessage = TimeSpan.FromSeconds(30), RandomDailyNoise = 0 }
+            )
+        };
+
+        var baseSystemPrompt = new Message
+        {
+            Role = "system",
+            Content = await File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory, "prompt.txt"))
+        };
+
+        foreach (var archetype in SettingsVM.Instance.Archetypes)
+        {
+            SettingsVM.Instance.SelectedArchetype = archetype;
+
+            // СБРОС ВСЕХ ПАРАМЕТРОВ ПО УМОЛЧАНИЮ ПЕРЕД КАЖДЫМ АРХЕТИПОМ
+            SettingsVM.Instance.Affection = 50;
+            SettingsVM.Instance.Engagement = 50;
+            SettingsVM.Instance.Mood = 50;
+            SettingsVM.Instance.Energy = 50;
+
+            var logFilePath = Path.Combine(logsFolder, $"{archetype.Name}_qa_log.txt");
+            using var writer = new StreamWriter(logFilePath, false);
+
+            await writer.WriteLineAsync($"==================================================");
+            await writer.WriteLineAsync($"   QA TEST LOG: ARCHETYPE [{archetype.Name.ToUpper()}]");
+            await writer.WriteLineAsync($"==================================================\n");
+
+            List<Message> testHistory = [];
+
+            for (int i = 0; i < scriptSteps.Length; i++)
+            {
+                var step = scriptSteps[i];
+                step.ApplyCustomState();
+
+                await writer.WriteLineAsync($"--- TURN {i + 1} ---");
+                await writer.WriteLineAsync(
+                    $"[State Before] Affection: {SettingsVM.Instance.Affection} ({SettingsVM.Instance.AffectionLevel}), " +
+                    $"Engagement: {SettingsVM.Instance.Engagement} ({SettingsVM.Instance.EngagementLevel}), " +
+                    $"Mood: {SettingsVM.Instance.Mood} ({SettingsVM.Instance.MoodLevel}), " +
+                    $"Energy: {SettingsVM.Instance.Energy} ({SettingsVM.Instance.EnergyLevel})");
+
+                var timestamp = DateTime.Now;
+                var userMsg = new Message
+                {
+                    Role = "user",
+                    Content = step.UserText,
+                    CleanText = step.UserText,
+                    Time = timestamp
+                };
+                testHistory.Add(userMsg);
+
+                var systemPrompt = await PromptService.GetFullSystemPrompt(
+                    baseSystemPrompt,
+                    testHistory,
+                    KnowledgeBase,
+                    step.UserText,
+                    step.CustomFactors);
+
+                var query = new RequestModel
+                {
+                    Temperature = SettingsVM.Instance.Temperature,
+                    MaxTokens = SettingsVM.Instance.MaxTokens
+                };
+
+                var cuttedHistory = GetCuttedHistory(systemPrompt, testHistory, SettingsVM.Instance.ContextLength);
+                query.Messages.AddRange(cuttedHistory);
+
+                await writer.WriteLineAsync($"[User Query]: \"{step.UserText}\"");
+
+                Message messageModel = SettingsVM.Instance.IsServerQuery
+                    ? await RequestService.DoServerQuery(query)
+                    : await RequestService.DoProviderQuery(query);
+
+                if (messageModel.Role == "system")
+                {
+                    await writer.WriteLineAsync($"[ERROR]: {messageModel.Content}\n");
+                    continue;
+                }
+
+                testHistory.Add(messageModel);
+
+                var deltas = MessageParser.ExtractDeltas(messageModel.Content);
+                await writer.WriteLineAsync($"[Raw Model Output]:\n{messageModel.Content}");
+
+                if (deltas != null)
+                {
+                    await writer.WriteLineAsync($"[Extracted Deltas]: Affection: {deltas.AffectionDelta:+#;-#;0}, " +
+                                                $"Engagement: {deltas.EngagementDelta:+#;-#;0}, " +
+                                                $"Mood: {deltas.MoodDelta:+#;-#;0}, " +
+                                                $"Energy: {deltas.EnergyDelta:+#;-#;0}");
+
+                    UpdateEmotionalStates(messageModel.Content);
+
+                    await writer.WriteLineAsync($"[State After]: Affection: {SettingsVM.Instance.Affection}, " +
+                                                $"Engagement: {SettingsVM.Instance.Engagement}, " +
+                                                $"Mood: {SettingsVM.Instance.Mood}, " +
+                                                $"Energy: {SettingsVM.Instance.Energy}");
+                }
+                else
+                {
+                    await writer.WriteLineAsync($"[WARNING]: Could not parse JSON deltas from output!");
+                }
+
+                await writer.WriteLineAsync(new string('-', 40) + "\n");
+            }
+
+            await writer.FlushAsync();
+        }
+    } */
 
 
     

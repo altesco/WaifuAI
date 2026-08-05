@@ -51,4 +51,8 @@ public class SettingsModel
     public int Engagement { get; set; } = 50;
     public int Mood { get; set; } = 50;
     public int Energy { get; set; } = 50;
+
+    // Status System
+    public string? UserName { get; set; }
+    public bool IsDating { get; set; }    
 }
