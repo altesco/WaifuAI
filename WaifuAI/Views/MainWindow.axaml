@@ -369,6 +369,7 @@
                         x:DataType="vm:SettingsVM"
                         DataContext="{x:Static vm:SettingsVM.Instance}">
                         <StackPanel.Styles>
+
                             <Style Selector="ProgressBar">
                                 <Setter Property="Height" Value="8" />
                                 <Setter Property="Width" Value="100" />
@@ -377,7 +378,13 @@
                                 <Setter Property="VerticalAlignment" Value="Center" />
                                 <Setter Property="BorderThickness" Value="2" />
                                 <Setter Property="Margin" Value="11,0,0,0" />
+                                <Setter Property="Transitions">
+                                    <Transitions>
+                                        <DoubleTransition Property="Value" Duration="0:0:1.5" Easing="QuadraticEaseOut" />
+                                    </Transitions>
+                                </Setter>
                             </Style>
+
                             <Style Selector="ProgressBar.mini-style">
                                 <Setter Property="Height" Value="16" />
                                 <Setter Property="Width" Value="3" />
@@ -386,11 +393,23 @@
                                 <Setter Property="Orientation" Value="Vertical" />
                                 <Setter Property="BorderThickness" Value="0" />
                                 <Setter Property="Margin" Value="25,0,0,0" />
+                                <Setter Property="Transitions">
+                                    <Transitions>
+                                        <DoubleTransition Property="Value" Duration="0:0:1.5" Easing="QuadraticEaseOut" />
+                                    </Transitions>
+                                </Setter>
                             </Style>
+
+                            <Style Selector="ToolTip">
+                                <Setter Property="Placement" Value="Bottom"/>
+                                <Setter Property="HorizontalOffset" Value="0"/>
+                                <Setter Property="VerticalOffset" Value="4"/>
+                            </Style>
+
                         </StackPanel.Styles>
 
                         <!-- Affection -->
-                        <Grid>
+                        <Grid ToolTip.Tip="{Binding Affection, StringFormat={}Affection [{0}/100]}">
                             <ProgressBar
                                 BorderBrush="{Binding #AffectionIcon.Foreground}"
                                 Value="{Binding Affection}"
@@ -435,10 +454,11 @@
                                     </Style>
                                 </LucideIcon.Styles>
                             </LucideIcon>
+
                         </Grid>
 
                         <!-- Engagement -->
-                        <Grid>
+                        <Grid ToolTip.Tip="{Binding Engagement, StringFormat={}Engagement [{0}/100]}">
                             <ProgressBar
                                 BorderBrush="{Binding #EngagementIcon.Foreground}"
                                 Value="{Binding Engagement}"
@@ -499,7 +519,7 @@
                         </Grid>
 
                         <!-- Mood -->
-                        <Grid>
+                        <Grid ToolTip.Tip="{Binding Mood, StringFormat={}Mood [{0}/100]}">
                             <ProgressBar
                                 BorderBrush="{Binding #MoodIcon.Foreground}"
                                 Value="{Binding Mood}"
@@ -542,7 +562,7 @@
                         </Grid>
 
                         <!-- Energy -->
-                        <Grid>
+                        <Grid ToolTip.Tip="{Binding Energy, StringFormat={}Energy [{0}/100]}">
                             <ProgressBar
                                 BorderBrush="{Binding #EnergyIcon.Foreground}"
                                 Value="{Binding Energy}"
@@ -2175,6 +2195,11 @@
                                         IsBigTextBox="True">
                                         <TextBox Text="{Binding ContextLength, Mode=TwoWay}" />
                                     </views:SideCard>
+
+                                    <Slider Width="100" Value="{Binding Affection, Mode=TwoWay}"/>
+                                    <Slider Width="100" Value="{Binding Engagement, Mode=TwoWay}" />
+                                    <Slider Width="100" Value="{Binding Mood, Mode=TwoWay}" />
+                                    <Slider Width="100" Value="{Binding Energy, Mode=TwoWay}" />
 
                                 </StackPanel>
                             </ScrollViewer>
