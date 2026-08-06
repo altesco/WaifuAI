@@ -86,6 +86,8 @@ public partial class MainVM : ObservableValidator
 
         KnowledgeBase.CollectionChanged += OnKnowledgeBaseChanged;
         SelectedMessages.CollectionChanged += OnSelectedMessagesChanged;
+
+        DropService.Start();
     }
 
     private static GptEncoding _encoder;

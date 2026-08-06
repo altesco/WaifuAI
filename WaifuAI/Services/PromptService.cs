@@ -96,9 +96,14 @@ public static class PromptService
         };
     }
 
-    private static string GetEngagementInstruction(EngagementType engagement, EnergyType energy, MoodType mood, int engagementValue)
+    private static string GetEngagementInstruction(
+        EngagementType engagement,
+        EnergyType energy,
+        MoodType mood,
+        int engagementValue,
+        float baseQuestionP)
     {
-        bool shouldAskQuestion = Random.Shared.Next(100) < engagementValue;
+        bool shouldAskQuestion = ShouldAskQuestion(baseQuestionP, engagementValue, energy, mood);
 
         return engagement switch
         {
@@ -116,7 +121,7 @@ public static class PromptService
                     : "Your engagement in the conversation is normal. Share your thoughts, but do NOT force any follow-up questions."
             },
 
-            _ => energy switch 
+            _ => energy switch
             {
                 EnergyType.Low =>
                     "The topic of conversation has intrigued you, but severe physical exhaustion overrides your excitement. Respond " +
@@ -136,6 +141,29 @@ public static class PromptService
                 }
             }
         };
+    }
+
+    private static bool ShouldAskQuestion(float baseQuestionP, int engagementValue, EnergyType energy, MoodType mood)
+    {
+        float energyFactor = energy switch
+        {
+            EnergyType.Low => 0.3f,
+            EnergyType.High => 1.1f,
+            _ => 1.0f
+        };
+
+        float moodFactor = mood switch
+        {
+            MoodType.Bad => 0.6f,
+            MoodType.Normal => 1.2f,
+            _ => 1.0f
+        };
+
+        // Формула вероятности
+        float pFinal = baseQuestionP * (0.3f + 0.9f * (engagementValue / 100f)) * energyFactor * moodFactor;
+        pFinal = Math.Clamp(pFinal, 0.02f, 0.85f); // Жесткий предел от 2% до 85%
+
+        return Random.Shared.NextDouble() < pFinal;
     }
 
     private static string GetMoodInstruction(MoodType mood, EngagementType engagement, EnergyType energy)
@@ -177,7 +205,7 @@ public static class PromptService
         };
     }
 
-    private static string GetMoodSystemInstructions()
+    private static string GetMoodSystemInstructions(ArchetypeVM archetype)
     {
         var vm = SettingsVM.Instance;
         var affection = vm.AffectionLevel;
@@ -192,7 +220,7 @@ public static class PromptService
         var dynamicDirectives =
             $"{statusHeader}\n" +
             $"{GetAffectionInstruction(affection, mood, energy)}\n" +
-            $"{GetEngagementInstruction(engagement, energy, mood, vm.Engagement)}\n" +
+            $"{GetEngagementInstruction(engagement, energy, mood, vm.Engagement, archetype.Sensitivity.ResponseQuestionChance)}\n" +
             $"{GetMoodInstruction(mood, engagement, energy)}\n" +
             $"{GetEnergyInstruction(energy, affection)}";
 
@@ -331,7 +359,6 @@ public static class PromptService
         var f = NormalizeFactors(rawFactors, sensitivity);
         var settings = SettingsVM.Instance;
 
-        // гибридный бонус общения (50% длительность + 50% активность)
         float experienceBonus = (f.DaysFactor * 0.5f) + (f.MessageFactor * 0.5f);
 
         return new MoodVector
@@ -339,30 +366,34 @@ public static class PromptService
             Affection = CalculateRange(
                 baseVector.Affection,
                 shiftMin: sensitivity.AbsenceAffectionImpact * f.AbsenceFactor,
-                shiftMax: sensitivity.DaysAffectionBonus * experienceBonus, 
+                shiftMax: sensitivity.DaysAffectionBonus * experienceBonus,
                 noise: f.DailyNoise,
-                currentValue: settings.Affection),
+                currentValue: settings.Affection,
+                volatility: 1.0f), // Стабильно
 
             Engagement = CalculateRange(
                 baseVector.Engagement,
                 shiftMin: sensitivity.AbsenceEngagementImpact * f.AbsenceFactor,
                 shiftMax: sensitivity.DaysEngagementBonus * experienceBonus,
                 noise: f.DailyNoise,
-                currentValue: settings.Engagement),
+                currentValue: settings.Engagement,
+                volatility: 2.0f), // Высокая раскачка
 
             Mood = CalculateRange(
                 baseVector.Mood,
                 shiftMin: sensitivity.AbsenceMoodImpact * f.AbsenceFactor,
-                shiftMax: sensitivity.DaysMoodBonus * experienceBonus, 
+                shiftMax: sensitivity.DaysMoodBonus * experienceBonus,
                 noise: f.DailyNoise,
-                currentValue: settings.Mood),
+                currentValue: settings.Mood,
+                volatility: 1.5f), // Средне-высокая раскачка
 
             Energy = CalculateRange(
                 baseVector.Energy,
                 shiftMin: sensitivity.AbsenceEnergyImpact * f.AbsenceFactor,
                 shiftMax: sensitivity.DaysEnergyBonus * experienceBonus,
                 noise: 0,
-                currentValue: settings.Energy)
+                currentValue: settings.Energy,
+                volatility: 1.0f) // Стабильно
         };
     }
 
@@ -371,13 +402,14 @@ public static class PromptService
         float shiftMin,
         float shiftMax,
         int noise,
-        int currentValue)
+        int currentValue,
+        float volatility = 1.0f)
     {
-        // 1. Смещаем границы с учётом факторов и случайного шума дня
-        int calculatedMin = (int)Math.Round(baseRange.MinDelta + shiftMin + noise);
-        int calculatedMax = (int)Math.Round(baseRange.MaxDelta + shiftMax + noise);
+        // 1. Умножаем смещение и базовые дельты на коэффициент волатильности
+        int calculatedMin = (int)Math.Round((baseRange.MinDelta + shiftMin + noise) * volatility);
+        int calculatedMax = (int)Math.Round((baseRange.MaxDelta + shiftMax + noise) * volatility);
 
-        // 2. Нелинейное сжатие рамок (Dampening): чем ближе показатель к 0 или 100, тем сужаются допустимые дельты
+        // 2. Нелинейное сжатие рамок (Dampening)
         if (calculatedMax > 0)
         {
             double upperFactor = Math.Max(0.2, (100.0 - currentValue) / 100.0);
@@ -390,15 +422,18 @@ public static class PromptService
             calculatedMin = (int)Math.Round(calculatedMin * lowerFactor);
         }
 
-        // 3. Физический предел: верхняя дельта не может превышать оставшийся запас до 100, а нижняя — до 0
+        // 3. Физический предел
         int maxPositive = Math.Max(0, 100 - currentValue);
         int maxNegative = -Math.Max(0, currentValue);
 
         calculatedMax = Math.Clamp(calculatedMax, 0, maxPositive);
         calculatedMin = Math.Clamp(calculatedMin, maxNegative, 0);
 
-        // 4. Clamping для защиты промпта от экстремальных значений
-        return (Math.Clamp(calculatedMin, -25, 20), Math.Clamp(calculatedMax, -20, 25));
+        // 4. Clamping с расширением границ от волатильности
+        int limitMin = (int)Math.Round(-25 * volatility);
+        int limitMax = (int)Math.Round(25 * volatility);
+
+        return (Math.Clamp(calculatedMin, limitMin, 20), Math.Clamp(calculatedMax, -20, limitMax));
     }
 
     private static NormalizedFactors NormalizeFactors(Factors factors, ArchetypeSensitivity s)
@@ -457,7 +492,7 @@ public static class PromptService
 
         var basePrompt = baseSystemPrompt.Content;
 
-        basePrompt = basePrompt.Replace("{{EMOTIONAL_DIRECTIVES}}", GetMoodSystemInstructions());
+        basePrompt = basePrompt.Replace("{{EMOTIONAL_DIRECTIVES}}", GetMoodSystemInstructions(archetype));
 
         var responseLengthDirective = GetResponseLengthInstruction(SettingsVM.Instance.ResponseLength);
         basePrompt = basePrompt.Replace("{{RESPONSE_LENGTH_DIRECTIVE}}", responseLengthDirective);

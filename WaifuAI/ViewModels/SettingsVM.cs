@@ -135,6 +135,10 @@ public partial class SettingsVM : ObservableValidator
         UserName = SettingsModel.UserName;
         IsDating = SettingsModel.IsDating;
 
+        // Drop Times
+        LastEngagementDrop = SettingsModel.LastEngagementDrop;
+        LastEnergyDrop = SettingsModel.LastEnergyDrop;
+
         IsSettingsLoading = false;
     }
 
@@ -194,6 +198,10 @@ public partial class SettingsVM : ObservableValidator
         // Status System
         SettingsModel.UserName = UserName;
         SettingsModel.IsDating = IsDating;
+
+        // Drop Times
+        SettingsModel.LastEngagementDrop = LastEngagementDrop;
+        SettingsModel.LastEnergyDrop = LastEnergyDrop;
 
         var options = new JsonSerializerOptions { WriteIndented = true };
         var json = JsonSerializer.Serialize(SettingsModel, options);
@@ -801,7 +809,11 @@ public partial class SettingsVM : ObservableValidator
                 AbsenceEnergyImpact = -1.0f, DaysEnergyBonus = 0.0f,
                 DaysSaturation = 35,
                 MessageSaturation = 900,
-                AbsenceTauHours = 24f
+                AbsenceTauHours = 24f,
+                ResponseQuestionChance = 0.35f,
+                EngagementDropChance = 0.35f,
+                EngagementFloor = 25,
+                EngagementDropRange = (5, 15)
             }
         },
         new()
@@ -826,7 +838,11 @@ public partial class SettingsVM : ObservableValidator
                 AbsenceEnergyImpact = -0.5f, DaysEnergyBonus = 0.0f,
                 DaysSaturation = 50,
                 MessageSaturation = 500,
-                AbsenceTauHours = 48f
+                AbsenceTauHours = 48f,
+                ResponseQuestionChance = 0.2f,
+                EngagementDropChance = 0.15f,
+                EngagementFloor = 30,
+                EngagementDropRange = (3, 10)
             }
         },
         new()
@@ -851,7 +867,11 @@ public partial class SettingsVM : ObservableValidator
                 AbsenceEnergyImpact = -1.5f, DaysEnergyBonus = 0.5f,
                 DaysSaturation = 45,
                 MessageSaturation = 600,
-                AbsenceTauHours = 36f
+                AbsenceTauHours = 36f,
+                ResponseQuestionChance = 0.25f,
+                EngagementDropChance = 0.3f,
+                EngagementFloor = 15,
+                EngagementDropRange = (5, 15)
             }
         },
         new()
@@ -876,7 +896,11 @@ public partial class SettingsVM : ObservableValidator
                 AbsenceEnergyImpact = -1.0f, DaysEnergyBonus = 0.0f,
                 DaysSaturation = 10,
                 MessageSaturation = 1500,
-                AbsenceTauHours = 16f
+                AbsenceTauHours = 16f,
+                ResponseQuestionChance = 0.75f,
+                EngagementDropChance = 0.05f,
+                EngagementFloor = 50,
+                EngagementDropRange = (3, 10)
             }
         },
         new()
@@ -901,7 +925,11 @@ public partial class SettingsVM : ObservableValidator
                 AbsenceEnergyImpact = -0.5f, DaysEnergyBonus = 1.0f,
                 DaysSaturation = 7,
                 MessageSaturation = 2000,
-                AbsenceTauHours = 10f
+                AbsenceTauHours = 10f,
+                ResponseQuestionChance = 0.85f,
+                EngagementDropChance = 0.25f,
+                EngagementFloor = 35,
+                EngagementDropRange = (5, 20)
             }
         },
         new()
@@ -926,7 +954,11 @@ public partial class SettingsVM : ObservableValidator
                 AbsenceEnergyImpact = -2.0f, DaysEnergyBonus = 0.0f,
                 DaysSaturation = 5,
                 MessageSaturation = 1500,
-                AbsenceTauHours = 6f
+                AbsenceTauHours = 6f,
+                ResponseQuestionChance = 0.65f,
+                EngagementDropChance = 0.05f,
+                EngagementFloor = 60,
+                EngagementDropRange = (3, 10)
             }
         },
         new()
@@ -951,7 +983,11 @@ public partial class SettingsVM : ObservableValidator
                 AbsenceEnergyImpact = -1.0f, DaysEnergyBonus = 0.0f,
                 DaysSaturation = 20,
                 MessageSaturation = 1200,
-                AbsenceTauHours = 20f
+                AbsenceTauHours = 20f,
+                ResponseQuestionChance = 0.6f,
+                EngagementDropChance = 0.40f,
+                EngagementFloor = 20,
+                EngagementDropRange = (5, 20)
             }
         },
         new()
@@ -975,7 +1011,11 @@ public partial class SettingsVM : ObservableValidator
                 AbsenceEnergyImpact = -1.5f, DaysEnergyBonus = 0.0f,
                 DaysSaturation = 40,
                 MessageSaturation = 800,
-                AbsenceTauHours = 24f
+                AbsenceTauHours = 24f,
+                ResponseQuestionChance = 0.4f,
+                EngagementDropChance = 0.45f,
+                EngagementFloor = 10,
+                EngagementDropRange = (8, 25)
             }
         },
         new()
@@ -1000,7 +1040,11 @@ public partial class SettingsVM : ObservableValidator
                 AbsenceEnergyImpact = -3.0f, DaysEnergyBonus = 0.5f,
                 DaysSaturation = 30,
                 MessageSaturation = 600,
-                AbsenceTauHours = 14f
+                AbsenceTauHours = 14f,
+                ResponseQuestionChance = 0.2f,
+                EngagementDropChance = 0.50f,
+                EngagementFloor = 10,
+                EngagementDropRange = (5, 20)
             }
         },
         new()
@@ -1025,7 +1069,11 @@ public partial class SettingsVM : ObservableValidator
                 AbsenceEnergyImpact = -1.0f, DaysEnergyBonus = 0.0f,
                 DaysSaturation = 7,
                 MessageSaturation = 1200,
-                AbsenceTauHours = 12f
+                AbsenceTauHours = 12f,
+                ResponseQuestionChance = 0.5f,
+                EngagementDropChance = 0.40f,
+                EngagementFloor = 20,
+                EngagementDropRange = (5, 15)
             }
         },
         new()
@@ -1049,7 +1097,11 @@ public partial class SettingsVM : ObservableValidator
                 AbsenceEnergyImpact = -2.0f, DaysEnergyBonus = 0.0f,
                 DaysSaturation = 30,
                 MessageSaturation = 400,
-                AbsenceTauHours = 72f
+                AbsenceTauHours = 72f,
+                ResponseQuestionChance = 0.15f,
+                EngagementDropChance = 0.60f,
+                EngagementFloor = 10,
+                EngagementDropRange = (10, 25)
             }
         },
         new()
@@ -1074,7 +1126,11 @@ public partial class SettingsVM : ObservableValidator
                 AbsenceEnergyImpact = -1.0f, DaysEnergyBonus = 0.0f,
                 DaysSaturation = 60,
                 MessageSaturation = 700,
-                AbsenceTauHours = 48f
+                AbsenceTauHours = 48f,
+                ResponseQuestionChance = 0.3f,
+                EngagementDropChance = 0.45f,
+                EngagementFloor = 15,
+                EngagementDropRange = (5, 20)
             }
         },
         new()
@@ -1099,7 +1155,11 @@ public partial class SettingsVM : ObservableValidator
                 AbsenceEnergyImpact = -1.0f, DaysEnergyBonus = 0.0f,
                 DaysSaturation = 25,
                 MessageSaturation = 1000,
-                AbsenceTauHours = 18f
+                AbsenceTauHours = 18f,
+                ResponseQuestionChance = 0.55f,
+                EngagementDropChance = 0.35f,
+                EngagementFloor = 20,
+                EngagementDropRange = (5, 20)
             }
         }
     ];
@@ -1163,6 +1223,9 @@ public partial class SettingsVM : ObservableValidator
 
     [ObservableProperty] private string? _userName;
     [ObservableProperty] private bool _isDating;
+
+    [ObservableProperty] private DateTime _lastEngagementDrop;
+    [ObservableProperty] private DateTime _lastEnergyDrop;
 
     #endregion
 }

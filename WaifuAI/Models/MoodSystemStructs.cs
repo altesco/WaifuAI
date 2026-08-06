@@ -39,6 +39,13 @@ public struct ArchetypeSensitivity
     public int DaysSaturation { get; set; }
     public int MessageSaturation { get; set; }
     public float AbsenceTauHours { get; set; }
+
+    // шансы
+    public float ResponseQuestionChance { get; set; }
+
+    public float EngagementDropChance { get; set; }
+    public int EngagementFloor { get; set; }
+    public (int Min, int Max) EngagementDropRange { get; set; }
 }
 
 public struct NormalizedFactors

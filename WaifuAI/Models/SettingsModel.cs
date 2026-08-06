@@ -55,4 +55,8 @@ public class SettingsModel
     // Status System
     public string? UserName { get; set; }
     public bool IsDating { get; set; }    
+
+    // Drop Times
+    public DateTime LastEngagementDrop { get; set; } = DateTime.UtcNow;
+    public DateTime LastEnergyDrop { get; set; } = DateTime.UtcNow;
 }
