@@ -96,7 +96,11 @@ public partial class MainVM : ObservableValidator
 
     [ObservableProperty] private string _initializingMessage;
     [ObservableProperty] private string _webAddress;
-    [ObservableProperty] private string _question = string.Empty;
+
+    [ObservableProperty] 
+    [NotifyCanExecuteChangedFor(nameof(RequestCommand))]
+    private string _question = string.Empty;
+
     [ObservableProperty] private int? _tokens;
     [ObservableProperty] private MessageVM? _selectedMessage;
 
@@ -154,7 +158,9 @@ public partial class MainVM : ObservableValidator
         Content = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "prompt.txt"))
     };
 
-    [RelayCommand]
+    private bool CanDoRequest => !string.IsNullOrWhiteSpace(Question);
+
+    [RelayCommand(CanExecute = nameof(CanDoRequest))]
     private async Task Request()
     {
         var timestamp = DateTime.Now;
@@ -532,6 +538,19 @@ public partial class MainVM : ObservableValidator
     }
     
     [ObservableProperty] private bool _isMaximized;
+
+    [RelayCommand]
+    private void InsertNewLine(object? parameter)
+    {
+        if (parameter is not TextBox textBox)
+            return;
+        
+        int caretIndex = textBox.CaretIndex;
+        string text = textBox.Text ?? "";
+
+        textBox.Text = text.Insert(caretIndex, Environment.NewLine);
+        textBox.CaretIndex = caretIndex + Environment.NewLine.Length;
+    }
 
 
 

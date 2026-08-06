@@ -1644,6 +1644,18 @@
                                                     <Setter Property="BorderThickness" Value="0" />
                                                 </Style>
                                             </TextBox.Styles>
+                                            <TextBox.KeyBindings>
+                                                <!-- Shift+Enter: вставляет перевод строки через специальную команду -->
+                                                <KeyBinding 
+                                                    Gesture="Shift+Enter"
+                                                    Command="{Binding InsertNewLineCommand}"
+                                                    CommandParameter="{Binding #TextBox}" />
+
+                                                <!-- Обычный Enter: вызывает вашу команду отправки -->
+                                                <KeyBinding 
+                                                    Gesture="Enter"
+                                                    Command="{Binding RequestCommand}" />
+                                            </TextBox.KeyBindings>
                                         </TextBox>
                                         <StackPanel
                                             Grid.Row="1"
@@ -1655,10 +1667,7 @@
                                             <Button
                                                 Margin="3"
                                                 Classes="icon-button"
-                                                Command="{Binding RequestCommand}"
-                                                CommandParameter="{Binding #MyWebView}"
-                                                IsDefault="True"
-                                                IsEnabled="{Binding Question, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                                                Command="{Binding RequestCommand}">
                                                 <LucideIcon Kind="SendHorizontal" Size="20" />
                                             </Button>
                                             <Button Margin="3" Classes="icon-button">
@@ -2195,11 +2204,6 @@
                                         IsBigTextBox="True">
                                         <TextBox Text="{Binding ContextLength, Mode=TwoWay}" />
                                     </views:SideCard>
-
-                                    <Slider Width="100" Value="{Binding Affection, Mode=TwoWay}"/>
-                                    <Slider Width="100" Value="{Binding Engagement, Mode=TwoWay}" />
-                                    <Slider Width="100" Value="{Binding Mood, Mode=TwoWay}" />
-                                    <Slider Width="100" Value="{Binding Energy, Mode=TwoWay}" />
 
                                 </StackPanel>
                             </ScrollViewer>
