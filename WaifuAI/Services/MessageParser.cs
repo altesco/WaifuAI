@@ -88,6 +88,7 @@ public class MessageParser
 
         clean = Regex.Replace(clean, @"\[LEARNED_NAME:\s*([^\]]+)\]", "", RegexOptions.IgnoreCase);
         clean = Regex.Replace(clean, @"\[RELATIONSHIP:\s*([^\]]+)\]", "", RegexOptions.IgnoreCase);
+        clean = Regex.Replace(clean, @"\[SLEEP: \s*([^\]]+)\]", "", RegexOptions.IgnoreCase);
 
         // лишние пробелы
         clean = Regex.Replace(clean, @"[ \t]+", " ");

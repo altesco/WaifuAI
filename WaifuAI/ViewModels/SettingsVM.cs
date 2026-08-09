@@ -134,7 +134,7 @@ public partial class SettingsVM : ObservableValidator
         // Status System
         UserName = SettingsModel.UserName;
         IsDating = SettingsModel.IsDating;
-        IsSleeping = SettingsModel.IsSleeping;
+        //IsSleeping = SettingsModel.IsSleeping;
         WakeUpTime = SettingsModel.WakeUpTime;
         RandomDailyNoise = SettingsModel.RandomDailyNoise;
         LastUserEntry = SettingsModel.LastUserEntry;
@@ -203,7 +203,7 @@ public partial class SettingsVM : ObservableValidator
         // Status System
         SettingsModel.UserName = UserName;
         SettingsModel.IsDating = IsDating;
-        SettingsModel.IsSleeping = IsSleeping;
+        //SettingsModel.IsSleeping = IsSleeping;
         SettingsModel.WakeUpTime = WakeUpTime;
         SettingsModel.RandomDailyNoise = RandomDailyNoise;
         SettingsModel.LastUserEntry = LastUserEntry;
@@ -1188,8 +1188,14 @@ public partial class SettingsVM : ObservableValidator
 
     [ObservableProperty] private int _randomDailyNoise;
 
-    [ObservableProperty] private bool _isSleeping;
-    [ObservableProperty] private DateTime _wakeUpTime;
+    //[ObservableProperty] private bool _isSleeping;
+    public bool IsSleeping => DateTime.UtcNow < WakeUpTime;
+
+    public void NotifySleepStatus() => OnPropertyChanged(nameof(IsSleeping));
+        
+    [ObservableProperty] 
+    [NotifyPropertyChangedFor(nameof(IsSleeping))]
+    private DateTime _wakeUpTime;
 
     [ObservableProperty] private DateTime _lastUserEntry;
 

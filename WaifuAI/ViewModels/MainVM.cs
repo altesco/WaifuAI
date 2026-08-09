@@ -90,8 +90,25 @@ public partial class MainVM : ObservableValidator
         SelectedMessages.CollectionChanged += OnSelectedMessagesChanged;
 
         DropService.OnWakeUpFirstMessageRequested += HandleWakeUpFirstMessageAsync;
-
         DropService.Start();
+
+        if (SettingsVM.Instance.IsSleeping)
+            StartSleepTimer();
+        else
+            StopSleepTimer();
+        SettingsVM.Instance.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName != nameof(SettingsVM.Instance.IsSleeping))
+                return;
+            
+            if (SettingsVM.Instance.IsSleeping)
+                StartSleepTimer();
+            else
+                StopSleepTimer();
+        };
+
+        // на случай вылета из приложения делаем это почаще
+        SettingsVM.Instance.LastUserEntry = DateTime.UtcNow;
     }
 
     private static GptEncoding _encoder;
@@ -131,7 +148,56 @@ public partial class MainVM : ObservableValidator
 
     private CancellationTokenSource? _cts;
     [ObservableProperty] private bool _isGeneratingResponse;
-    
+
+    private DispatcherTimer? _sleepTimer;
+
+    [ObservableProperty] 
+    [NotifyPropertyChangedFor(nameof(RemainingSleepTimeMask))]
+    private string _remainingSleepTimeText = string.Empty;
+
+    public string RemainingSleepTimeMask =>
+        RemainingSleepTimeText.Length >= 8 ? "00:00:00" : "00:00";    
+
+
+    private void StartSleepTimer()
+    {
+        _sleepTimer?.Stop();
+
+        // Обновляем UI сразу, не дожидаясь первого тика
+        UpdateRemainingTime();
+
+        _sleepTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromSeconds(1)
+        };
+        _sleepTimer.Tick += (_, _) => UpdateRemainingTime();
+        _sleepTimer.Start();
+    }
+
+    private void StopSleepTimer()
+    {
+        _sleepTimer?.Stop();
+        _sleepTimer = null;
+        RemainingSleepTimeText = string.Empty;
+    }
+
+    private void UpdateRemainingTime()
+    {
+        var remaining = SettingsVM.Instance.WakeUpTime - DateTime.UtcNow;
+
+        if (remaining <= TimeSpan.Zero)
+        {
+            RemainingSleepTimeText = "00:00:00";
+            StopSleepTimer();
+            SettingsVM.Instance.NotifySleepStatus();
+            RequestCommand.NotifyCanExecuteChanged();
+            return;
+        }
+
+        RemainingSleepTimeText = remaining.Hours > 0
+            ? remaining.ToString(@"hh\:mm\:ss")
+            : remaining.ToString(@"mm\:ss");
+    }
 
     private async Task HandleWakeUpFirstMessageAsync()
     {
@@ -420,7 +486,7 @@ public partial class MainVM : ObservableValidator
         var sleepTime = MessageParser.ParseWakeUpTime(text);
         if (sleepTime != null)
         {
-            s.IsSleeping = true;
+            //s.IsSleeping = true;
             s.WakeUpTime = timestamp.AddMinutes((int)(sleepTime * 60));
         }
 

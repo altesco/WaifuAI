@@ -427,13 +427,15 @@ public static class PromptService
                 currentValue: settings.Mood,
                 volatility: 1.5f), // Средне-высокая раскачка
 
+            // В CalculateDynamicDeltas для Energy передавай shiftMax: 0
             Energy = CalculateRange(
                 baseVector.Energy,
                 shiftMin: sensitivity.AbsenceEnergyImpact * f.AbsenceFactor,
-                shiftMax: sensitivity.DaysEnergyBonus * experienceBonus,
+                shiftMax: 0, // Убираем плюс к энергии от стажа общения!
                 noise: 0,
                 currentValue: settings.Energy,
-                volatility: 1.0f) // Стабильно
+                volatility: 1.0f,
+                isEnergy: true) // Добавляем флаг
         };
     }
 
@@ -443,37 +445,41 @@ public static class PromptService
         float shiftMax,
         int noise,
         float currentValue,
-        float volatility = 1.0f)
+        float volatility = 1.0f,
+        bool isEnergy = false)
     {
-        // 1. Умножаем смещение и базовые дельты на коэффициент волатильности
-        var calculatedMin = Math.Round((baseRange.MinDelta + shiftMin + noise) * volatility);
-        var calculatedMax = Math.Round((baseRange.MaxDelta + shiftMax + noise) * volatility);
+        var calculatedMin = Math.Round((baseRange.MinDelta + shiftMin + noise) * volatility,
+            MidpointRounding.AwayFromZero);
+        var calculatedMax = Math.Round((baseRange.MaxDelta + shiftMax + noise) * volatility,
+            MidpointRounding.AwayFromZero);
 
-        // 2. Нелинейное сжатие рамок (Dampening)
+        // Для энергии не режем отрицательный расход от усталости!
+        if (calculatedMin < 0)
+        {
+            double lowerFactor = isEnergy ? 1.0 : Math.Max(0.2, currentValue / 100.0);
+            calculatedMin = Math.Round(calculatedMin * lowerFactor, MidpointRounding.AwayFromZero);
+        }
+
         if (calculatedMax > 0)
         {
             double upperFactor = Math.Max(0.2, (100.0 - currentValue) / 100.0);
-            calculatedMax = Math.Round(calculatedMax * upperFactor);
+            calculatedMax = Math.Round(calculatedMax * upperFactor, MidpointRounding.AwayFromZero);
         }
 
-        if (calculatedMin < 0)
-        {
-            double lowerFactor = Math.Max(0.2, currentValue / 100.0);
-            calculatedMin = Math.Round(calculatedMin * lowerFactor);
-        }
-
-        // 3. Физический предел
         var maxPositive = Math.Max(0, 100 - currentValue);
         var maxNegative = -Math.Max(0, currentValue);
 
-        calculatedMax = Math.Clamp(calculatedMax, 0, maxPositive);
-        calculatedMin = Math.Clamp(calculatedMin, maxNegative, 0);
+        calculatedMax = Math.Clamp(calculatedMax, maxNegative, maxPositive);
+        calculatedMin = Math.Clamp(calculatedMin, maxNegative, maxPositive);
 
-        // 4. Clamping с расширением границ от волатильности
-        var limitMin = Math.Round(-25 * volatility);
-        var limitMax = Math.Round(25 * volatility);
+        if (calculatedMin > calculatedMax)
+            calculatedMin = calculatedMax;
 
-        return ((int)Math.Clamp(calculatedMin, limitMin, 20), (int)Math.Clamp(calculatedMax, -20, limitMax));
+        var limitMin = Math.Round(-25 * volatility, MidpointRounding.AwayFromZero);
+        var limitMax = Math.Round(25 * volatility, MidpointRounding.AwayFromZero);
+
+        return ((int)Math.Clamp(calculatedMin, limitMin, limitMax),
+            (int)Math.Clamp(calculatedMax, limitMin, limitMax));
     }
 
     private static NormalizedFactors NormalizeFactors(Factors factors, ArchetypeSensitivity s)
@@ -566,6 +572,10 @@ public static class PromptService
         basePrompt = basePrompt.Replace("{{INITIATIVE_PROMPT}}", initiateText);
 
         var deltas = CalculateDynamicDeltas(archetype.BaseMoodVector, factors, archetype.Sensitivity);
+        Console.WriteLine(GetDeltaFormattedString(deltas.Affection));
+        Console.WriteLine(GetDeltaFormattedString(deltas.Engagement));
+        Console.WriteLine(GetDeltaFormattedString(deltas.Mood));
+        Console.WriteLine(GetDeltaFormattedString(deltas.Energy));
         basePrompt = basePrompt
             .Replace("{{AFFECTION_BOUNDS}}", GetDeltaFormattedString(deltas.Affection))
             .Replace("{{ENGAGEMENT_BOUNDS}}", GetDeltaFormattedString(deltas.Engagement))

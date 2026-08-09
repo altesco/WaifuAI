@@ -1674,7 +1674,8 @@
                                             Margin="3"
                                             HorizontalAlignment="Right"
                                             VerticalAlignment="Bottom"
-                                            Orientation="Horizontal">
+                                            Orientation="Horizontal"
+                                            IsVisible="{Binding Source={x:Static vm:SettingsVM.Instance}, Path=!IsSleeping, Mode=TwoWay}">
                                             <Button
                                                 Margin="3"
                                                 Classes="icon-button"
@@ -1685,6 +1686,30 @@
                                                 <LucideIcon Kind="Mic" Size="20" />
                                             </Button>
                                         </StackPanel>
+                                        <Border
+                                            Background="{DynamicResource ErrorColor}"
+                                            Grid.Row="1"
+                                            Grid.Column="1"
+                                            Margin="8"
+                                            HorizontalAlignment="Right"
+                                            VerticalAlignment="Bottom"
+                                            Height="24"
+                                            CornerRadius="12"
+                                            IsVisible="{Binding Source={x:Static vm:SettingsVM.Instance}, Path=IsSleeping, Mode=TwoWay}">
+                                            <Grid VerticalAlignment="Center">
+                                                <TextBlock
+                                                    VerticalAlignment="Center"
+                                                    Margin="8,0,8,0"
+                                                    Foreground="{DynamicResource SystemErrorTextColor}"
+                                                    Text="{Binding RemainingSleepTimeMask}"
+                                                    Opacity="0" />
+                                                <TextBlock
+                                                    VerticalAlignment="Center"
+                                                    HorizontalAlignment="Center"
+                                                    Foreground="{DynamicResource SystemErrorTextColor}"
+                                                    Text="{Binding RemainingSleepTimeText}" />
+                                            </Grid>
+                                        </Border>
                                         <Border
                                             Grid.Row="2"
                                             Grid.Column="0"

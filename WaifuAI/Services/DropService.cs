@@ -172,7 +172,7 @@ public static class DropService
                     double sleptHours = (s.WakeUpTime - currentTime).TotalHours;
                     s.Energy = Math.Min(100.0f, s.Energy + (float)(sleptHours * sensitivity.EnergyRecoveryRate));
 
-                    s.IsSleeping = false;
+                    //s.IsSleeping = false;
                     SetRandomMorningMood();
                     wokeUpOffline = true;
                     currentTime = s.WakeUpTime;
@@ -202,7 +202,7 @@ public static class DropService
                 // Если засыпание должно произойти прямо сейчас (например, энергия уже была 0)
                 if (nextSleepTime <= currentTime)
                 {
-                    s.IsSleeping = true;
+                    //s.IsSleeping = true;
                     int sleepHours = Random.Shared.Next(
                         sensitivity.BaseSleepDurationRange.Min,
                         sensitivity.BaseSleepDurationRange.Max + 1
@@ -222,7 +222,7 @@ public static class DropService
                     double awakeHours = (nextSleepTime - currentTime).TotalHours;
                     s.Energy = Math.Max(0.0f, s.Energy - (float)(awakeHours * hourlyEnergyDrop));
 
-                    s.IsSleeping = true;
+                    //s.IsSleeping = true;
                     int sleepHours = Random.Shared.Next(
                         sensitivity.BaseSleepDurationRange.Min,
                         sensitivity.BaseSleepDurationRange.Max + 1
@@ -246,7 +246,7 @@ public static class DropService
         if (DateTime.UtcNow < s.WakeUpTime)
             return;
 
-        s.IsSleeping = false;
+        //s.IsSleeping = false;
         SetRandomMorningMood();
 
         if (Random.Shared.NextDouble() < firstMessageChance)

@@ -56,7 +56,7 @@ public class SettingsModel
     public string? UserName { get; set; }
     public bool IsDating { get; set; }  
     public int RandomDailyNoise { get; set; }
-    public bool IsSleeping { get; set; }
+    //public bool IsSleeping { get; set; }
     public DateTime WakeUpTime { get; set; }
     public DateTime LastUserEntry { get; set; } = DateTime.UtcNow;
 
