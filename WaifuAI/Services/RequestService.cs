@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using WaifuAI.Models;
 using WaifuAI.ViewModels;
@@ -11,7 +12,7 @@ namespace WaifuAI.Services;
 
 public static class RequestService
 {   
-    public static async Task<Message> DoServerQuery(RequestModel queryModel)
+    public static async Task<Message> DoServerQuery(RequestModel queryModel, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -43,7 +44,7 @@ public static class RequestService
                     Content = "wtf something is wrong" 
                 };
             var message = model.Choices[0].Message;
-            message.Time = DateTime.Now;
+            message.Time = DateTime.UtcNow;
             message.Tokens = model?.Usage.CompletionTokens ?? 0;
             return message;
         }
@@ -58,7 +59,7 @@ public static class RequestService
         }
     }
 
-    public static async Task<Message> DoProviderQuery(RequestModel requestModel)
+    public static async Task<Message> DoProviderQuery(RequestModel requestModel, CancellationToken cancellationToken = default)
     {
         requestModel.Model = SettingsVM.Instance.AiModel;
 
@@ -108,7 +109,7 @@ public static class RequestService
             var message = result?.Choices[0].Message ?? 
                           new Message { Role = "assistant", Content = "wtf something is wrong" };
 
-            message.Time = DateTime.Now;
+            message.Time = DateTime.UtcNow;
             message.Tokens = result?.Usage.CompletionTokens ?? 0;
 
             return message;

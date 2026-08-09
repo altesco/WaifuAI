@@ -21,31 +21,40 @@ public struct Factors
 public struct ArchetypeSensitivity
 {
     // --- AFFECTION (Симпатия) ---
-    public float AbsenceAffectionImpact { get; set; } // Влияние отсутствия на минимум (e.g. -1.0f)
-    public float DaysAffectionBonus { get; set; } // Рост максимального барьера от дней (e.g. +3.0f)
+    public float AbsenceAffectionImpact { get; set; }
+    public float DaysAffectionBonus { get; set; }
 
-    // --- ENGAGEMENT (Вовлеченность/Интерес) ---
-    public float AbsenceEngagementImpact { get; set; } // Падение интереса при отсутствии (e.g. -6.0f)
-    public float DaysEngagementBonus { get; set; } // Рост интереса со временем (e.g. +2.0f)
+    // --- ENGAGEMENT (Вовлеченность) ---
+    public float AbsenceEngagementImpact { get; set; }
+    public float DaysEngagementBonus { get; set; }
+    public float EngagementDropChance { get; set; }
+    public float EngagementFloor { get; set; }
+    public (int Min, int Max) EngagementDropRange { get; set; }
 
     // --- MOOD (Настроение) ---
-    public float AbsenceMoodImpact { get; set; } // Обида/раздражение от молчания (e.g. -5.0f)
-    public float DaysMoodBonus { get; set; } // Стабильность настроения от дней (e.g. +1.5f)
+    public float AbsenceMoodImpact { get; set; }
+    public float DaysMoodBonus { get; set; }
+    public float MoodDropChance { get; set; }
+    public float MoodFloor { get; set; }
+    public (int Min, int Max) MoodDropRange { get; set; }
 
     // --- ENERGY (Энергия) ---
-    public float AbsenceEnergyImpact { get; set; } // Упадок энергии от ожидания (e.g. -2.0f)
-    public float DaysEnergyBonus { get; set; } // e.g. 0.0f
+    public float AbsenceEnergyImpact { get; set; }
+    public float DaysEnergyBonus { get; set; }
+    public float EnergyDropRate { get; set; } // Списание энергии за 5 минут (float)
+    public float EnergyRecoveryRate { get; set; } // Восстановление энергии в час сна (float)
+    public float SleepChanceLowEnergy { get; set; } // Базовая вероятность уйти спать при Energy.Low
 
+    // --- SLEEP & AUTONOMY ---
+    public DateTime LatestBedtime { get; set; } // Самое позднее время отхода ко сну
+    public (int Min, int Max) BaseSleepDurationRange { get; set; } // Диапазон часов сна (Min, Max)
+    public float FirstMessageChance { get; set; } // Шанс написать первой при пробуждении
+
+    // --- GENERAL ---
     public int DaysSaturation { get; set; }
     public int MessageSaturation { get; set; }
     public float AbsenceTauHours { get; set; }
-
-    // шансы
     public float ResponseQuestionChance { get; set; }
-
-    public float EngagementDropChance { get; set; }
-    public int EngagementFloor { get; set; }
-    public (int Min, int Max) EngagementDropRange { get; set; }
 }
 
 public struct NormalizedFactors

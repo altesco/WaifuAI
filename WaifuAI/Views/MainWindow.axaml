@@ -400,16 +400,15 @@
                                 </Setter>
                             </Style>
 
-                            <Style Selector="ToolTip">
-                                <Setter Property="Placement" Value="Bottom"/>
-                                <Setter Property="HorizontalOffset" Value="0"/>
-                                <Setter Property="VerticalOffset" Value="4"/>
-                            </Style>
-
                         </StackPanel.Styles>
 
                         <!-- Affection -->
-                        <Grid ToolTip.Tip="{Binding Affection, StringFormat={}Affection [{0}/100]}">
+                        <Grid 
+                            Background="Transparent" 
+                            ToolTip.Tip="{Binding Affection, StringFormat={}Affection [{0:F0}/100]}"
+                            ToolTip.Placement="Bottom"
+                            ToolTip.HorizontalOffset="0"
+                            ToolTip.VerticalOffset="4">
                             <ProgressBar
                                 BorderBrush="{Binding #AffectionIcon.Foreground}"
                                 Value="{Binding Affection}"
@@ -458,7 +457,12 @@
                         </Grid>
 
                         <!-- Engagement -->
-                        <Grid ToolTip.Tip="{Binding Engagement, StringFormat={}Engagement [{0}/100]}">
+                        <Grid 
+                            Background="Transparent" 
+                            ToolTip.Tip="{Binding Engagement, StringFormat={}Engagement [{0:F0}/100]}"
+                            ToolTip.Placement="Bottom"
+                            ToolTip.HorizontalOffset="0"
+                            ToolTip.VerticalOffset="4">
                             <ProgressBar
                                 BorderBrush="{Binding #EngagementIcon.Foreground}"
                                 Value="{Binding Engagement}"
@@ -519,7 +523,12 @@
                         </Grid>
 
                         <!-- Mood -->
-                        <Grid ToolTip.Tip="{Binding Mood, StringFormat={}Mood [{0}/100]}">
+                        <Grid 
+                            Background="Transparent" 
+                            ToolTip.Tip="{Binding Mood, StringFormat={}Mood [{0:F0}/100]}"
+                            ToolTip.Placement="Bottom"
+                            ToolTip.HorizontalOffset="0"
+                            ToolTip.VerticalOffset="4">
                             <ProgressBar
                                 BorderBrush="{Binding #MoodIcon.Foreground}"
                                 Value="{Binding Mood}"
@@ -562,7 +571,12 @@
                         </Grid>
 
                         <!-- Energy -->
-                        <Grid ToolTip.Tip="{Binding Energy, StringFormat={}Energy [{0}/100]}">
+                        <Grid 
+                            Background="Transparent" 
+                            ToolTip.Tip="{Binding Energy, StringFormat={}Energy [{0:F0}/100]}"
+                            ToolTip.Placement="Bottom"
+                            ToolTip.HorizontalOffset="0"
+                            ToolTip.VerticalOffset="4">
                             <ProgressBar
                                 BorderBrush="{Binding #EnergyIcon.Foreground}"
                                 Value="{Binding Energy}"
@@ -1298,7 +1312,7 @@
                                                                         Grid.Column="4"
                                                                         FontSize="12"
                                                                         Foreground="{DynamicResource SystemBaseMediumColor}"
-                                                                        Text="{Binding MessageModel.Time, StringFormat='{}{0:HH:mm}'}" />
+                                                                        Text="{Binding LocalTime, StringFormat='{}{0:HH:mm}'}" />
                                                                 </Grid>
                                                             </StackPanel>
                                                             <!--  Loading animation  -->
@@ -1645,13 +1659,10 @@
                                                 </Style>
                                             </TextBox.Styles>
                                             <TextBox.KeyBindings>
-                                                <!-- Shift+Enter: вставляет перевод строки через специальную команду -->
                                                 <KeyBinding 
                                                     Gesture="Shift+Enter"
                                                     Command="{Binding InsertNewLineCommand}"
                                                     CommandParameter="{Binding #TextBox}" />
-
-                                                <!-- Обычный Enter: вызывает вашу команду отправки -->
                                                 <KeyBinding 
                                                     Gesture="Enter"
                                                     Command="{Binding RequestCommand}" />

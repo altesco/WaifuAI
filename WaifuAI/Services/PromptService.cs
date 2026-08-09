@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using ElBruno.LocalEmbeddings;
@@ -69,38 +70,77 @@ public static class PromptService
         return text;
     }
 
-    private static string GetEnergyInstruction(EnergyType energy, AffectionType affection)
+    private static string GetEnergyInstruction(EnergyType energy, AffectionType affection, ArchetypeVM archetype)
     {
-        return energy switch
+        var s = SettingsVM.Instance;
+
+        if (energy != EnergyType.Low)
         {
-            EnergyType.Low => affection switch
+            return energy switch
             {
-                AffectionType.Love =>
-                    "You are falling asleep as you walk and can barely hold on. But you flatly refuse " +
-                    "to close the chat because you love {{User}} too much.",
+                EnergyType.Middle => affection switch
+                {
+                    AffectionType.Good or AffectionType.Love =>
+                        "You feel tired after a long day, but you try to cheer up for {{User}} and hide your heavy fatigue.",
+                    _ =>
+                        "You feel exhausted. You may mention that it was a hard day. Your overall activity and enthusiasm are reduced."
+                },
                 _ =>
-                    "You are critically exhausted and desperately want to sleep. Write briefly, complain about " +
-                    "fatigue, and try to say goodbye so you can go to sleep."
-            },
-            EnergyType.Middle => affection switch
-            {
-                AffectionType.Good or AffectionType.Love =>
-                    "You feel tired after a long day, but you try to cheer up for {{User}} " +
-                    "and hide your heavy fatigue.",
-                _ =>
-                    "You feel exhausted. You may mention that it was a hard day. Your overall activity " +
-                    "and enthusiasm are reduced."
-            },
+                    "You are full of energy and vigor. There are no restrictions on activity, cheerfulness, or message length."
+            };
+        }
+
+        // --- РАСЧЕТ ВЕРОЯТНОСТИ ПОЙТИ СПАТЬ ---
+        float sleepProbability = CalculateSleepProbability(s.Energy, s.Affection, archetype);
+
+        bool mustSleep = Random.Shared.NextDouble() < sleepProbability;
+
+        if (mustSleep)
+        {
+            var (minHours, maxHours) = archetype.Sensitivity.BaseSleepDurationRange;
+            return $"[CRITICAL DIRECTIVE: GO TO SLEEP NOW]\n" +
+                   $"Your physical energy is completely depleted ({(int)Math.Floor(s.Energy)}/100). " +
+                   $"You CANNOT stay awake any longer and MUST go to sleep immediately.\n" +
+                   $"• Say a brief, natural goodbye in Russian matching your archetype.\n" +
+                   $"• You MUST include the tag [SLEEP: X] on a new line after your dialogue (BEFORE the JSON block), " +
+                   $"where X is the sleep duration in hours between {minHours} and {maxHours} (e.g. [SLEEP: 8]).";
+        }
+
+        // Если удержались от сна
+        string stayAwakeText = affection switch
+        {
+            AffectionType.Love =>
+                "You are falling asleep on your feet and desperately tired, but you stubbornly fight off " +
+                "sleep to stay with {{User}} a bit longer.",
             _ =>
-                "You are full of energy and vigor. There are no restrictions on activity, cheerfulness, or message length."
+                "You are critically exhausted, but you decide to stay awake for a few more moments. Complain " +
+                "about fatigue and write short messages."
         };
+
+        return stayAwakeText + "\nDo NOT say goodbye and NEVER append any [SLEEP] tags in this response.";
+    }
+
+    public static float CalculateSleepProbability(float energy, float affection, ArchetypeVM archetype)
+    {
+        float baseSleepChance = archetype.Sensitivity.SleepChanceLowEnergy;
+
+        // Множитель истощения: при energy = 20.0 factor = 1.0, а при energy -> 0.0 factor стремится к 3.0
+        float energyExhaustionFactor = 1.0f + 2.0f * MathF.Pow((20.0f - Math.Clamp(energy, 0.0f, 20.0f)) / 20.0f, 1.5f);
+
+        // Сопротивление от привязанности
+        float affectionFactor = 1.25f - 0.5f * (affection / 100.0f);
+
+        float sleepProbability = baseSleepChance * energyExhaustionFactor * affectionFactor;
+
+        // При критически низкой энергии (ниже 3.0) шанс уйти спать составит не менее 92-98%
+        return Math.Clamp(sleepProbability, 0.05f, 0.98f);
     }
 
     private static string GetEngagementInstruction(
         EngagementType engagement,
         EnergyType energy,
         MoodType mood,
-        int engagementValue,
+        float engagementValue,
         float baseQuestionP)
     {
         bool shouldAskQuestion = ShouldAskQuestion(baseQuestionP, engagementValue, energy, mood);
@@ -143,7 +183,7 @@ public static class PromptService
         };
     }
 
-    private static bool ShouldAskQuestion(float baseQuestionP, int engagementValue, EnergyType energy, MoodType mood)
+    private static bool ShouldAskQuestion(float baseQuestionP, float engagementValue, EnergyType energy, MoodType mood)
     {
         float energyFactor = energy switch
         {
@@ -213,16 +253,16 @@ public static class PromptService
         var mood = vm.MoodLevel;
         var energy = vm.EnergyLevel;
 
-        var statusHeader = $"[Current Internal State: Affection={vm.Affection}/100 ({affection}), " +
-                           $"Mood={vm.Mood}/100 ({mood}), Energy={vm.Energy}/100 ({energy}), " +
-                           $"Engagement={vm.Engagement}/100 ({engagement})]";
+        var statusHeader = $"[Current Internal State: Affection={(int)Math.Floor(vm.Affection)}/100 ({affection}), " +
+                           $"Mood={(int)Math.Floor(vm.Mood)}/100 ({mood}), Energy={(int)Math.Floor(vm.Energy)}/100 ({energy}), " +
+                           $"Engagement={(int)Math.Floor(vm.Engagement)}/100 ({engagement})]";
 
         var dynamicDirectives =
             $"{statusHeader}\n" +
             $"{GetAffectionInstruction(affection, mood, energy)}\n" +
             $"{GetEngagementInstruction(engagement, energy, mood, vm.Engagement, archetype.Sensitivity.ResponseQuestionChance)}\n" +
             $"{GetMoodInstruction(mood, engagement, energy)}\n" +
-            $"{GetEnergyInstruction(energy, affection)}";
+            $"{GetEnergyInstruction(energy, affection, archetype)}";
 
         return dynamicDirectives;
     }
@@ -402,38 +442,38 @@ public static class PromptService
         float shiftMin,
         float shiftMax,
         int noise,
-        int currentValue,
+        float currentValue,
         float volatility = 1.0f)
     {
         // 1. Умножаем смещение и базовые дельты на коэффициент волатильности
-        int calculatedMin = (int)Math.Round((baseRange.MinDelta + shiftMin + noise) * volatility);
-        int calculatedMax = (int)Math.Round((baseRange.MaxDelta + shiftMax + noise) * volatility);
+        var calculatedMin = Math.Round((baseRange.MinDelta + shiftMin + noise) * volatility);
+        var calculatedMax = Math.Round((baseRange.MaxDelta + shiftMax + noise) * volatility);
 
         // 2. Нелинейное сжатие рамок (Dampening)
         if (calculatedMax > 0)
         {
             double upperFactor = Math.Max(0.2, (100.0 - currentValue) / 100.0);
-            calculatedMax = (int)Math.Round(calculatedMax * upperFactor);
+            calculatedMax = Math.Round(calculatedMax * upperFactor);
         }
 
         if (calculatedMin < 0)
         {
             double lowerFactor = Math.Max(0.2, currentValue / 100.0);
-            calculatedMin = (int)Math.Round(calculatedMin * lowerFactor);
+            calculatedMin = Math.Round(calculatedMin * lowerFactor);
         }
 
         // 3. Физический предел
-        int maxPositive = Math.Max(0, 100 - currentValue);
-        int maxNegative = -Math.Max(0, currentValue);
+        var maxPositive = Math.Max(0, 100 - currentValue);
+        var maxNegative = -Math.Max(0, currentValue);
 
         calculatedMax = Math.Clamp(calculatedMax, 0, maxPositive);
         calculatedMin = Math.Clamp(calculatedMin, maxNegative, 0);
 
         // 4. Clamping с расширением границ от волатильности
-        int limitMin = (int)Math.Round(-25 * volatility);
-        int limitMax = (int)Math.Round(25 * volatility);
+        var limitMin = Math.Round(-25 * volatility);
+        var limitMax = Math.Round(25 * volatility);
 
-        return (Math.Clamp(calculatedMin, limitMin, 20), Math.Clamp(calculatedMax, -20, limitMax));
+        return ((int)Math.Clamp(calculatedMin, limitMin, 20), (int)Math.Clamp(calculatedMax, -20, limitMax));
     }
 
     private static NormalizedFactors NormalizeFactors(Factors factors, ArchetypeSensitivity s)
@@ -471,72 +511,79 @@ public static class PromptService
         List<Message> history,
         ObservableCollection<KnowledgeRecord> knowledgeBase,
         string question,
-        Factors factors)
+        Factors factors,
+        bool isInitiative = false)
     {
-        if (history.Count <= 0)
-            return new Message();
-
-        var archetype = SettingsVM.Instance.SelectedArchetype;
-        var archetypePrompt = archetype.Prompt;
-
-        string userName = SettingsVM.Instance.UserName is null
-            ? "User"
-            : SettingsVM.Instance.UserName;
-
-        var now = DateTime.Now;
-        string byWho = history.Last().Role == "user"
-            ? userName
-            : "you";
-
-        var birthday = SettingsVM.Instance.Birthday;
-
+        var settings = SettingsVM.Instance;
         var basePrompt = baseSystemPrompt.Content;
 
-        basePrompt = basePrompt.Replace("{{EMOTIONAL_DIRECTIVES}}", GetMoodSystemInstructions(archetype));
+        var userName = settings.UserName ?? "User";
+        var waifuName = settings.WaifuName;
 
-        var responseLengthDirective = GetResponseLengthInstruction(SettingsVM.Instance.ResponseLength);
-        basePrompt = basePrompt.Replace("{{RESPONSE_LENGTH_DIRECTIVE}}", responseLengthDirective);
+        var birthday = settings.Birthday;
+        var age = DateOnly.TryParseExact(
+            birthday, 
+            "yyyy-MM-dd", 
+            CultureInfo.InvariantCulture, 
+            DateTimeStyles.None,
+            out var parsedDate)
+            ? Helper.GetAge(parsedDate)
+            : 18;
+        basePrompt = basePrompt
+            .Replace("{{BIRTHDAY}}", birthday)
+            .Replace("{{AGE}}", age.ToString());
 
-        var deltas = CalculateDynamicDeltas(archetype.BaseMoodVector, factors, archetype.Sensitivity);
-        basePrompt = basePrompt.Replace("{{AFFECTION_BOUNDS}}", GetDeltaFormattedString(deltas.Affection));
-        basePrompt = basePrompt.Replace("{{ENGAGEMENT_BOUNDS}}", GetDeltaFormattedString(deltas.Engagement));
-        basePrompt = basePrompt.Replace("{{MOOD_BOUNDS}}", GetDeltaFormattedString(deltas.Mood));
-        basePrompt = basePrompt.Replace("{{ENERGY_BOUNDS}}", GetDeltaFormattedString(deltas.Energy));
+        var archetype = settings.SelectedArchetype;
+        var archetypePrompt = archetype.Prompt;
+        basePrompt = basePrompt.Replace("{{ARCHETYPE_PROMPT}}", archetypePrompt);
 
         var relationship = GetRelationshipStatus(
-            SettingsVM.Instance.Affection,
+            settings.Affection,
             factors.DaysKnown,
             factors.MessageCount,
-            SettingsVM.Instance.UserName,
-            SettingsVM.Instance.IsDating);
+            settings.UserName,
+            settings.IsDating);
+        basePrompt = basePrompt.Replace("{{RELATIONSHIP_STATUS}}", relationship);
+
+        var currentTime = DateTime.UtcNow;
+        var lastMsg = history.LastOrDefault();
+        var byWho = lastMsg?.Role == "user" ? userName : "you";
+        var timeAgo = lastMsg != null ? TimeAgoText(currentTime, lastMsg.Time) : "just now";
+        basePrompt = basePrompt
+            .Replace("{{CURRENT_TIME}}", currentTime.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss, dddd"))
+            .Replace("{{BY_WHO}}", byWho)
+            .Replace("{{TIME_AGO}}", timeAgo);
+
+        var moodInstructions = GetMoodSystemInstructions(archetype);
+        var responseLengthDirective = GetResponseLengthInstruction(settings.ResponseLength);
+        basePrompt = basePrompt
+            .Replace("{{EMOTIONAL_DIRECTIVES}}", moodInstructions)
+            .Replace("{{RESPONSE_LENGTH_DIRECTIVE}}", responseLengthDirective);
+
+        var initiateText = isInitiative
+            ? GetWakeUpInitiativePrompt(archetype)
+            : string.Empty;
+        basePrompt = basePrompt.Replace("{{INITIATIVE_PROMPT}}", initiateText);
+
+        var deltas = CalculateDynamicDeltas(archetype.BaseMoodVector, factors, archetype.Sensitivity);
+        basePrompt = basePrompt
+            .Replace("{{AFFECTION_BOUNDS}}", GetDeltaFormattedString(deltas.Affection))
+            .Replace("{{ENGAGEMENT_BOUNDS}}", GetDeltaFormattedString(deltas.Engagement))
+            .Replace("{{MOOD_BOUNDS}}", GetDeltaFormattedString(deltas.Mood))
+            .Replace("{{ENERGY_BOUNDS}}", GetDeltaFormattedString(deltas.Energy));
+
+        basePrompt = basePrompt
+            .Replace("{{User}}", userName)
+            .Replace("{{Waifu}}", waifuName);
 
         var message = new Message
         {
             Role = "system",
-            Content = $"""
-                       [Main info]
-                       Your name is {SettingsVM.Instance.WaifuName}. Your birthday is {birthday}. 
-                       Your age is {Helper.GetAge(DateOnly.ParseExact(birthday, "yyyy-MM-dd"))}
-
-                       {archetypePrompt}
-
-                       {relationship}
-
-                       [Temporal & Conversation Context]
-                        • Current Local Time: {now:yyyy-MM-dd HH:mm:ss, dddd} (matches {userName}'s local time).
-                        • Last Message State: Sent by {byWho} {TimeAgoText(now, history.Last().Time)}.
-                        
-                        [Time & Flow Behavioral Directive]
-                        You MUST actively account for the time elapsed and who sent the last message:
-                        - Time Gap Analysis: Notice whether this is a fast ongoing dialogue or if a noticeable pause (hours, days) has occurred. Pay attention to time-of-day changes (e.g., late night, early morning).
-                        - Sender Context:
-                          * If {userName} left you waiting after YOUR last message for a long time, reflect your natural reaction to being ignored or left waiting.
-                          * If {userName} vanished after THEIR own message and just returned after hours/days of silence, address their sudden disappearance or return.
-                        - Archetype & State Reaction: Process any long silence or unusual time gap strictly through your Archetype, Affection, and Mood (e.g., express impatience, offended pride, anxiety, relief, or coldness). Do NOT ignore noticeable gaps in time!
-
-                       {basePrompt}
-                       """.Replace("{{User}}", userName)
+            Content = basePrompt
         };
+
+        if (knowledgeBase.Count <= 0)
+            return message;
 
         var header = "[Knowledge Records]";
         var embedding =
@@ -572,7 +619,7 @@ public static class PromptService
             timeAgo = $"{(int)diff.TotalMinutes} minutes ago";
         else
             timeAgo = "just now";
-        timeAgo += $" (at {lastMessageTime:yyyy-MM-dd HH:mm:ss, dddd})";
+        timeAgo += $" (at {lastMessageTime.ToLocalTime():yyyy-MM-dd HH:mm:ss, dddd})";
         return timeAgo;
     }
 
@@ -582,7 +629,7 @@ public static class PromptService
     #region RelationshipStatus
 
     public static string GetRelationshipStatus(
-        int affection,
+        float affection,
         int daysKnown,
         int messageCount,
         string? userName,
@@ -667,4 +714,60 @@ public static class PromptService
     }
 
     #endregion
+
+
+    #region FirstMessaging
+
+    private static string GetWakeUpInitiativePrompt(ArchetypeVM archetype)
+    {
+        var s = SettingsVM.Instance;
+
+        return $"[SYSTEM DIRECTIVE: AUTONOMOUS WAKE-UP MESSAGE]\n" +
+               $"You have just woken up and your energy is fully restored ({(int)Math.Floor(s.Energy)}/100).\n" +
+               $"This is an autonomous FIRST message initiated by you upon waking up. {{User}} has NOT sent any messages or opened the chat yet.\n" +
+               $"• Consider your current internal metrics: Affection={(int)Math.Floor(s.Affection)}/100 ({s.AffectionLevel}), " +
+               $"Mood={(int)Math.Floor(s.Mood)}/100 ({s.MoodLevel}), Engagement={(int)Math.Floor(s.Engagement)}/100 ({s.EngagementLevel}), Energy={(int)Math.Floor(s.Energy)}/100.\n" +
+               $"• Write a natural greeting or morning thought matching your archetype ({archetype.Name}) and exact current emotional background.\n" +
+               $"• Keep it brief (1-3 sentences).\n" +
+               $"• Do NOT mention system prompts, tags, or internal metrics.\n" +
+               $"• NEVER append any [SLEEP] tags.";
+    }
+
+    #endregion
+
+
+
+
+
+
+    
+
+    public static float CalculateQuestionProbability(float baseQuestionP, float engagementValue, EnergyType energy,
+        MoodType mood)
+    {
+        float energyFactor = energy switch
+        {
+            EnergyType.Low => 0.3f,
+            EnergyType.High => 1.1f,
+            _ => 1.0f
+        };
+
+        float moodFactor = mood switch
+        {
+            MoodType.Bad => 0.6f,
+            MoodType.Normal => 1.2f,
+            _ => 1.0f
+        };
+
+        float pFinal = baseQuestionP * (0.3f + 0.9f * (engagementValue / 100f)) * energyFactor * moodFactor;
+        return Math.Clamp(pFinal, 0.02f, 0.85f);
+    }
+
+
+
+
+
+
+
+
 }

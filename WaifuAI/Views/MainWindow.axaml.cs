@@ -193,8 +193,11 @@ namespace WaifuAI.Views
 
         private void Window_Closed(object? sender, EventArgs e)
         {
+            SettingsVM.Instance.LastUserEntry = DateTime.UtcNow;
+
             if (VoiceService.PythonProcess is null || VoiceService.PythonProcess.HasExited)
                 return;
+            
             VoiceService.PythonProcess.Kill(entireProcessTree: true);
             VoiceService.PythonProcess.Dispose();
         }

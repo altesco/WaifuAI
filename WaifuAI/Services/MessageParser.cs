@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Linq;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -132,6 +133,20 @@ public class MessageParser
         if (Regex.IsMatch(text, @"\[RELATIONSHIP:\s*BREAKUP\]", RegexOptions.IgnoreCase))
             return false;
 
+        return null;
+    }
+
+    public static float? ParseWakeUpTime(string text)
+    {
+        var match = Regex.Match(text, @"\[SLEEP: \s*([^\]]+)\]", RegexOptions.IgnoreCase);
+
+        if (match.Success && 
+            float.TryParse(
+                match.Groups[1].Value.Trim(), 
+                NumberStyles.Float,
+                CultureInfo.InvariantCulture, 
+                out float result))
+            return result;
         return null;
     }
 }

@@ -14,5 +14,9 @@ public partial class ArchetypeVM : ObservableObject
     [ObservableProperty] private string _prompt = string.Empty;
 
     public MoodVector BaseMoodVector { get; set; }
+
+    public float BreakUpAffection { get; set; }
+    public float BreakUpMood { get; set; }
+
     public ArchetypeSensitivity Sensitivity { get; set; }
 }

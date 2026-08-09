@@ -47,16 +47,21 @@ public class SettingsModel
     public string SelectedArchetype { get; set; } = string.Empty;
 
     // Emotional State System
-    public int Affection { get; set; } = 50;
-    public int Engagement { get; set; } = 50;
-    public int Mood { get; set; } = 50;
-    public int Energy { get; set; } = 50;
+    public float Affection { get; set; } = 28;
+    public float Engagement { get; set; } = 50;
+    public float Mood { get; set; } = 50;
+    public float Energy { get; set; } = 100;
 
     // Status System
     public string? UserName { get; set; }
-    public bool IsDating { get; set; }    
+    public bool IsDating { get; set; }  
+    public int RandomDailyNoise { get; set; }
+    public bool IsSleeping { get; set; }
+    public DateTime WakeUpTime { get; set; }
+    public DateTime LastUserEntry { get; set; } = DateTime.UtcNow;
 
     // Drop Times
     public DateTime LastEngagementDrop { get; set; } = DateTime.UtcNow;
+    public DateTime LastMoodDrop { get; set; } = DateTime.UtcNow;
     public DateTime LastEnergyDrop { get; set; } = DateTime.UtcNow;
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -40,6 +41,8 @@ public partial class MessageVM : ObservableObject
     [ObservableProperty] private bool _isHighlighted;
 
     [ObservableProperty] private bool _isFailed;
+
+    public DateTime LocalTime => MessageModel.Time.ToLocalTime();
 
     protected override void OnPropertyChanged(PropertyChangedEventArgs e)
     {

@@ -134,9 +134,14 @@ public partial class SettingsVM : ObservableValidator
         // Status System
         UserName = SettingsModel.UserName;
         IsDating = SettingsModel.IsDating;
+        IsSleeping = SettingsModel.IsSleeping;
+        WakeUpTime = SettingsModel.WakeUpTime;
+        RandomDailyNoise = SettingsModel.RandomDailyNoise;
+        LastUserEntry = SettingsModel.LastUserEntry;
 
         // Drop Times
         LastEngagementDrop = SettingsModel.LastEngagementDrop;
+        LastMoodDrop = SettingsModel.LastMoodDrop;
         LastEnergyDrop = SettingsModel.LastEnergyDrop;
 
         IsSettingsLoading = false;
@@ -198,9 +203,14 @@ public partial class SettingsVM : ObservableValidator
         // Status System
         SettingsModel.UserName = UserName;
         SettingsModel.IsDating = IsDating;
+        SettingsModel.IsSleeping = IsSleeping;
+        SettingsModel.WakeUpTime = WakeUpTime;
+        SettingsModel.RandomDailyNoise = RandomDailyNoise;
+        SettingsModel.LastUserEntry = LastUserEntry;
 
         // Drop Times
         SettingsModel.LastEngagementDrop = LastEngagementDrop;
+        SettingsModel.LastMoodDrop = LastMoodDrop;
         SettingsModel.LastEnergyDrop = LastEnergyDrop;
 
         var options = new JsonSerializerOptions { WriteIndented = true };
@@ -377,12 +387,11 @@ public partial class SettingsVM : ObservableValidator
     [RelayCommand]
     private void RefreshMonoFonts()
     {
-        var stopwatch = Stopwatch.StartNew(); 
         var allFonts = FontManager.Current.SystemFonts
             .Select(f => f.Name)
-            .Where(name => name.Contains("Mono", StringComparison.OrdinalIgnoreCase) || 
-                name.Contains("Code", StringComparison.OrdinalIgnoreCase) ||
-                name.Contains("Console", StringComparison.OrdinalIgnoreCase))
+            .Where(name => name.Contains("Mono", StringComparison.OrdinalIgnoreCase) ||
+                           name.Contains("Code", StringComparison.OrdinalIgnoreCase) ||
+                           name.Contains("Console", StringComparison.OrdinalIgnoreCase))
             .OrderBy(name => name)
             .ToList();
         if (allFonts.Count <= 0)
@@ -392,8 +401,6 @@ public partial class SettingsVM : ObservableValidator
         foreach (var font in allFonts)
             MonospaceFonts.Add(font);
         SelectedMonoFont = allFonts.Contains(currentFont) ? currentFont : allFonts[0];
-        stopwatch.Stop();
-        Console.WriteLine(stopwatch.ElapsedMilliseconds);
     }
 
     #endregion
@@ -689,7 +696,7 @@ public partial class SettingsVM : ObservableValidator
         if (Model3DFolder != BaseModel3DFolder)
         {
             // set new temp
-            var time = DateTime.Now.ToString("dd_MM_yyyy_HH_mm_ss");
+            var time = DateTime.UtcNow.ToString("dd_MM_yyyy_HH_mm_ss");
             newFileName = $"temp_{time}.vrm";
             var source = Path.Combine(Model3DFolder, modelFileName);
             var target = Path.Combine(BaseModel3DFolder, newFileName);
@@ -758,8 +765,8 @@ public partial class SettingsVM : ObservableValidator
 
     [ObservableProperty] private string _waifuName;
 
-    [ObservableProperty] 
-    [RegularExpression(@"^\d{2}\-\d{2}\-\d{4}$", ErrorMessage = "Формат должен быть ГГГГ-ММ-ДД")]
+    [ObservableProperty]
+    [RegularExpression(@"^\d{4}\-\d{2}\-\d{2}$", ErrorMessage = "Формат должен быть ГГГГ-ММ-ДД")]
     [CustomValidation(typeof(SettingsVM), nameof(ValidateRealDate))]
     private string _birthday;
 
@@ -791,375 +798,326 @@ public partial class SettingsVM : ObservableValidator
         {
             Name = "tsundere",
             Description =
-                "Колючая снаружи, но мягкая и заботливая внутри. Проявляет симпатию через напускную грубость.",
+                "Колючая снаружи, но мягкая и заботливая внутри. Проявления симпатии через напускную грубость.",
             Emoji = "🔥",
             Color = Color.Parse("#ff5c5c"),
+            BreakUpAffection = 25f,
+            BreakUpMood = 15f,
             BaseMoodVector = new MoodVector
-            {
-                Affection = (-3, 2),
-                Engagement = (-5, 10),
-                Mood = (-8, 8),
-                Energy = (-2, 1)
-            },
+                { Affection = (-3, 2), Engagement = (-5, 10), Mood = (-8, 8), Energy = (-2, 1) },
             Sensitivity = new ArchetypeSensitivity
             {
-                AbsenceAffectionImpact = -2.0f, DaysAffectionBonus = 4.0f,
-                AbsenceEngagementImpact = -5.0f, DaysEngagementBonus = 2.0f,
-                AbsenceMoodImpact = -8.0f, DaysMoodBonus = 1.5f,
+                AbsenceAffectionImpact = -6.0f, DaysAffectionBonus = 4.0f,
+                AbsenceEngagementImpact = -12.0f, DaysEngagementBonus = 2.0f,
+                AbsenceMoodImpact = -15.0f, DaysMoodBonus = 1.5f,
                 AbsenceEnergyImpact = -1.0f, DaysEnergyBonus = 0.0f,
-                DaysSaturation = 35,
-                MessageSaturation = 900,
-                AbsenceTauHours = 24f,
+                DaysSaturation = 35, MessageSaturation = 900, AbsenceTauHours = 12f,
                 ResponseQuestionChance = 0.35f,
-                EngagementDropChance = 0.35f,
-                EngagementFloor = 25,
-                EngagementDropRange = (5, 15)
+                EngagementDropChance = 0.35f, EngagementFloor = 25.0f, EngagementDropRange = (5, 15),
+                MoodDropChance = 0.40f, MoodFloor = 20.0f, MoodDropRange = (5, 15),
+                EnergyDropRate = 0.35f, EnergyRecoveryRate = 12.5f, SleepChanceLowEnergy = 0.45f,
+                LatestBedtime = new DateTime(2026, 1, 1, 1, 0, 0), BaseSleepDurationRange = (7, 9),
+                FirstMessageChance = 0.25f
             }
         },
         new()
         {
             Name = "kuudere",
-            Description =
-                "Хладнокровная, молчаливая и внешне безэмоциональная. Скрывает глубокие чувства за маской апатии.",
+            Description = "Хладнокровная, молчаливая и внешне безэмоциональная.",
             Emoji = "🧊",
             Color = Color.Parse("#0008ff"),
+            BreakUpAffection = 20f,
+            BreakUpMood = 25f,
             BaseMoodVector = new MoodVector
-            {
-                Affection = (-1, 2),
-                Engagement = (-2, 5),
-                Mood = (-2, 3),
-                Energy = (-1, 1)
-            },
+                { Affection = (-1, 2), Engagement = (-2, 5), Mood = (-2, 3), Energy = (-1, 1) },
             Sensitivity = new ArchetypeSensitivity
             {
-                AbsenceAffectionImpact = -0.5f, DaysAffectionBonus = 1.5f,
-                AbsenceEngagementImpact = -1.0f, DaysEngagementBonus = 1.0f,
-                AbsenceMoodImpact = -0.5f, DaysMoodBonus = 0.5f,
+                AbsenceAffectionImpact = -2.5f, DaysAffectionBonus = 1.5f,
+                AbsenceEngagementImpact = -5.0f, DaysEngagementBonus = 1.0f,
+                AbsenceMoodImpact = -4.0f, DaysMoodBonus = 0.5f,
                 AbsenceEnergyImpact = -0.5f, DaysEnergyBonus = 0.0f,
-                DaysSaturation = 50,
-                MessageSaturation = 500,
-                AbsenceTauHours = 48f,
+                DaysSaturation = 50, MessageSaturation = 500, AbsenceTauHours = 24f,
                 ResponseQuestionChance = 0.2f,
-                EngagementDropChance = 0.15f,
-                EngagementFloor = 30,
-                EngagementDropRange = (3, 10)
+                EngagementDropChance = 0.15f, EngagementFloor = 30.0f, EngagementDropRange = (3, 10),
+                MoodDropChance = 0.15f, MoodFloor = 40.0f, MoodDropRange = (3, 8),
+                EnergyDropRate = 0.25f, EnergyRecoveryRate = 14.0f, SleepChanceLowEnergy = 0.60f,
+                LatestBedtime = new DateTime(2026, 1, 1, 23, 0, 0), BaseSleepDurationRange = (7, 8),
+                FirstMessageChance = 0.10f
             }
         },
         new()
         {
             Name = "dandere",
-            Description =
-                "Крайне стеснительная и молчаливая личность. Раскрывается только в узком кругу тех, кому доверяет.",
+            Description = "Крайне стеснительная и молчаливая личность.",
             Emoji = "😳",
             Color = Color.Parse("#544dc2"),
+            BreakUpAffection = 15f,
+            BreakUpMood = 10f,
             BaseMoodVector = new MoodVector
-            {
-                Affection = (-2, 3),
-                Engagement = (-3, 8),
-                Mood = (-4, 5),
-                Energy = (-3, 1)
-            },
+                { Affection = (-2, 3), Engagement = (-3, 8), Mood = (-4, 5), Energy = (-3, 1) },
             Sensitivity = new ArchetypeSensitivity
             {
-                AbsenceAffectionImpact = -1.0f, DaysAffectionBonus = 5.0f,
-                AbsenceEngagementImpact = -3.0f, DaysEngagementBonus = 3.0f,
-                AbsenceMoodImpact = -2.0f, DaysMoodBonus = 2.0f,
+                AbsenceAffectionImpact = -4.0f, DaysAffectionBonus = 5.0f,
+                AbsenceEngagementImpact = -8.0f, DaysEngagementBonus = 3.0f,
+                AbsenceMoodImpact = -8.0f, DaysMoodBonus = 2.0f,
                 AbsenceEnergyImpact = -1.5f, DaysEnergyBonus = 0.5f,
-                DaysSaturation = 45,
-                MessageSaturation = 600,
-                AbsenceTauHours = 36f,
+                DaysSaturation = 45, MessageSaturation = 600, AbsenceTauHours = 18f,
                 ResponseQuestionChance = 0.25f,
-                EngagementDropChance = 0.3f,
-                EngagementFloor = 15,
-                EngagementDropRange = (5, 15)
+                EngagementDropChance = 0.3f, EngagementFloor = 15.0f, EngagementDropRange = (5, 15),
+                MoodDropChance = 0.30f, MoodFloor = 25.0f, MoodDropRange = (4, 12),
+                EnergyDropRate = 0.30f, EnergyRecoveryRate = 13.0f, SleepChanceLowEnergy = 0.50f,
+                LatestBedtime = new DateTime(2026, 1, 1, 23, 30, 0), BaseSleepDurationRange = (8, 9),
+                FirstMessageChance = 0.15f
             }
         },
         new()
         {
             Name = "deredere",
-            Description =
-                "Воплощение чистой любви и оптимизма. Всегда искренняя, теплая и энергично заботится об окружающих.",
+            Description = "Воплощение чистой любви и оптимизма.",
             Emoji = "💓",
             Color = Color.Parse("#ff4b8a"),
+            BreakUpAffection = 35f,
+            BreakUpMood = 20f,
             BaseMoodVector = new MoodVector
-            {
-                Affection = (-1, 6),
-                Engagement = (-2, 12),
-                Mood = (-2, 10),
-                Energy = (-1, 2)
-            },
+                { Affection = (-1, 6), Engagement = (-2, 12), Mood = (-2, 10), Energy = (-1, 2) },
             Sensitivity = new ArchetypeSensitivity
             {
-                AbsenceAffectionImpact = -1.0f, DaysAffectionBonus = 3.0f,
-                AbsenceEngagementImpact = -2.0f, DaysEngagementBonus = 2.5f,
-                AbsenceMoodImpact = -3.0f, DaysMoodBonus = 2.0f,
+                AbsenceAffectionImpact = -3.5f, DaysAffectionBonus = 3.0f,
+                AbsenceEngagementImpact = -6.0f, DaysEngagementBonus = 2.5f,
+                AbsenceMoodImpact = -10.0f, DaysMoodBonus = 2.0f,
                 AbsenceEnergyImpact = -1.0f, DaysEnergyBonus = 0.0f,
-                DaysSaturation = 10,
-                MessageSaturation = 1500,
-                AbsenceTauHours = 16f,
+                DaysSaturation = 10, MessageSaturation = 1500, AbsenceTauHours = 12f,
                 ResponseQuestionChance = 0.75f,
-                EngagementDropChance = 0.05f,
-                EngagementFloor = 50,
-                EngagementDropRange = (3, 10)
+                EngagementDropChance = 0.05f, EngagementFloor = 50.0f, EngagementDropRange = (3, 10),
+                MoodDropChance = 0.10f, MoodFloor = 45.0f, MoodDropRange = (2, 8),
+                EnergyDropRate = 0.30f, EnergyRecoveryRate = 13.5f, SleepChanceLowEnergy = 0.35f,
+                LatestBedtime = new DateTime(2026, 1, 1, 0, 0, 0), BaseSleepDurationRange = (7, 8),
+                FirstMessageChance = 0.70f
             }
         },
         new()
         {
             Name = "genki",
-            Description =
-                "Неиссякаемый источник энергии. Жизнерадостная, активная и всегда готова вдохновлять на подвиги.",
+            Description = "Неиссякаемый источник энергии.",
             Emoji = "🌞",
             Color = Color.Parse("#dfa017"),
+            BreakUpAffection = 30f,
+            BreakUpMood = 25f,
             BaseMoodVector = new MoodVector
-            {
-                Affection = (-1, 4),
-                Engagement = (-2, 15),
-                Mood = (-2, 12),
-                Energy = (-1, 3)
-            },
+                { Affection = (-1, 4), Engagement = (-2, 15), Mood = (-2, 12), Energy = (-1, 3) },
             Sensitivity = new ArchetypeSensitivity
             {
-                AbsenceAffectionImpact = -0.5f, DaysAffectionBonus = 2.0f,
-                AbsenceEngagementImpact = -4.0f, DaysEngagementBonus = 3.0f,
-                AbsenceMoodImpact = -2.0f, DaysMoodBonus = 1.0f,
+                AbsenceAffectionImpact = -2.5f, DaysAffectionBonus = 2.0f,
+                AbsenceEngagementImpact = -10.0f, DaysEngagementBonus = 3.0f,
+                AbsenceMoodImpact = -8.0f, DaysMoodBonus = 1.0f,
                 AbsenceEnergyImpact = -0.5f, DaysEnergyBonus = 1.0f,
-                DaysSaturation = 7,
-                MessageSaturation = 2000,
-                AbsenceTauHours = 10f,
+                DaysSaturation = 7, MessageSaturation = 2000, AbsenceTauHours = 8f,
                 ResponseQuestionChance = 0.85f,
-                EngagementDropChance = 0.25f,
-                EngagementFloor = 35,
-                EngagementDropRange = (5, 20)
+                EngagementDropChance = 0.25f, EngagementFloor = 35.0f, EngagementDropRange = (5, 20),
+                MoodDropChance = 0.20f, MoodFloor = 35.0f, MoodDropRange = (5, 15),
+                EnergyDropRate = 0.45f, EnergyRecoveryRate = 16.0f, SleepChanceLowEnergy = 0.40f,
+                LatestBedtime = new DateTime(2026, 1, 1, 1, 30, 0), BaseSleepDurationRange = (6, 8),
+                FirstMessageChance = 0.80f
             }
         },
         new()
         {
             Name = "yandere",
-            Description =
-                "Одержимая и пугающе преданная. Готова на любые крайности ради того, чтобы объект любви принадлежал только ей.",
+            Description = "Одержимая и пугающе преданная.",
             Emoji = "🔪",
             Color = Color.Parse("#cb0e0e"),
+            BreakUpAffection = 10f,
+            BreakUpMood = 5f,
             BaseMoodVector = new MoodVector
-            {
-                Affection = (-5, 10),
-                Engagement = (-10, 15),
-                Mood = (-15, 15),
-                Energy = (-2, 2)
-            },
+                { Affection = (-5, 10), Engagement = (-10, 15), Mood = (-15, 15), Energy = (-2, 2) },
             Sensitivity = new ArchetypeSensitivity
             {
-                AbsenceAffectionImpact = -5.0f, DaysAffectionBonus = 8.0f,
-                AbsenceEngagementImpact = -12.0f, DaysEngagementBonus = 4.0f,
-                AbsenceMoodImpact = -12.0f, DaysMoodBonus = 3.0f,
+                AbsenceAffectionImpact = -12.0f, DaysAffectionBonus = 8.0f,
+                AbsenceEngagementImpact = -20.0f, DaysEngagementBonus = 4.0f,
+                AbsenceMoodImpact = -20.0f, DaysMoodBonus = 3.0f,
                 AbsenceEnergyImpact = -2.0f, DaysEnergyBonus = 0.0f,
-                DaysSaturation = 5,
-                MessageSaturation = 1500,
-                AbsenceTauHours = 6f,
+                DaysSaturation = 5, MessageSaturation = 1500, AbsenceTauHours = 4f,
                 ResponseQuestionChance = 0.65f,
-                EngagementDropChance = 0.05f,
-                EngagementFloor = 60,
-                EngagementDropRange = (3, 10)
+                EngagementDropChance = 0.05f, EngagementFloor = 60.0f, EngagementDropRange = (3, 10),
+                MoodDropChance = 0.50f, MoodFloor = 10.0f, MoodDropRange = (10, 25),
+                EnergyDropRate = 0.30f, EnergyRecoveryRate = 14.0f, SleepChanceLowEnergy = 0.15f,
+                LatestBedtime = new DateTime(2026, 1, 1, 3, 0, 0), BaseSleepDurationRange = (5, 7),
+                FirstMessageChance = 0.85f
             }
         },
         new()
         {
             Name = "teasedere",
-            Description =
-                "Мастер подколов и легкого кокетства. Обожает смущать собеседника и проявляет чувства через дразнилки.",
+            Description = "Мастер подколов и легкого кокетства.",
             Emoji = "❤️‍🔥",
             Color = Color.Parse("#ff9431"),
+            BreakUpAffection = 25f,
+            BreakUpMood = 20f,
             BaseMoodVector = new MoodVector
-            {
-                Affection = (-2, 4),
-                Engagement = (-3, 12),
-                Mood = (-3, 8),
-                Energy = (-1, 2)
-            },
+                { Affection = (-2, 4), Engagement = (-3, 12), Mood = (-3, 8), Energy = (-1, 2) },
             Sensitivity = new ArchetypeSensitivity
             {
-                AbsenceAffectionImpact = -1.0f, DaysAffectionBonus = 3.0f,
-                AbsenceEngagementImpact = -5.0f, DaysEngagementBonus = 3.0f,
-                AbsenceMoodImpact = -3.0f, DaysMoodBonus = 1.5f,
+                AbsenceAffectionImpact = -3.5f, DaysAffectionBonus = 3.0f,
+                AbsenceEngagementImpact = -10.0f, DaysEngagementBonus = 3.0f,
+                AbsenceMoodImpact = -8.0f, DaysMoodBonus = 1.5f,
                 AbsenceEnergyImpact = -1.0f, DaysEnergyBonus = 0.0f,
-                DaysSaturation = 20,
-                MessageSaturation = 1200,
-                AbsenceTauHours = 20f,
+                DaysSaturation = 20, MessageSaturation = 1200, AbsenceTauHours = 14f,
                 ResponseQuestionChance = 0.6f,
-                EngagementDropChance = 0.40f,
-                EngagementFloor = 20,
-                EngagementDropRange = (5, 20)
+                EngagementDropChance = 0.40f, EngagementFloor = 20.0f, EngagementDropRange = (5, 20),
+                MoodDropChance = 0.35f, MoodFloor = 30.0f, MoodDropRange = (4, 12),
+                EnergyDropRate = 0.35f, EnergyRecoveryRate = 13.0f, SleepChanceLowEnergy = 0.40f,
+                LatestBedtime = new DateTime(2026, 1, 1, 2, 0, 0), BaseSleepDurationRange = (7, 9),
+                FirstMessageChance = 0.60f
             }
         },
         new()
         {
             Name = "dorodere",
-            Description = "Милая и добрая на первый взгляд, но хранит внутри затаенную обиду или жестокую сторону.",
+            Description = "Милая на первый взгляд, но хранит внутри жестокую сторону.",
             Emoji = "⚫",
             Color = Colors.SlateGray,
+            BreakUpAffection = 15f,
+            BreakUpMood = 10f,
             BaseMoodVector = new MoodVector
-            {
-                Affection = (-4, 3),
-                Engagement = (-4, 8),
-                Mood = (-6, 6),
-                Energy = (-2, 1)
-            },
+                { Affection = (-4, 3), Engagement = (-4, 8), Mood = (-6, 6), Energy = (-2, 1) },
             Sensitivity = new ArchetypeSensitivity
             {
-                AbsenceAffectionImpact = -3.0f, DaysAffectionBonus = 2.0f,
-                AbsenceEngagementImpact = -4.0f, DaysEngagementBonus = 1.5f,
-                AbsenceMoodImpact = -7.0f, DaysMoodBonus = 1.0f,
+                AbsenceAffectionImpact = -7.0f, DaysAffectionBonus = 2.0f,
+                AbsenceEngagementImpact = -10.0f, DaysEngagementBonus = 1.5f,
+                AbsenceMoodImpact = -14.0f, DaysMoodBonus = 1.0f,
                 AbsenceEnergyImpact = -1.5f, DaysEnergyBonus = 0.0f,
-                DaysSaturation = 40,
-                MessageSaturation = 800,
-                AbsenceTauHours = 24f,
+                DaysSaturation = 40, MessageSaturation = 800, AbsenceTauHours = 16f,
                 ResponseQuestionChance = 0.4f,
-                EngagementDropChance = 0.45f,
-                EngagementFloor = 10,
-                EngagementDropRange = (8, 25)
+                EngagementDropChance = 0.45f, EngagementFloor = 10.0f, EngagementDropRange = (8, 25),
+                MoodDropChance = 0.45f, MoodFloor = 15.0f, MoodDropRange = (6, 20),
+                EnergyDropRate = 0.35f, EnergyRecoveryRate = 12.5f, SleepChanceLowEnergy = 0.55f,
+                LatestBedtime = new DateTime(2026, 1, 1, 2, 30, 0), BaseSleepDurationRange = (6, 8),
+                FirstMessageChance = 0.30f
             }
         },
         new()
         {
             Name = "utsudere",
-            Description =
-                "Меланхоличная личность, склонная к грусти и депрессивным настроениям из-за тяжелого прошлого.",
+            Description = "Меланхоличная личность, склонная к грусти.",
             Emoji = "💧",
             Color = Color.Parse("#0876d6"),
+            BreakUpAffection = 10f,
+            BreakUpMood = 5f,
             BaseMoodVector = new MoodVector
-            {
-                Affection = (-2, 3),
-                Engagement = (-5, 5),
-                Mood = (-8, 3),
-                Energy = (-4, 1)
-            },
+                { Affection = (-2, 3), Engagement = (-5, 5), Mood = (-8, 3), Energy = (-4, 1) },
             Sensitivity = new ArchetypeSensitivity
             {
-                AbsenceAffectionImpact = -2.0f, DaysAffectionBonus = 2.5f,
-                AbsenceEngagementImpact = -5.0f, DaysEngagementBonus = 1.5f,
-                AbsenceMoodImpact = -5.0f, DaysMoodBonus = 1.0f,
+                AbsenceAffectionImpact = -5.0f, DaysAffectionBonus = 2.5f,
+                AbsenceEngagementImpact = -10.0f, DaysEngagementBonus = 1.5f,
+                AbsenceMoodImpact = -12.0f, DaysMoodBonus = 1.0f,
                 AbsenceEnergyImpact = -3.0f, DaysEnergyBonus = 0.5f,
-                DaysSaturation = 30,
-                MessageSaturation = 600,
-                AbsenceTauHours = 14f,
+                DaysSaturation = 30, MessageSaturation = 600, AbsenceTauHours = 10f,
                 ResponseQuestionChance = 0.2f,
-                EngagementDropChance = 0.50f,
-                EngagementFloor = 10,
-                EngagementDropRange = (5, 20)
+                EngagementDropChance = 0.50f, EngagementFloor = 10.0f, EngagementDropRange = (5, 20),
+                MoodDropChance = 0.60f, MoodFloor = 10.0f, MoodDropRange = (5, 18),
+                EnergyDropRate = 0.40f, EnergyRecoveryRate = 11.0f, SleepChanceLowEnergy = 0.70f,
+                LatestBedtime = new DateTime(2026, 1, 1, 3, 0, 0), BaseSleepDurationRange = (9, 11),
+                FirstMessageChance = 0.10f
             }
         },
         new()
         {
             Name = "bakadere",
-            Description =
-                "Наивная, неуклюжая и очень открытая. Не умеет скрывать чувства и часто попадает в неловкие ситуации.",
+            Description = "Наивная, неуклюжая и очень открытая.",
             Emoji = "🐔",
             Color = Colors.Brown,
+            BreakUpAffection = 30f,
+            BreakUpMood = 25f,
             BaseMoodVector = new MoodVector
-            {
-                Affection = (-1, 5),
-                Engagement = (-2, 10),
-                Mood = (-3, 8),
-                Energy = (-1, 2)
-            },
+                { Affection = (-1, 5), Engagement = (-2, 10), Mood = (-3, 8), Energy = (-1, 2) },
             Sensitivity = new ArchetypeSensitivity
             {
-                AbsenceAffectionImpact = -0.5f, DaysAffectionBonus = 2.0f,
-                AbsenceEngagementImpact = -2.0f, DaysEngagementBonus = 1.5f,
-                AbsenceMoodImpact = -1.5f, DaysMoodBonus = 1.0f,
+                AbsenceAffectionImpact = -2.0f, DaysAffectionBonus = 2.0f,
+                AbsenceEngagementImpact = -5.0f, DaysEngagementBonus = 1.5f,
+                AbsenceMoodImpact = -5.0f, DaysMoodBonus = 1.0f,
                 AbsenceEnergyImpact = -1.0f, DaysEnergyBonus = 0.0f,
-                DaysSaturation = 7,
-                MessageSaturation = 1200,
-                AbsenceTauHours = 12f,
+                DaysSaturation = 7, MessageSaturation = 1200, AbsenceTauHours = 8f,
                 ResponseQuestionChance = 0.5f,
-                EngagementDropChance = 0.40f,
-                EngagementFloor = 20,
-                EngagementDropRange = (5, 15)
+                EngagementDropChance = 0.40f, EngagementFloor = 20.0f, EngagementDropRange = (5, 15),
+                MoodDropChance = 0.30f, MoodFloor = 30.0f, MoodDropRange = (3, 10),
+                EnergyDropRate = 0.35f, EnergyRecoveryRate = 13.5f, SleepChanceLowEnergy = 0.65f,
+                LatestBedtime = new DateTime(2026, 1, 1, 22, 0, 0), BaseSleepDurationRange = (8, 10),
+                FirstMessageChance = 0.50f
             }
         },
         new()
         {
             Name = "darudere",
-            Description = "Ленивая и слегка отстраненная. Предпочитает покой и отдых любым активным действиям.",
+            Description = "Ленивая и слегка отстраненная.",
             Emoji = "💤",
             Color = Color.Parse("#1d6bc5"),
+            BreakUpAffection = 20f,
+            BreakUpMood = 20f,
             BaseMoodVector = new MoodVector
-            {
-                Affection = (-1, 2),
-                Engagement = (-5, 4),
-                Mood = (-2, 4),
-                Energy = (-5, 1)
-            },
+                { Affection = (-1, 2), Engagement = (-5, 4), Mood = (-2, 4), Energy = (-5, 1) },
             Sensitivity = new ArchetypeSensitivity
             {
-                AbsenceAffectionImpact = -0.2f, DaysAffectionBonus = 1.0f,
-                AbsenceEngagementImpact = -1.0f, DaysEngagementBonus = 0.5f,
-                AbsenceMoodImpact = -0.5f, DaysMoodBonus = 0.5f,
+                AbsenceAffectionImpact = -1.0f, DaysAffectionBonus = 1.0f,
+                AbsenceEngagementImpact = -3.0f, DaysEngagementBonus = 0.5f,
+                AbsenceMoodImpact = -2.0f, DaysMoodBonus = 0.5f,
                 AbsenceEnergyImpact = -2.0f, DaysEnergyBonus = 0.0f,
-                DaysSaturation = 30,
-                MessageSaturation = 400,
-                AbsenceTauHours = 72f,
+                DaysSaturation = 30, MessageSaturation = 400, AbsenceTauHours = 36f,
                 ResponseQuestionChance = 0.15f,
-                EngagementDropChance = 0.60f,
-                EngagementFloor = 10,
-                EngagementDropRange = (10, 25)
+                EngagementDropChance = 0.60f, EngagementFloor = 10.0f, EngagementDropRange = (10, 25),
+                MoodDropChance = 0.25f, MoodFloor = 25.0f, MoodDropRange = (3, 10),
+                EnergyDropRate = 0.50f, EnergyRecoveryRate = 10.0f, SleepChanceLowEnergy = 0.85f,
+                LatestBedtime = new DateTime(2026, 1, 1, 21, 30, 0), BaseSleepDurationRange = (9, 12),
+                FirstMessageChance = 0.05f
             }
         },
         new()
         {
             Name = "hinedere",
-            Description =
-                "Циничная и высокомерная снаружи, но способна измениться, если найдет кого-то достойного доверия.",
+            Description = "Циничная и высокомерная снаружи.",
             Emoji = "🚬",
             Color = Color.Parse("#318eb0"),
+            BreakUpAffection = 15f,
+            BreakUpMood = 15f,
             BaseMoodVector = new MoodVector
-            {
-                Affection = (-4, 2),
-                Engagement = (-4, 6),
-                Mood = (-5, 5),
-                Energy = (-2, 1)
-            },
+                { Affection = (-4, 2), Engagement = (-4, 6), Mood = (-5, 5), Energy = (-2, 1) },
             Sensitivity = new ArchetypeSensitivity
             {
-                AbsenceAffectionImpact = -1.5f, DaysAffectionBonus = 3.5f,
-                AbsenceEngagementImpact = -3.0f, DaysEngagementBonus = 2.0f,
-                AbsenceMoodImpact = -4.0f, DaysMoodBonus = 1.5f,
+                AbsenceAffectionImpact = -4.5f, DaysAffectionBonus = 3.5f,
+                AbsenceEngagementImpact = -8.0f, DaysEngagementBonus = 2.0f,
+                AbsenceMoodImpact = -9.0f, DaysMoodBonus = 1.5f,
                 AbsenceEnergyImpact = -1.0f, DaysEnergyBonus = 0.0f,
-                DaysSaturation = 60,
-                MessageSaturation = 700,
-                AbsenceTauHours = 48f,
+                DaysSaturation = 60, MessageSaturation = 700, AbsenceTauHours = 24f,
                 ResponseQuestionChance = 0.3f,
-                EngagementDropChance = 0.45f,
-                EngagementFloor = 15,
-                EngagementDropRange = (5, 20)
+                EngagementDropChance = 0.45f, EngagementFloor = 15.0f, EngagementDropRange = (5, 20),
+                MoodDropChance = 0.40f, MoodFloor = 20.0f, MoodDropRange = (5, 15),
+                EnergyDropRate = 0.30f, EnergyRecoveryRate = 13.0f, SleepChanceLowEnergy = 0.50f,
+                LatestBedtime = new DateTime(2026, 1, 1, 2, 0, 0), BaseSleepDurationRange = (6, 8),
+                FirstMessageChance = 0.20f
             }
         },
         new()
         {
             Name = "sadodere",
-            Description =
-                "Любит доминировать и манипулировать чувствами других. Получает удовольствие, дразня свою цель.",
+            Description = "Любит доминировать и манипулировать чувствами.",
             Emoji = "🩸",
             Color = Color.Parse("#be2edd"),
+            BreakUpAffection = 15f,
+            BreakUpMood = 15f,
             BaseMoodVector = new MoodVector
-            {
-                Affection = (-3, 3),
-                Engagement = (-3, 10),
-                Mood = (-4, 8),
-                Energy = (-1, 2)
-            },
+                { Affection = (-3, 3), Engagement = (-3, 10), Mood = (-4, 8), Energy = (-1, 2) },
             Sensitivity = new ArchetypeSensitivity
             {
-                AbsenceAffectionImpact = -2.0f, DaysAffectionBonus = 3.0f,
-                AbsenceEngagementImpact = -6.0f, DaysEngagementBonus = 2.5f,
-                AbsenceMoodImpact = -4.0f, DaysMoodBonus = 1.5f,
+                AbsenceAffectionImpact = -5.0f, DaysAffectionBonus = 3.0f,
+                AbsenceEngagementImpact = -12.0f, DaysEngagementBonus = 2.5f,
+                AbsenceMoodImpact = -10.0f, DaysMoodBonus = 1.5f,
                 AbsenceEnergyImpact = -1.0f, DaysEnergyBonus = 0.0f,
-                DaysSaturation = 25,
-                MessageSaturation = 1000,
-                AbsenceTauHours = 18f,
+                DaysSaturation = 25, MessageSaturation = 1000, AbsenceTauHours = 12f,
                 ResponseQuestionChance = 0.55f,
-                EngagementDropChance = 0.35f,
-                EngagementFloor = 20,
-                EngagementDropRange = (5, 20)
+                EngagementDropChance = 0.35f, EngagementFloor = 20.0f, EngagementDropRange = (5, 20),
+                MoodDropChance = 0.35f, MoodFloor = 25.0f, MoodDropRange = (5, 15),
+                EnergyDropRate = 0.30f, EnergyRecoveryRate = 13.5f, SleepChanceLowEnergy = 0.35f,
+                LatestBedtime = new DateTime(2026, 1, 1, 1, 30, 0), BaseSleepDurationRange = (6, 8),
+                FirstMessageChance = 0.55f
             }
         }
     ];
@@ -1173,7 +1131,7 @@ public partial class SettingsVM : ObservableValidator
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(AffectionLevel))]
-    private int _affection;
+    private float _affection;
 
     public AffectionType AffectionLevel => Affection switch
     {
@@ -1185,7 +1143,7 @@ public partial class SettingsVM : ObservableValidator
 
     [ObservableProperty] 
     [NotifyPropertyChangedFor(nameof(EnergyLevel))]
-    private int _energy;
+    private float _energy;
 
     public EnergyType EnergyLevel => Energy switch
     {
@@ -1196,7 +1154,7 @@ public partial class SettingsVM : ObservableValidator
     
     [ObservableProperty] 
     [NotifyPropertyChangedFor(nameof(EngagementLevel))]
-    private int _engagement;
+    private float _engagement;
 
     public EngagementType EngagementLevel => Engagement switch
     {
@@ -1207,7 +1165,7 @@ public partial class SettingsVM : ObservableValidator
     
     [ObservableProperty] 
     [NotifyPropertyChangedFor(nameof(MoodLevel))]
-    private int _mood;
+    private float _mood;
 
     public MoodType MoodLevel => Mood switch
     {
@@ -1225,7 +1183,15 @@ public partial class SettingsVM : ObservableValidator
     [ObservableProperty] private bool _isDating;
 
     [ObservableProperty] private DateTime _lastEngagementDrop;
+    [ObservableProperty] private DateTime _lastMoodDrop;
     [ObservableProperty] private DateTime _lastEnergyDrop;
+
+    [ObservableProperty] private int _randomDailyNoise;
+
+    [ObservableProperty] private bool _isSleeping;
+    [ObservableProperty] private DateTime _wakeUpTime;
+
+    [ObservableProperty] private DateTime _lastUserEntry;
 
     #endregion
 }

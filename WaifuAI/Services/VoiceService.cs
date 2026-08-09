@@ -135,8 +135,8 @@ public static class VoiceService
 
     public static async Task WaitForPythonServerAsync(int timeoutSeconds = 20)
     {
-        var startTime = DateTime.Now;
-        while ((DateTime.Now - startTime).TotalSeconds < timeoutSeconds)
+        var startTime = DateTime.UtcNow;
+        while ((DateTime.UtcNow - startTime).TotalSeconds < timeoutSeconds)
         {
             try
             {
