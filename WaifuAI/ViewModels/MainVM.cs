@@ -423,12 +423,14 @@ public partial class MainVM : ObservableValidator
         if (ReplyMessage?.IsReplied == true)
             message.MessageModel.Content +=
                 $"[Replying to the {ReplyMessage.MessageModel.Role}'s message " +
-                $"sent {PromptService.TimeAgoText(timestamp, _history.Last().Time)}: '{Quote}']\n\n" +
+                $"sent on {ReplyMessage.MessageModel.Time.ToLocalTime()} " +
+                $"({PromptService.TimeAgoText(timestamp, ReplyMessage.MessageModel.Time)}): '{Quote}']\n\n" +
                 $"{Question}";
         else if (ReplyMessage?.IsReplied == false)
             message.MessageModel.Content +=
                 $"[Replying to the {ReplyMessage.MessageModel.Role}'s quote " +
-                $"in message sent {PromptService.TimeAgoText(timestamp, _history.Last().Time)}: '{Quote}']\n\n" +
+                $"in message sent on {ReplyMessage.MessageModel.Time.ToLocalTime()} " +
+                $"({PromptService.TimeAgoText(timestamp, ReplyMessage.MessageModel.Time)}): '{Quote}']\n\n" +
                 $"{Question}";
         else
             message.MessageModel.Content += $"\n{Question}";
@@ -478,9 +480,12 @@ public partial class MainVM : ObservableValidator
             s.Affection = s.SelectedArchetype.BreakUpAffection;
             s.Mood = s.SelectedArchetype.BreakUpMood;
         }
-        s.IsDating = isDating ?? false;
+        if (isDating != null)
+            s.IsDating = (bool)isDating;
 
-        s.UserName = MessageParser.ParseTextForLearnedName(text);
+        var newName = MessageParser.ParseTextForLearnedName(text);
+        if (newName != null)
+            s.UserName = newName;
 
         var sleepTime = MessageParser.ParseWakeUpTime(text);
         if (sleepTime != null)

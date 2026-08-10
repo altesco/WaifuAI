@@ -306,7 +306,7 @@
                 <Setter Property="RenderTransformOrigin" Value="50%,50%" />
             </Style>
 
-            <!-- <Style Selector="ScrollViewer">
+            <Style Selector="ScrollViewer">
                 <Setter Property="Interaction.Behaviors">
                     <BehaviorCollectionTemplate>
                         <BehaviorCollection>
@@ -314,7 +314,7 @@
                         </BehaviorCollection>
                     </BehaviorCollectionTemplate>
                 </Setter>
-            </Style> -->
+            </Style>
 
         </Grid.Styles>
 
@@ -780,6 +780,13 @@
                                     SelectedItems="{Binding SelectedMessages}"
                                     SelectionMode="{Binding IsMultiSelect, Converter={StaticResource BoolToSelectionModeConverter}}"
                                     Tag="{Binding IsMultiSelect}">
+
+                                    <ListBox.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <!-- Обычный StackPanel отключает виртуализацию -->
+                                            <StackPanel />
+                                        </ItemsPanelTemplate>
+                                    </ListBox.ItemsPanel>
                                     
                                     <ListBox.ItemContainerTheme>
                                         <ControlTheme x:DataType="vm:MessageVM" TargetType="ListBoxItem">
@@ -1113,10 +1120,8 @@
                                                                                             </Setter.Value>
                                                                                         </Setter>
                                                                                     </Style>
-                                                                                    <Style
-                                                                                        Selector="TextBlock[Tag=assistant]">
-                                                                                        <Setter Property="Text"
-                                                                                            Value="Вайфу" />
+                                                                                    <Style Selector="TextBlock[Tag=assistant]">
+                                                                                        <Setter Property="Text" Value="{Binding Source={x:Static vm:SettingsVM.Instance}, Path=WaifuName}"/>
                                                                                         <Setter Property="Foreground">
                                                                                             <Setter.Value>
                                                                                                 <SolidColorBrush
@@ -1124,12 +1129,9 @@
                                                                                             </Setter.Value>
                                                                                         </Setter>
                                                                                     </Style>
-                                                                                    <Style
-                                                                                        Selector="TextBlock[Tag=user]">
-                                                                                        <Setter Property="Text"
-                                                                                            Value="Пользователь" />
-                                                                                        <Setter Property="Foreground"
-                                                                                            Value="{DynamicResource SystemAccentColor}" />
+                                                                                    <Style Selector="TextBlock[Tag=user]">
+                                                                                        <Setter Property="Foreground" Value="{DynamicResource SystemAccentColor}" />
+                                                                                        <Setter Property="Text" Value="{Binding Source={x:Static vm:SettingsVM.Instance}, Path=UserName, TargetNullValue='Пользователь'}" />
                                                                                     </Style>
                                                                                 </TextBlock.Styles>
                                                                             </TextBlock>
@@ -1957,6 +1959,13 @@
                                         Background="Transparent"
                                         ItemsSource="{Binding Archetypes}"
                                         SelectedItem="{Binding SelectedArchetype, Mode=TwoWay}">
+
+                                        <ListBox.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel />
+                                            </ItemsPanelTemplate>
+                                        </ListBox.ItemsPanel>
+
                                         <ListBox.Styles>
                                             <Style Selector="ListBoxItem">
                                                 <Setter Property="CornerRadius" Value="0" />
