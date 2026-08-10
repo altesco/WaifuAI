@@ -165,7 +165,7 @@ public static class DropService
 
         while (currentTime < now)
         {
-            if (s.IsSleeping)
+            if (currentTime < s.WakeUpTime)
             {
                 if (s.WakeUpTime <= now)
                 {

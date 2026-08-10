@@ -107,7 +107,6 @@ public partial class MainVM : ObservableValidator
                 StopSleepTimer();
         };
 
-        // на случай вылета из приложения делаем это почаще
         SettingsVM.Instance.LastUserEntry = DateTime.UtcNow;
     }
 
