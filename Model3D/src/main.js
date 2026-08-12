@@ -14,7 +14,8 @@ const renderer = new THREE.WebGLRenderer({
 });
 renderer.setClearColor(0xeef1f5, 1);
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setPixelRatio(window.devicePixelRatio, 2);
+//renderer.setPixelRatio(window.devicePixelRatio, 2);
+renderer.setPixelRatio(1);
 document.body.appendChild(renderer.domElement);
 
 // --- Camera ---
@@ -239,26 +240,11 @@ function updateBlink(deltaTime) {
 
 // --- Render Loop ---
 let vState = { aa: 0, ee: 0, oh: 0 };
-let debugTimer = 0;
 let smoothedVowels = { aa: 0, ee: 0, oh: 0 };
 
 function animate() {
   requestAnimationFrame(animate);
   const deltaTime = Math.min(clock.getDelta(), 0.05); //const deltaTime = clock.getDelta();
-  debugTimer += deltaTime;
-  if (debugTimer > 0.1) { // Вывод каждые 100мс
-    const sync = lipSync.update();
-    if (sync.volume > 0.05) { // Выводим только когда есть хоть какой-то звук
-      console.log(
-        `%c[TTS Debug]%c Vol: ${sync.volume.toFixed(2)} | ` +
-        `AA (Mid): ${sync.vowels.aa.toFixed(2)} | ` +
-        `EE (High): ${sync.vowels.ee.toFixed(2)} | ` +
-        `OH (Low): ${sync.vowels.oh.toFixed(2)}`,
-        "color: #00ff00; font-weight: bold;", "color: default;"
-      );
-    }
-    debugTimer = 0;
-  }
 
   // 1. Получаем данные ОДИН раз за кадр
   const syncData = lipSync.update();

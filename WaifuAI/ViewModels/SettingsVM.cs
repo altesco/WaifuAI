@@ -595,9 +595,9 @@ public partial class SettingsVM : ObservableValidator
 
     public async Task InitializeModel3D()
     {
-        ModelService.SetBackground();
+        Model3DService.SetBackground();
         await ChangeModel3D(SelectedModel3D);
-        ModelService.SetCamera(Camera);
+        Model3DService.SetCamera(Camera);
         _ = RefreshVoiceModelInfo();
     }
 
@@ -679,7 +679,7 @@ public partial class SettingsVM : ObservableValidator
         
         _ = Task.Run(async () =>
         {
-            ModelService.SetCamera(value);
+            Model3DService.SetCamera(value);
 
             await Task.Delay(30);
 

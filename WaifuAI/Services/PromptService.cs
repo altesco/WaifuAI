@@ -572,15 +572,17 @@ public static class PromptService
         basePrompt = basePrompt.Replace("{{INITIATIVE_PROMPT}}", initiateText);
 
         var deltas = CalculateDynamicDeltas(archetype.BaseMoodVector, factors, archetype.Sensitivity);
-        Console.WriteLine(GetDeltaFormattedString(deltas.Affection));
-        Console.WriteLine(GetDeltaFormattedString(deltas.Engagement));
-        Console.WriteLine(GetDeltaFormattedString(deltas.Mood));
-        Console.WriteLine(GetDeltaFormattedString(deltas.Energy));
         basePrompt = basePrompt
             .Replace("{{AFFECTION_BOUNDS}}", GetDeltaFormattedString(deltas.Affection))
             .Replace("{{ENGAGEMENT_BOUNDS}}", GetDeltaFormattedString(deltas.Engagement))
             .Replace("{{MOOD_BOUNDS}}", GetDeltaFormattedString(deltas.Mood))
             .Replace("{{ENERGY_BOUNDS}}", GetDeltaFormattedString(deltas.Energy));
+
+        var lang = GetFullLanguageName(settings.SelectedLanguage);
+        var example = GetResponseExample(settings.SelectedLanguage);
+        basePrompt = basePrompt
+            .Replace("{{LANGUAGE}}", lang)
+            .Replace("{{RESPONSE_EXAMPLE}}", example);
 
         basePrompt = basePrompt
             .Replace("{{User}}", userName)
@@ -746,38 +748,26 @@ public static class PromptService
     #endregion
 
 
+    #region UserLanguage
 
-
-
-
-    
-
-    public static float CalculateQuestionProbability(float baseQuestionP, float engagementValue, EnergyType energy,
-        MoodType mood)
+    private static string GetResponseExample(string language) => language switch
     {
-        float energyFactor = energy switch
-        {
-            EnergyType.Low => 0.3f,
-            EnergyType.High => 1.1f,
-            _ => 1.0f
-        };
+        "ru" => "*mood:happy* *motion:standing_greeting* Привет! *mood:surprised* *motion:bashful* Странно, почему ты так внезапно спрашиваешь про мой любимый цвет? *mood:neutral* *motion:thinking* Ну, дай подумать... наверное, это красный.",
+        "de" => "*mood:happy* *motion:standing_greeting* Hey! *mood:surprised* *motion:bashful* Komisch, warum fragst du mich plötzlich nach meiner Lieblingsfarbe? *mood:neutral* *motion:thinking* Na schön, lass mich überlegen... es ist wahrscheinlich Rot.",
+        "es" => "*mood:happy* *motion:standing_greeting* ¡Hola! *mood:surprised* *motion:bashful* Qué raro, ¿por qué me preguntas de la nada cuál es mi color favorito? *mood:neutral* *motion:thinking* Bueno, déjame pensar... supongo que es el rojo.",
+        "fr" => "*mood:happy* *motion:standing_greeting* Salut ! *mood:surprised* *motion:bashful* Bizarre, pourquoi tu me demandes ça d'un coup, ma couleur préférée ? *mood:neutral* *motion:thinking* Bon, laisse-moi réfléchir... c'est sûrement le rouge.",
+        _ => "*mood:happy* *motion:standing_greeting* Hey! *mood:surprised* *motion:bashful* Weird, why are you suddenly asking about my favorite color? *mood:neutral* *motion:thinking* Well, let me think... I guess it's red."
+    };
 
-        float moodFactor = mood switch
-        {
-            MoodType.Bad => 0.6f,
-            MoodType.Normal => 1.2f,
-            _ => 1.0f
-        };
-
-        float pFinal = baseQuestionP * (0.3f + 0.9f * (engagementValue / 100f)) * energyFactor * moodFactor;
-        return Math.Clamp(pFinal, 0.02f, 0.85f);
-    }
-
-
-
-
-
-
-
-
+    private static string GetFullLanguageName(string language) => language switch
+    {
+        "ru" => "RUSSIAN",
+        "en" => "ENGLISH",
+        "de" => "GERMAN",
+        "es" => "SPANISH",
+        "fr" => "FRENCH",
+        _ => "UNDEFINED UNDETERMINED (DESIDE BASED ON {{User}} RESPONSE)"
+    };
+        
+    #endregion
 }

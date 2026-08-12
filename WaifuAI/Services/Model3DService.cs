@@ -2,6 +2,8 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Themes.Fluent;
@@ -11,13 +13,15 @@ using WaifuAI.Models;
 
 namespace WaifuAI.Services;
 
-public static class ModelService
+public static class Model3DService
 {
-    public static async Task<string> StartWebServer(int port)
+    public static async Task<string> StartWebServer()
     {
+        int port = GetFreePort();
+
         var baseDir = Path.Combine(AppContext.BaseDirectory, "WebAssets");
         var server = new WebServer(o => o
-                .WithUrlPrefix($"http://localhost:{port}/")
+                .WithUrlPrefix($"http://127.0.0.1:{port}/")
                 .WithMode(HttpListenerMode.EmbedIO))
             .WithStaticFolder("/", baseDir, false)
             .HandleHttpException((_, exception) =>
@@ -25,12 +29,27 @@ public static class ModelService
                 Debug.WriteLine($"EmbedIO Error (ignored): {exception.Message}");
                 return Task.CompletedTask;
             });
+
         _ = server.RunAsync();
+
         while (server.State != WebServerState.Listening)
             await Task.Delay(50);
-        string url = $"http://localhost:{port}/index.html";
+
+        string url = $"http://127.0.0.1:{port}/index.html";
         return url;
     }
+
+    private static int GetFreePort()
+    {
+        var listener = new TcpListener(IPAddress.Loopback, 0);
+        // Принудительно отключаем задержку TIME_WAIT при закрытии
+        listener.Server.LingerState = new LingerOption(true, 0);
+        listener.Start();
+        int port = ((IPEndPoint)listener.LocalEndpoint).Port;
+        listener.Stop();
+        return port;
+    }
+
 
     public static async Task<bool> WaitForResponce()
     {
@@ -39,7 +58,6 @@ public static class ModelService
         while (jsStatus == 0 && attempts < 20) 
         {
             var message = new EvaluateScriptMessage<int>("return (typeof window.vrmApp !== 'undefined') ? 1 : 0;");
-
             jsStatus = await WeakReferenceMessenger.Default.Send(message);
             
             Console.WriteLine(jsStatus);

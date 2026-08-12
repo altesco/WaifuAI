@@ -246,7 +246,6 @@ public static class DropService
         if (DateTime.UtcNow < s.WakeUpTime)
             return;
 
-        //s.IsSleeping = false;
         SetRandomMorningMood();
 
         if (Random.Shared.NextDouble() < firstMessageChance)

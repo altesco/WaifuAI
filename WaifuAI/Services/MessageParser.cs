@@ -23,7 +23,9 @@ public class MessageParser
 
     public static async Task CreateVectorGenerator()
     {
-        VectorGenerator = await LocalEmbeddingGenerator.CreateAsync();
+        VectorGenerator = await Task.Run(async () => 
+            await LocalEmbeddingGenerator.CreateAsync()
+        ).ConfigureAwait(false);
     }
 
     public static ParsedDialogue ParseTextForEmotions(string text)

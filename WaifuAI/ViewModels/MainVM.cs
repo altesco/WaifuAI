@@ -35,8 +35,8 @@ public partial class MainVM : ObservableValidator
         await SettingsVM.Instance.Load();
 
         InitializingMessage = "Запуск веб-сервера...";
-        WebAddress = await ModelService.StartWebServer(12347);
-        await ModelService.WaitForResponce();
+        WebAddress = await Model3DService.StartWebServer();
+        await Model3DService.WaitForResponce();
 
         await SettingsVM.Instance.InitializeModel3D();
 
@@ -242,6 +242,11 @@ public partial class MainVM : ObservableValidator
 
             // 3. Подрезаем по контексту и формируем итоговый пак сообщений
             var cuttedHistory = GetCuttedHistory(wakeUpPrompt, recentHistory, SettingsVM.Instance.ContextLength);
+            cuttedHistory.Add(new Message
+            {
+                Role = "user",
+                Content = "[System Event: You opened the app for the first time after waking up and decided to message the user first. The user hasn't come online yet. Initiate the conversation according to your system directives.]"
+            });
             query.Messages.AddRange(cuttedHistory);
 
             // 4. Делаем запрос

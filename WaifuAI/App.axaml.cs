@@ -32,6 +32,9 @@ namespace WaifuAI
                 // Avoid duplicate validations from both Avalonia and the CommunityToolkit. 
                 // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
                 WebView.Settings.AddCommandLineSwitch("autoplay-policy", "no-user-gesture-required");
+
+                WebView.Settings.OsrEnabled = false;
+
                 DisableAvaloniaDataAnnotationValidation();
                 desktop.MainWindow = new MainWindow
                 {
@@ -45,7 +48,7 @@ namespace WaifuAI
                 {
                     if (SettingsVM.Instance.IsSettingsLoading)
                         return;
-                    ModelService.SetBackground();
+                    Model3DService.SetBackground();
                     Dispatcher.UIThread.InvokeAsync(async () =>
                     {
                         await Task.Delay(10);

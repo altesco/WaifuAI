@@ -4,14 +4,14 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:conv="using:WaifuAI.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:ia="using:Avalonia.Xaml.Interactions.Animated"
+    xmlns:material="using:Material.Icons.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:WaifuAI.Models"
+    xmlns:sys="clr-namespace:System;assembly=System.Runtime"
     xmlns:views="using:WaifuAI.Views"
     xmlns:vm="using:WaifuAI.ViewModels"
-    xmlns:models="using:WaifuAI.Models"
     xmlns:wv="clr-namespace:WebViewControl;assembly=WebViewControl.Avalonia"
-    xmlns:material="using:Material.Icons.Avalonia"
-    xmlns:sys="clr-namespace:System;assembly=System.Runtime"
-    xmlns:ia="using:Avalonia.Xaml.Interactions.Animated"
     Title="WaifuAI"
     d:DesignHeight="720"
     d:DesignWidth="1024"
@@ -50,8 +50,8 @@
     <Grid
         x:Name="RootPanel"
         Margin="{Binding $parent[Window].OffScreenMargin}"
-        Focusable="True"
         Background="{DynamicResource Scroll}"
+        Focusable="True"
         PointerPressed="OnBackgroundPointerPressed">
         <Grid.Styles>
 
@@ -62,7 +62,7 @@
             <Style Selector="Border">
                 <Setter Property="BorderBrush" Value="{DynamicResource SystemBaseLowColor}" />
             </Style>
-            
+
             <Style Selector="ListBox">
                 <Setter Property="BorderBrush" Value="{DynamicResource SystemBaseLowColor}" />
             </Style>
@@ -133,8 +133,7 @@
                 <Setter Property="CornerRadius" Value="4" />
                 <Setter Property="FontSize" Value="13" />
             </Style>
-            <Style
-                Selector="MenuItem:pointerover /template/ Border#PART_LayoutRoot, MenuItem:selected /template/ Border#PART_LayoutRoot">
+            <Style Selector="MenuItem:pointerover /template/ Border#PART_LayoutRoot, MenuItem:selected /template/ Border#PART_LayoutRoot">
                 <Setter Property="Background" Value="{DynamicResource ButtonBackgroundPointerOver}" />
             </Style>
 
@@ -146,8 +145,7 @@
                 <Setter Property="Background" Value="{DynamicResource SystemChromeHighColor}" />
                 <Setter Property="BorderBrush" Value="{DynamicResource SystemBaseMediumLowColor}" />
                 <Setter Property="CornerRadius" Value="5" />
-                <Setter Property="FontFamily"
-                        Value="{Binding SelectedMonoFontFamily, Source={x:Static vm:SettingsVM.Instance}}" />
+                <Setter Property="FontFamily" Value="{Binding SelectedMonoFontFamily, Source={x:Static vm:SettingsVM.Instance}}" />
                 <Setter Property="Height" Value="30" />
                 <Setter Property="MinHeight" Value="0" />
                 <Setter Property="MinWidth" Value="0" />
@@ -310,7 +308,7 @@
                 <Setter Property="Interaction.Behaviors">
                     <BehaviorCollectionTemplate>
                         <BehaviorCollection>
-                            <ia:VerticalScrollViewerAnimatedBehavior/>
+                            <ia:VerticalScrollViewerAnimatedBehavior />
                         </BehaviorCollection>
                     </BehaviorCollectionTemplate>
                 </Setter>
@@ -357,17 +355,15 @@
                             Text="WaifuAI" />
                     </StackPanel>
 
-                    <Border
-                        x:Name="FakeTopBorder"
-                        MaxWidth="{StaticResource TopPanelEdgeWidth}" />
+                    <Border x:Name="FakeTopBorder" MaxWidth="{StaticResource TopPanelEdgeWidth}" />
 
                     <StackPanel
-                        Orientation="Horizontal"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
-                        Spacing="16"
                         x:DataType="vm:SettingsVM"
-                        DataContext="{x:Static vm:SettingsVM.Instance}">
+                        DataContext="{x:Static vm:SettingsVM.Instance}"
+                        Orientation="Horizontal"
+                        Spacing="16">
                         <StackPanel.Styles>
 
                             <Style Selector="ProgressBar">
@@ -380,7 +376,10 @@
                                 <Setter Property="Margin" Value="11,0,0,0" />
                                 <Setter Property="Transitions">
                                     <Transitions>
-                                        <DoubleTransition Property="Value" Duration="0:0:1.5" Easing="QuadraticEaseOut" />
+                                        <DoubleTransition
+                                            Easing="QuadraticEaseOut"
+                                            Property="Value"
+                                            Duration="0:0:1.5" />
                                     </Transitions>
                                 </Setter>
                             </Style>
@@ -395,45 +394,48 @@
                                 <Setter Property="Margin" Value="25,0,0,0" />
                                 <Setter Property="Transitions">
                                     <Transitions>
-                                        <DoubleTransition Property="Value" Duration="0:0:1.5" Easing="QuadraticEaseOut" />
+                                        <DoubleTransition
+                                            Easing="QuadraticEaseOut"
+                                            Property="Value"
+                                            Duration="0:0:1.5" />
                                     </Transitions>
                                 </Setter>
                             </Style>
 
                         </StackPanel.Styles>
 
-                        <!-- Affection -->
-                        <Grid 
-                            Background="Transparent" 
-                            ToolTip.Tip="{Binding Affection, StringFormat={}Affection [{0:F0}/100]}"
-                            ToolTip.Placement="Bottom"
+                        <!--  Affection  -->
+                        <Grid
+                            Background="Transparent"
                             ToolTip.HorizontalOffset="0"
+                            ToolTip.Placement="Bottom"
+                            ToolTip.Tip="{Binding Affection, StringFormat={}Affection [{0:F0}/100]}"
                             ToolTip.VerticalOffset="4">
                             <ProgressBar
-                                BorderBrush="{Binding #AffectionIcon.Foreground}"
-                                Value="{Binding Affection}"
-                                Foreground="{Binding #AffectionIcon.Foreground}"
-                                MinHeight="0"
                                 MinWidth="0"
-                                Classes.mini-style="{Binding #FakeTopBorder.Bounds.Width, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter={StaticResource TopPanelEdgeWidth}}" />
+                                MinHeight="0"
+                                BorderBrush="{Binding #AffectionIcon.Foreground}"
+                                Classes.mini-style="{Binding #FakeTopBorder.Bounds.Width, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter={StaticResource TopPanelEdgeWidth}}"
+                                Foreground="{Binding #AffectionIcon.Foreground}"
+                                Value="{Binding Affection}" />
                             <material:MaterialIcon
-                                Kind="Favorite"
-                                IconSize="22"
-                                Foreground="{DynamicResource SystemChromeHighColor}"
+                                Margin="0,2,0,0"
                                 HorizontalAlignment="Left"
                                 VerticalAlignment="Center"
-                                Margin="0,2,0,0" />
+                                Foreground="{DynamicResource SystemChromeHighColor}"
+                                IconSize="22"
+                                Kind="Favorite" />
                             <LucideIcon
                                 x:Name="AffectionIcon"
-                                Size="18"
-                                StrokeWidth="2.5"
                                 Margin="2,0,0,2"
                                 HorizontalAlignment="Left"
                                 VerticalAlignment="Center"
                                 Classes.bad="{Binding AffectionLevel, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:AffectionType.Bad}}"
-                                Classes.normal="{Binding AffectionLevel, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:AffectionType.Normal}}"
                                 Classes.good="{Binding AffectionLevel, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:AffectionType.Good}}"
-                                Classes.love="{Binding AffectionLevel, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:AffectionType.Love}}">
+                                Classes.love="{Binding AffectionLevel, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:AffectionType.Love}}"
+                                Classes.normal="{Binding AffectionLevel, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:AffectionType.Normal}}"
+                                Size="18"
+                                StrokeWidth="2.5">
                                 <LucideIcon.Styles>
                                     <Style Selector="LucideIcon.bad">
                                         <Setter Property="Foreground" Value="{DynamicResource SystemBaseHighColor}" />
@@ -456,55 +458,55 @@
 
                         </Grid>
 
-                        <!-- Engagement -->
-                        <Grid 
-                            Background="Transparent" 
-                            ToolTip.Tip="{Binding Engagement, StringFormat={}Engagement [{0:F0}/100]}"
-                            ToolTip.Placement="Bottom"
+                        <!--  Engagement  -->
+                        <Grid
+                            Background="Transparent"
                             ToolTip.HorizontalOffset="0"
+                            ToolTip.Placement="Bottom"
+                            ToolTip.Tip="{Binding Engagement, StringFormat={}Engagement [{0:F0}/100]}"
                             ToolTip.VerticalOffset="4">
                             <ProgressBar
-                                BorderBrush="{Binding #EngagementIcon.Foreground}"
-                                Value="{Binding Engagement}"
-                                Foreground="{Binding #EngagementIcon.Foreground}"
-                                MinHeight="0"
                                 MinWidth="0"
-                                Classes.mini-style="{Binding #FakeTopBorder.Bounds.Width, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter={StaticResource TopPanelEdgeWidth}}" />
+                                MinHeight="0"
+                                BorderBrush="{Binding #EngagementIcon.Foreground}"
+                                Classes.mini-style="{Binding #FakeTopBorder.Bounds.Width, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter={StaticResource TopPanelEdgeWidth}}"
+                                Foreground="{Binding #EngagementIcon.Foreground}"
+                                Value="{Binding Engagement}" />
                             <Border
-                                Height="20"
                                 Width="22"
-                                Background="{DynamicResource SystemChromeHighColor}"
+                                Height="20"
+                                Margin="0,0,0,0"
                                 HorizontalAlignment="Left"
                                 VerticalAlignment="Center"
-                                Margin="0,0,0,0"
+                                Background="{DynamicResource SystemChromeHighColor}"
                                 IsVisible="{Binding EngagementLevel, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:EngagementType.Indifferent}}" />
                             <Border
-                                Height="20"
                                 Width="20"
+                                Height="20"
+                                Margin="1,0,0,2"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
                                 Background="{DynamicResource SystemChromeHighColor}"
                                 CornerRadius="0,10,11,0"
-                                HorizontalAlignment="Left"
-                                VerticalAlignment="Center"
-                                Margin="1,0,0,2"
                                 IsVisible="{Binding EngagementLevel, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:EngagementType.Balanced}}" />
                             <material:MaterialIcon
-                                Kind="WaterDrop"
-                                IconSize="20"
-                                Foreground="{DynamicResource SystemChromeHighColor}"
+                                Margin="3,0,0,0"
                                 HorizontalAlignment="Left"
                                 VerticalAlignment="Center"
-                                Margin="3,0,0,0"
-                                IsVisible="{Binding EngagementLevel, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:EngagementType.Interested}}" />
+                                Foreground="{DynamicResource SystemChromeHighColor}"
+                                IconSize="20"
+                                IsVisible="{Binding EngagementLevel, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:EngagementType.Interested}}"
+                                Kind="WaterDrop" />
                             <LucideIcon
                                 x:Name="EngagementIcon"
-                                Size="18"
-                                StrokeWidth="2.5"
                                 Margin="2,0,0,0"
                                 HorizontalAlignment="Left"
                                 VerticalAlignment="Center"
-                                Classes.indifferent="{Binding EngagementLevel, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:EngagementType.Indifferent}}"
                                 Classes.balanced="{Binding EngagementLevel, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:EngagementType.Balanced}}"
-                                Classes.interested="{Binding EngagementLevel, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:EngagementType.Interested}}">
+                                Classes.indifferent="{Binding EngagementLevel, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:EngagementType.Indifferent}}"
+                                Classes.interested="{Binding EngagementLevel, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:EngagementType.Interested}}"
+                                Size="18"
+                                StrokeWidth="2.5">
                                 <LucideIcon.Styles>
                                     <Style Selector="LucideIcon.indifferent">
                                         <Setter Property="Foreground" Value="#aaa1ff" />
@@ -522,37 +524,37 @@
                             </LucideIcon>
                         </Grid>
 
-                        <!-- Mood -->
-                        <Grid 
-                            Background="Transparent" 
-                            ToolTip.Tip="{Binding Mood, StringFormat={}Mood [{0:F0}/100]}"
-                            ToolTip.Placement="Bottom"
+                        <!--  Mood  -->
+                        <Grid
+                            Background="Transparent"
                             ToolTip.HorizontalOffset="0"
+                            ToolTip.Placement="Bottom"
+                            ToolTip.Tip="{Binding Mood, StringFormat={}Mood [{0:F0}/100]}"
                             ToolTip.VerticalOffset="4">
                             <ProgressBar
-                                BorderBrush="{Binding #MoodIcon.Foreground}"
-                                Value="{Binding Mood}"
-                                Foreground="{Binding #MoodIcon.Foreground}"
-                                MinHeight="0"
                                 MinWidth="0"
-                                Classes.mini-style="{Binding #FakeTopBorder.Bounds.Width, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter={StaticResource TopPanelEdgeWidth}}" />
+                                MinHeight="0"
+                                BorderBrush="{Binding #MoodIcon.Foreground}"
+                                Classes.mini-style="{Binding #FakeTopBorder.Bounds.Width, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter={StaticResource TopPanelEdgeWidth}}"
+                                Foreground="{Binding #MoodIcon.Foreground}"
+                                Value="{Binding Mood}" />
                             <Border
-                                Height="22"
                                 Width="22"
-                                CornerRadius="11"
-                                Background="{DynamicResource SystemChromeHighColor}"
+                                Height="22"
                                 HorizontalAlignment="Left"
-                                VerticalAlignment="Center" />
+                                VerticalAlignment="Center"
+                                Background="{DynamicResource SystemChromeHighColor}"
+                                CornerRadius="11" />
                             <LucideIcon
                                 x:Name="MoodIcon"
-                                Size="18"
-                                StrokeWidth="2.5"
                                 Margin="2,0,0,0"
                                 HorizontalAlignment="Left"
                                 VerticalAlignment="Center"
                                 Classes.bad="{Binding MoodLevel, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:MoodType.Bad}}"
+                                Classes.best="{Binding MoodLevel, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:MoodType.Best}}"
                                 Classes.normal="{Binding MoodLevel, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:MoodType.Normal}}"
-                                Classes.best="{Binding MoodLevel, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:MoodType.Best}}">
+                                Size="18"
+                                StrokeWidth="2.5">
                                 <LucideIcon.Styles>
                                     <Style Selector="LucideIcon.bad">
                                         <Setter Property="Foreground" Value="#ff3a3a" />
@@ -570,28 +572,28 @@
                             </LucideIcon>
                         </Grid>
 
-                        <!-- Energy -->
-                        <Grid 
-                            Background="Transparent" 
-                            ToolTip.Tip="{Binding Energy, StringFormat={}Energy [{0:F0}/100]}"
-                            ToolTip.Placement="Bottom"
+                        <!--  Energy  -->
+                        <Grid
+                            Background="Transparent"
                             ToolTip.HorizontalOffset="0"
+                            ToolTip.Placement="Bottom"
+                            ToolTip.Tip="{Binding Energy, StringFormat={}Energy [{0:F0}/100]}"
                             ToolTip.VerticalOffset="4">
                             <ProgressBar
-                                BorderBrush="{Binding #EnergyIcon.Foreground}"
-                                Value="{Binding Energy}"
-                                Foreground="{Binding #EnergyIcon.Foreground}"
-                                MinHeight="0"
                                 MinWidth="0"
-                                Classes.mini-style="{Binding #FakeTopBorder.Bounds.Width, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter={StaticResource TopPanelEdgeWidth}}" />
+                                MinHeight="0"
+                                BorderBrush="{Binding #EnergyIcon.Foreground}"
+                                Classes.mini-style="{Binding #FakeTopBorder.Bounds.Width, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter={StaticResource TopPanelEdgeWidth}}"
+                                Foreground="{Binding #EnergyIcon.Foreground}"
+                                Value="{Binding Energy}" />
                             <Border
-                                Height="24"
                                 Width="12"
-                                Background="{DynamicResource SystemChromeHighColor}"
-                                RenderTransformOrigin="50%,50%"
+                                Height="24"
                                 HorizontalAlignment="Left"
                                 VerticalAlignment="Center"
-                                Classes.not-low="{Binding EnergyLevel, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter={x:Static models:EnergyType.Low}}">
+                                Background="{DynamicResource SystemChromeHighColor}"
+                                Classes.not-low="{Binding EnergyLevel, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter={x:Static models:EnergyType.Low}}"
+                                RenderTransformOrigin="50%,50%">
                                 <Border.RenderTransform>
                                     <RotateTransform Angle="45" />
                                 </Border.RenderTransform>
@@ -608,13 +610,13 @@
                             </Border>
                             <LucideIcon
                                 x:Name="EnergyIcon"
-                                Size="18"
-                                StrokeWidth="2.5"
                                 HorizontalAlignment="Left"
                                 VerticalAlignment="Center"
+                                Classes.high="{Binding EnergyLevel, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:EnergyType.High}}"
                                 Classes.low="{Binding EnergyLevel, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:EnergyType.Low}}"
                                 Classes.middle="{Binding EnergyLevel, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:EnergyType.Middle}}"
-                                Classes.high="{Binding EnergyLevel, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:EnergyType.High}}">
+                                Size="18"
+                                StrokeWidth="2.5">
                                 <LucideIcon.Styles>
                                     <Style Selector="LucideIcon.low">
                                         <Setter Property="Foreground" Value="#ff3a3a" />
@@ -642,43 +644,24 @@
                         Orientation="Horizontal"
                         Spacing="2"
                         Tag="{Binding IsWindows}">
-                        <StackPanel.Styles>
+                        <!-- <StackPanel.Styles>
                             <Style Selector="StackPanel[Tag=False]">
                                 <Setter Property="Margin" Value="6,0,6,0" />
                             </Style>
                             <Style Selector="StackPanel[Tag=True]">
                                 <Setter Property="Margin" Value="6,0,0,0" />
                             </Style>
-                        </StackPanel.Styles>
-                        <Button
-                            Classes="icon-button"
-                            ToolTip.HorizontalOffset="0"
-                            ToolTip.Placement="Bottom"
-                            ToolTip.Tip="Поиск"
-                            ToolTip.VerticalOffset="4">
-                            <LucideIcon Kind="Search" Size="20" />
-                        </Button>
-                        <Button
-                            Classes="icon-button"
-                            Command="{Binding SettingsCommand}"
-                            ToolTip.HorizontalOffset="0"
-                            ToolTip.Placement="BottomEdgeAlignedLeft"
-                            ToolTip.Tip="Настройки"
-                            ToolTip.VerticalOffset="4">
-                            <LucideIcon Kind="Settings" Size="20" />
-                        </Button>
+                        </StackPanel.Styles>-->
                         <CaptionButtons
                             MaxHeight="100"
                             IsVisible="{Binding IsWindows}"
                             Tag="{Binding IsMaximized}">
                             <CaptionButtons.Styles>
                                 <Style Selector="CaptionButtons[Tag=False] Button#PART_RestoreButton Path">
-                                    <Setter Property="Data"
-                                            Value="M2048 2048v-2048h-2048v2048h2048zM1843 1843h-1638v-1638h1638v1638z" />
+                                    <Setter Property="Data" Value="M2048 2048v-2048h-2048v2048h2048zM1843 1843h-1638v-1638h1638v1638z" />
                                 </Style>
                                 <Style Selector="CaptionButtons[Tag=True] Button#PART_RestoreButton Path">
-                                    <Setter Property="Data"
-                                            Value="M2048 410h-410v-410h-1638v1638h410v410h1638v-1638zM1434 1434h-1229v-1229h1229v1229zM1843 1843h-1229v-205h1024v-1024h205v1229z" />
+                                    <Setter Property="Data" Value="M2048 410h-410v-410h-1638v1638h410v410h1638v-1638zM1434 1434h-1229v-1229h1229v1229zM1843 1843h-1229v-205h1024v-1024h205v1229z" />
                                 </Style>
                                 <Style Selector="Button">
                                     <Setter Property="Width" Value="44" />
@@ -699,8 +682,7 @@
                                     <Setter Property="Background" Value="{DynamicResource ButtonBackgroundPointerOver}" />
                                     <Setter Property="Opacity" Value="0.7" />
                                 </Style>
-                                <Style
-                                    Selector="Button#PART_CloseButton:pressed /template/ ContentPresenter#PART_ContentPresenter">
+                                <Style Selector="Button#PART_CloseButton:pressed /template/ ContentPresenter#PART_ContentPresenter">
                                     <Setter Property="Background">
                                         <Setter.Value>
                                             <SolidColorBrush Opacity="0.7" Color="Red" />
@@ -722,43 +704,79 @@
                     <ColumnDefinition Width="40" />
                     <ColumnDefinition Width="400" MinWidth="400" />
                     <ColumnDefinition />
-                    <ColumnDefinition Width="350" MinWidth="256" />
-                    <ColumnDefinition Width="40" />
                 </Grid.ColumnDefinitions>
                 <Border Background="{DynamicResource SystemChromeMediumColor}" BorderThickness="0,0,1,0">
-                    <StackPanel
-                        Margin="5"
-                        HorizontalAlignment="Center"
-                        Spacing="4">
-                        <ToggleButton
-                            x:Name="ChatButton"
-                            IsChecked="True"
-                            IsCheckedChanged="LeftToggleButton_OnIsCheckedChanged"
-                            ToolTip.HorizontalOffset="4"
-                            ToolTip.Placement="Right"
-                            ToolTip.Tip="Чат"
-                            ToolTip.VerticalOffset="0">
-                            <LucideIcon Kind="MessageSquareText" Size="20" />
-                        </ToggleButton>
-                        <ToggleButton
-                            x:Name="MemoryButton"
-                            IsCheckedChanged="LeftToggleButton_OnIsCheckedChanged"
-                            ToolTip.HorizontalOffset="4"
-                            ToolTip.Placement="Right"
-                            ToolTip.Tip="База знаний"
-                            ToolTip.VerticalOffset="0">
-                            <LucideIcon Kind="BookText" Size="20" />
-                        </ToggleButton>
-                        <ToggleButton
-                            x:Name="PersonalityButton"
-                            IsCheckedChanged="LeftToggleButton_OnIsCheckedChanged"
-                            ToolTip.HorizontalOffset="4"
-                            ToolTip.Placement="Right"
-                            ToolTip.Tip="Личность"
-                            ToolTip.VerticalOffset="0">
-                            <LucideIcon Kind="Brain" Size="20" />
-                        </ToggleButton>
-                    </StackPanel>
+                    <Grid>
+                        <StackPanel
+                            Margin="5"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Top"
+                            Spacing="4">
+                            <ToggleButton
+                                x:Name="ChatButton"
+                                IsChecked="True"
+                                IsCheckedChanged="LeftToggleButton_OnIsCheckedChanged"
+                                ToolTip.HorizontalOffset="4"
+                                ToolTip.Placement="Right"
+                                ToolTip.Tip="Чат"
+                                ToolTip.VerticalOffset="0">
+                                <LucideIcon Kind="MessageSquareText" Size="20" />
+                            </ToggleButton>
+                            <ToggleButton
+                                x:Name="MemoryButton"
+                                IsCheckedChanged="LeftToggleButton_OnIsCheckedChanged"
+                                ToolTip.HorizontalOffset="4"
+                                ToolTip.Placement="Right"
+                                ToolTip.Tip="База знаний"
+                                ToolTip.VerticalOffset="0">
+                                <LucideIcon Kind="BookText" Size="20" />
+                            </ToggleButton>
+                            <ToggleButton
+                                x:Name="PersonalityButton"
+                                IsCheckedChanged="LeftToggleButton_OnIsCheckedChanged"
+                                ToolTip.HorizontalOffset="4"
+                                ToolTip.Placement="Right"
+                                ToolTip.Tip="Личность"
+                                ToolTip.VerticalOffset="0">
+                                <LucideIcon Kind="Brain" Size="20" />
+                            </ToggleButton>
+                        </StackPanel>
+                        <StackPanel
+                            Margin="5"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Bottom"
+                            Spacing="4">
+
+                            <ToggleButton
+                                x:Name="ParametersButton"
+                                IsCheckedChanged="LeftToggleButton_OnIsCheckedChanged"
+                                ToolTip.HorizontalOffset="4"
+                                ToolTip.Placement="Right"
+                                ToolTip.Tip="Параметры ИИ"
+                                ToolTip.VerticalOffset="0">
+                                <LucideIcon Kind="Settings2" Size="20" />
+                            </ToggleButton>
+                            <ToggleButton
+                                x:Name="ModelButton"
+                                IsCheckedChanged="LeftToggleButton_OnIsCheckedChanged"
+                                ToolTip.HorizontalOffset="4"
+                                ToolTip.Placement="Right"
+                                ToolTip.Tip="Источник модели"
+                                ToolTip.VerticalOffset="0">
+                                <LucideIcon Kind="Server" Size="20" />
+                            </ToggleButton>
+                            <Button
+                                Classes="icon-button"
+                                Command="{Binding SettingsCommand}"
+                                ToolTip.HorizontalOffset="4"
+                                ToolTip.Placement="Right"
+                                ToolTip.Tip="Настройки"
+                                ToolTip.VerticalOffset="0">
+                                <LucideIcon Kind="Settings" Size="20"/>
+                            </Button>
+
+                        </StackPanel>
+                    </Grid>
                 </Border>
 
 
@@ -783,30 +801,27 @@
 
                                     <ListBox.ItemsPanel>
                                         <ItemsPanelTemplate>
-                                            <!-- Обычный StackPanel отключает виртуализацию -->
+                                            <!--  Обычный StackPanel отключает виртуализацию  -->
                                             <StackPanel />
                                         </ItemsPanelTemplate>
                                     </ListBox.ItemsPanel>
-                                    
+
                                     <ListBox.ItemContainerTheme>
                                         <ControlTheme x:DataType="vm:MessageVM" TargetType="ListBoxItem">
                                             <Setter Property="Background" Value="Transparent" />
-                                            <Setter 
-                                                Property="IsHitTestVisible"
-                                                Value="{Binding MessageModel.Role, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter=temp}" />
+                                            <Setter Property="IsHitTestVisible" Value="{Binding MessageModel.Role, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter=temp}" />
                                         </ControlTheme>
                                     </ListBox.ItemContainerTheme>
+
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
                                             <Grid>
-                                                <Border Background="{DynamicResource SystemAccentColor}"
-                                                        Tag="{Binding IsHighlighted}">
+                                                <Border Background="{DynamicResource SystemAccentColor}" Tag="{Binding IsHighlighted}">
                                                     <Border.Styles>
                                                         <Style Selector="Border[Tag=True]">
                                                             <Setter Property="Transitions">
                                                                 <Transitions>
-                                                                    <DoubleTransition Property="Opacity"
-                                                                            Duration="0:0:0.0" />
+                                                                    <DoubleTransition Property="Opacity" Duration="0:0:0.0" />
                                                                 </Transitions>
                                                             </Setter>
                                                             <Setter Property="Opacity" Value="0.4" />
@@ -814,16 +829,14 @@
                                                         <Style Selector="Border[Tag=False]">
                                                             <Setter Property="Transitions">
                                                                 <Transitions>
-                                                                    <DoubleTransition Property="Opacity"
-                                                                            Duration="0:0:0.5" />
+                                                                    <DoubleTransition Property="Opacity" Duration="0:0:0.5" />
                                                                 </Transitions>
                                                             </Setter>
                                                             <Setter Property="Opacity" Value="0" />
                                                         </Style>
                                                     </Border.Styles>
                                                 </Border>
-                                                <Border x:DataType="vm:MainVM"
-                                                        DataContext="{Binding $parent[ListBox].DataContext}">
+                                                <Border x:DataType="vm:MainVM" DataContext="{Binding $parent[ListBox].DataContext}">
                                                     <Border.Tag>
                                                         <MultiBinding Converter="{x:Static BoolConverters.And}">
                                                             <Binding Path="$parent[ListBoxItem].IsSelected" />
@@ -832,8 +845,7 @@
                                                     </Border.Tag>
                                                     <Border.Styles>
                                                         <Style Selector="Border[Tag=True]">
-                                                            <Setter Property="Background"
-                                                                    Value="{DynamicResource SystemAccentColor}" />
+                                                            <Setter Property="Background" Value="{DynamicResource SystemAccentColor}" />
                                                             <Setter Property="Opacity" Value="0.4" />
                                                         </Style>
                                                         <Style Selector="Border[Tag=False]">
@@ -900,9 +912,7 @@
                                                                                 Header="Ответить на сообщение"
                                                                                 IsVisible="{Binding !$parent[ListBoxItem].((vm:MessageVM)DataContext).IsFailed}">
                                                                                 <MenuItem.Icon>
-                                                                                    <LucideIcon
-                                                                                        Kind="MessageSquareReply"
-                                                                                        Size="20" />
+                                                                                    <LucideIcon Kind="MessageSquareReply" Size="20" />
                                                                                 </MenuItem.Icon>
                                                                             </MenuItem>
                                                                             <MenuItem
@@ -912,8 +922,7 @@
                                                                                 Header="Выбрать"
                                                                                 IsVisible="{Binding !IsMultiSelect}">
                                                                                 <MenuItem.Icon>
-                                                                                    <LucideIcon Kind="CircleCheck"
-                                                                                        Size="20" />
+                                                                                    <LucideIcon Kind="CircleCheck" Size="20" />
                                                                                 </MenuItem.Icon>
                                                                             </MenuItem>
                                                                             <MenuItem
@@ -923,8 +932,7 @@
                                                                                 Header="Отменить выбор"
                                                                                 IsVisible="{Binding IsMultiSelect}">
                                                                                 <MenuItem.Icon>
-                                                                                    <LucideIcon Kind="CircleX"
-                                                                                        Size="20" />
+                                                                                    <LucideIcon Kind="CircleX" Size="20" />
                                                                                 </MenuItem.Icon>
                                                                             </MenuItem>
                                                                             <MenuItem
@@ -937,20 +945,14 @@
                                                                                 </MenuItem.Icon>
                                                                                 <MenuItem.Styles>
                                                                                     <Style Selector="MenuItem">
-                                                                                        <Setter Property="Foreground"
-                                                                                            Value="Red" />
+                                                                                        <Setter Property="Foreground" Value="Red" />
                                                                                     </Style>
-                                                                                    <Style
-                                                                                        Selector="MenuItem:pointerover /template/ ContentPresenter#PART_HeaderPresenter, MenuItem:selected /template/ ContentPresenter#PART_HeaderPresenter">
-                                                                                        <Setter Property="Foreground"
-                                                                                            Value="Red" />
+                                                                                    <Style Selector="MenuItem:pointerover /template/ ContentPresenter#PART_HeaderPresenter, MenuItem:selected /template/ ContentPresenter#PART_HeaderPresenter">
+                                                                                        <Setter Property="Foreground" Value="Red" />
                                                                                     </Style>
-                                                                                    <Style
-                                                                                        Selector="MenuItem:pointerover /template/ Border#PART_LayoutRoot, MenuItem:selected /template/ Border#PART_LayoutRoot">
+                                                                                    <Style Selector="MenuItem:pointerover /template/ Border#PART_LayoutRoot, MenuItem:selected /template/ Border#PART_LayoutRoot">
                                                                                         <Setter Property="Background">
-                                                                                            <SolidColorBrush
-                                                                                                Opacity="0.15"
-                                                                                                Color="Red" />
+                                                                                            <SolidColorBrush Opacity="0.15" Color="Red" />
                                                                                         </Setter>
                                                                                     </Style>
                                                                                 </MenuItem.Styles>
@@ -982,9 +984,7 @@
                                                                                 Header="Ответить на сообщение"
                                                                                 IsVisible="{Binding !$parent[ListBoxItem].((vm:MessageVM)DataContext).IsFailed}">
                                                                                 <MenuItem.Icon>
-                                                                                    <LucideIcon
-                                                                                        Kind="MessageSquareReply"
-                                                                                        Size="20" />
+                                                                                    <LucideIcon Kind="MessageSquareReply" Size="20" />
                                                                                 </MenuItem.Icon>
                                                                             </MenuItem>
                                                                             <MenuItem
@@ -994,8 +994,7 @@
                                                                                 Header="Выбрать"
                                                                                 IsVisible="{Binding !IsMultiSelect}">
                                                                                 <MenuItem.Icon>
-                                                                                    <LucideIcon Kind="CircleCheck"
-                                                                                        Size="20" />
+                                                                                    <LucideIcon Kind="CircleCheck" Size="20" />
                                                                                 </MenuItem.Icon>
                                                                             </MenuItem>
                                                                             <MenuItem
@@ -1005,8 +1004,7 @@
                                                                                 Header="Отменить выбор"
                                                                                 IsVisible="{Binding IsMultiSelect}">
                                                                                 <MenuItem.Icon>
-                                                                                    <LucideIcon Kind="CircleX"
-                                                                                        Size="20" />
+                                                                                    <LucideIcon Kind="CircleX" Size="20" />
                                                                                 </MenuItem.Icon>
                                                                             </MenuItem>
                                                                             <MenuItem
@@ -1019,20 +1017,14 @@
                                                                                 </MenuItem.Icon>
                                                                                 <MenuItem.Styles>
                                                                                     <Style Selector="MenuItem">
-                                                                                        <Setter Property="Foreground"
-                                                                                            Value="Red" />
+                                                                                        <Setter Property="Foreground" Value="Red" />
                                                                                     </Style>
-                                                                                    <Style
-                                                                                        Selector="MenuItem:pointerover /template/ ContentPresenter#PART_HeaderPresenter, MenuItem:selected /template/ ContentPresenter#PART_HeaderPresenter">
-                                                                                        <Setter Property="Foreground"
-                                                                                            Value="Red" />
+                                                                                    <Style Selector="MenuItem:pointerover /template/ ContentPresenter#PART_HeaderPresenter, MenuItem:selected /template/ ContentPresenter#PART_HeaderPresenter">
+                                                                                        <Setter Property="Foreground" Value="Red" />
                                                                                     </Style>
-                                                                                    <Style
-                                                                                        Selector="MenuItem:pointerover /template/ Border#PART_LayoutRoot, MenuItem:selected /template/ Border#PART_LayoutRoot">
+                                                                                    <Style Selector="MenuItem:pointerover /template/ Border#PART_LayoutRoot, MenuItem:selected /template/ Border#PART_LayoutRoot">
                                                                                         <Setter Property="Background">
-                                                                                            <SolidColorBrush
-                                                                                                Opacity="0.15"
-                                                                                                Color="Red" />
+                                                                                            <SolidColorBrush Opacity="0.15" Color="Red" />
                                                                                         </Setter>
                                                                                     </Style>
                                                                                 </MenuItem.Styles>
@@ -1084,14 +1076,12 @@
                                                                             Tag="{Binding ReplyMessage.MessageModel.Role}">
                                                                             <Border.Styles>
                                                                                 <Style Selector="Border[Tag=user]">
-                                                                                    <Setter Property="Background"
-                                                                                        Value="{DynamicResource SystemAccentColor}" />
+                                                                                    <Setter Property="Background" Value="{DynamicResource SystemAccentColor}" />
                                                                                 </Style>
                                                                                 <Style Selector="Border[Tag=assistant]">
                                                                                     <Setter Property="Background">
                                                                                         <Setter.Value>
-                                                                                            <SolidColorBrush
-                                                                                                Color="{Binding SelectedArchetype.Color, Source={x:Static vm:SettingsVM.Instance}}" />
+                                                                                            <SolidColorBrush Color="{Binding SelectedArchetype.Color, Source={x:Static vm:SettingsVM.Instance}}" />
                                                                                         </Setter.Value>
                                                                                     </Setter>
                                                                                 </Style>
@@ -1108,24 +1098,20 @@
                                                                                 TextTrimming="CharacterEllipsis">
                                                                                 <TextBlock.Styles>
                                                                                     <Style Selector="Border[Tag=user]">
-                                                                                        <Setter Property="Background"
-                                                                                            Value="{DynamicResource SystemAccentColor}" />
+                                                                                        <Setter Property="Background" Value="{DynamicResource SystemAccentColor}" />
                                                                                     </Style>
-                                                                                    <Style
-                                                                                        Selector="Border[Tag=assistant]">
+                                                                                    <Style Selector="Border[Tag=assistant]">
                                                                                         <Setter Property="Background">
                                                                                             <Setter.Value>
-                                                                                                <SolidColorBrush
-                                                                                                    Color="{Binding SelectedArchetype.Color, Source={x:Static vm:SettingsVM.Instance}}" />
+                                                                                                <SolidColorBrush Color="{Binding SelectedArchetype.Color, Source={x:Static vm:SettingsVM.Instance}}" />
                                                                                             </Setter.Value>
                                                                                         </Setter>
                                                                                     </Style>
                                                                                     <Style Selector="TextBlock[Tag=assistant]">
-                                                                                        <Setter Property="Text" Value="{Binding Source={x:Static vm:SettingsVM.Instance}, Path=WaifuName}"/>
+                                                                                        <Setter Property="Text" Value="{Binding Source={x:Static vm:SettingsVM.Instance}, Path=WaifuName}" />
                                                                                         <Setter Property="Foreground">
                                                                                             <Setter.Value>
-                                                                                                <SolidColorBrush
-                                                                                                    Color="{Binding SelectedArchetype.Color, Source={x:Static vm:SettingsVM.Instance}}" />
+                                                                                                <SolidColorBrush Color="{Binding SelectedArchetype.Color, Source={x:Static vm:SettingsVM.Instance}}" />
                                                                                             </Setter.Value>
                                                                                         </Setter>
                                                                                     </Style>
@@ -1164,22 +1150,14 @@
                                                                                     <LucideIcon Kind="Copy" Size="20" />
                                                                                 </MenuItem.Icon>
                                                                                 <MenuItem.Styles>
-                                                                                    <Style
-                                                                                        Selector="MenuItem[Tag=True]">
-                                                                                        <Setter Property="Header"
-                                                                                            Value="Копировать выделенное" />
-                                                                                        <Setter Property="Command"
-                                                                                            Value="{Binding #PART_SelectableTextBlock.Copy}" />
+                                                                                    <Style Selector="MenuItem[Tag=True]">
+                                                                                        <Setter Property="Header" Value="Копировать выделенное" />
+                                                                                        <Setter Property="Command" Value="{Binding #PART_SelectableTextBlock.Copy}" />
                                                                                     </Style>
-                                                                                    <Style
-                                                                                        Selector="MenuItem[Tag=False]">
-                                                                                        <Setter Property="Header"
-                                                                                            Value="Копировать текст" />
-                                                                                        <Setter Property="Command"
-                                                                                            Value="{Binding CopyMessageTextCommand}" />
-                                                                                        <Setter
-                                                                                            Property="CommandParameter"
-                                                                                            Value="{Binding #PART_SelectableTextBlock}" />
+                                                                                    <Style Selector="MenuItem[Tag=False]">
+                                                                                        <Setter Property="Header" Value="Копировать текст" />
+                                                                                        <Setter Property="Command" Value="{Binding CopyMessageTextCommand}" />
+                                                                                        <Setter Property="CommandParameter" Value="{Binding #PART_SelectableTextBlock}" />
                                                                                     </Style>
                                                                                 </MenuItem.Styles>
                                                                             </MenuItem>
@@ -1189,40 +1167,28 @@
                                                                                 IsVisible="{Binding !$parent[ListBoxItem].((vm:MessageVM)DataContext).IsFailed}"
                                                                                 Tag="{Binding #PART_SelectableTextBlock.CanCopy}">
                                                                                 <MenuItem.Styles>
-                                                                                    <Style
-                                                                                        Selector="MenuItem[Tag=True]">
-                                                                                        <Setter Property="Header"
-                                                                                            Value="Ответить на цитату" />
+                                                                                    <Style Selector="MenuItem[Tag=True]">
+                                                                                        <Setter Property="Header" Value="Ответить на цитату" />
                                                                                         <Setter Property="Icon">
                                                                                             <Setter.Value>
                                                                                                 <Template>
-                                                                                                    <LucideIcon
-                                                                                                        Kind="MessageSquareQuote"
-                                                                                                        Size="20" />
+                                                                                                    <LucideIcon Kind="MessageSquareQuote" Size="20" />
                                                                                                 </Template>
                                                                                             </Setter.Value>
                                                                                         </Setter>
-                                                                                        <Setter Property="Command"
-                                                                                            Value="{Binding MakeQuoteCommand}" />
-                                                                                        <Setter
-                                                                                            Property="CommandParameter"
-                                                                                            Value="{Binding #PART_SelectableTextBlock.SelectedText}" />
+                                                                                        <Setter Property="Command" Value="{Binding MakeQuoteCommand}" />
+                                                                                        <Setter Property="CommandParameter" Value="{Binding #PART_SelectableTextBlock.SelectedText}" />
                                                                                     </Style>
-                                                                                    <Style
-                                                                                        Selector="MenuItem[Tag=False]">
-                                                                                        <Setter Property="Header"
-                                                                                            Value="Ответить на сообщение" />
+                                                                                    <Style Selector="MenuItem[Tag=False]">
+                                                                                        <Setter Property="Header" Value="Ответить на сообщение" />
                                                                                         <Setter Property="Icon">
                                                                                             <Setter.Value>
                                                                                                 <Template>
-                                                                                                    <LucideIcon
-                                                                                                        Kind="MessageSquareReply"
-                                                                                                        Size="20" />
+                                                                                                    <LucideIcon Kind="MessageSquareReply" Size="20" />
                                                                                                 </Template>
                                                                                             </Setter.Value>
                                                                                         </Setter>
-                                                                                        <Setter Property="Command"
-                                                                                            Value="{Binding MakeReplyCommand}" />
+                                                                                        <Setter Property="Command" Value="{Binding MakeReplyCommand}" />
                                                                                     </Style>
                                                                                 </MenuItem.Styles>
                                                                             </MenuItem>
@@ -1233,8 +1199,7 @@
                                                                                 Header="Выбрать"
                                                                                 IsVisible="{Binding !IsMultiSelect}">
                                                                                 <MenuItem.Icon>
-                                                                                    <LucideIcon Kind="CircleCheck"
-                                                                                        Size="20" />
+                                                                                    <LucideIcon Kind="CircleCheck" Size="20" />
                                                                                 </MenuItem.Icon>
                                                                             </MenuItem>
                                                                             <MenuItem
@@ -1244,8 +1209,7 @@
                                                                                 Header="Отменить выбор"
                                                                                 IsVisible="{Binding IsMultiSelect}">
                                                                                 <MenuItem.Icon>
-                                                                                    <LucideIcon Kind="CircleX"
-                                                                                        Size="20" />
+                                                                                    <LucideIcon Kind="CircleX" Size="20" />
                                                                                 </MenuItem.Icon>
                                                                             </MenuItem>
                                                                             <MenuItem
@@ -1258,20 +1222,14 @@
                                                                                 </MenuItem.Icon>
                                                                                 <MenuItem.Styles>
                                                                                     <Style Selector="MenuItem">
-                                                                                        <Setter Property="Foreground"
-                                                                                            Value="Red" />
+                                                                                        <Setter Property="Foreground" Value="Red" />
                                                                                     </Style>
-                                                                                    <Style
-                                                                                        Selector="MenuItem:pointerover /template/ ContentPresenter#PART_HeaderPresenter, MenuItem:selected /template/ ContentPresenter#PART_HeaderPresenter">
-                                                                                        <Setter Property="Foreground"
-                                                                                            Value="Red" />
+                                                                                    <Style Selector="MenuItem:pointerover /template/ ContentPresenter#PART_HeaderPresenter, MenuItem:selected /template/ ContentPresenter#PART_HeaderPresenter">
+                                                                                        <Setter Property="Foreground" Value="Red" />
                                                                                     </Style>
-                                                                                    <Style
-                                                                                        Selector="MenuItem:pointerover /template/ Border#PART_LayoutRoot, MenuItem:selected /template/ Border#PART_LayoutRoot">
+                                                                                    <Style Selector="MenuItem:pointerover /template/ Border#PART_LayoutRoot, MenuItem:selected /template/ Border#PART_LayoutRoot">
                                                                                         <Setter Property="Background">
-                                                                                            <SolidColorBrush
-                                                                                                Opacity="0.15"
-                                                                                                Color="Red" />
+                                                                                            <SolidColorBrush Opacity="0.15" Color="Red" />
                                                                                         </Setter>
                                                                                     </Style>
                                                                                 </MenuItem.Styles>
@@ -1279,8 +1237,7 @@
                                                                         </ContextMenu>
                                                                     </SelectableTextBlock.ContextMenu>
                                                                 </SelectableTextBlock>
-                                                                <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto"
-                                                                      IsVisible="{Binding MessageModel.Role, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter=temp}">
+                                                                <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto" IsVisible="{Binding MessageModel.Role, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter=temp}">
                                                                     <LucideIcon
                                                                         Margin="0,0,3,0"
                                                                         Foreground="{DynamicResource SystemBaseMediumColor}"
@@ -1300,12 +1257,10 @@
                                                                         Tag="{Binding #PART_Column2.Bounds.Width}">
                                                                         <Separator.Styles>
                                                                             <Style Selector="Separator">
-                                                                                <Setter Property="IsVisible"
-                                                                                    Value="False" />
+                                                                                <Setter Property="IsVisible" Value="False" />
                                                                             </Style>
                                                                             <Style Selector="Separator[Tag=0]">
-                                                                                <Setter Property="IsVisible"
-                                                                                    Value="True" />
+                                                                                <Setter Property="IsVisible" Value="True" />
                                                                             </Style>
                                                                         </Separator.Styles>
                                                                     </Separator>
@@ -1328,10 +1283,8 @@
                                                                     <Style Selector="Ellipse.dot">
                                                                         <Setter Property="Width" Value="8" />
                                                                         <Setter Property="Height" Value="8" />
-                                                                        <Setter Property="Fill"
-                                                                                Value="{DynamicResource SystemBaseHighColor}" />
-                                                                        <Setter Property="RenderTransformOrigin"
-                                                                                Value="50%,50%" />
+                                                                        <Setter Property="Fill" Value="{DynamicResource SystemBaseHighColor}" />
+                                                                        <Setter Property="RenderTransformOrigin" Value="50%,50%" />
                                                                     </Style>
                                                                     <Style Selector="Ellipse.dot1">
                                                                         <Style.Animations>
@@ -1340,34 +1293,19 @@
                                                                                 IterationCount="Infinite"
                                                                                 Duration="0:0:1.2">
                                                                                 <KeyFrame Cue="0%">
-                                                                                    <Setter Property="Opacity"
-                                                                                        Value="0.2" />
-                                                                                    <Setter
-                                                                                        Property="ScaleTransform.ScaleX"
-                                                                                        Value="0.8" />
-                                                                                    <Setter
-                                                                                        Property="ScaleTransform.ScaleY"
-                                                                                        Value="0.8" />
+                                                                                    <Setter Property="Opacity" Value="0.2" />
+                                                                                    <Setter Property="ScaleTransform.ScaleX" Value="0.8" />
+                                                                                    <Setter Property="ScaleTransform.ScaleY" Value="0.8" />
                                                                                 </KeyFrame>
                                                                                 <KeyFrame Cue="50%">
-                                                                                    <Setter Property="Opacity"
-                                                                                        Value="1" />
-                                                                                    <Setter
-                                                                                        Property="ScaleTransform.ScaleX"
-                                                                                        Value="1.2" />
-                                                                                    <Setter
-                                                                                        Property="ScaleTransform.ScaleY"
-                                                                                        Value="1.2" />
+                                                                                    <Setter Property="Opacity" Value="1" />
+                                                                                    <Setter Property="ScaleTransform.ScaleX" Value="1.2" />
+                                                                                    <Setter Property="ScaleTransform.ScaleY" Value="1.2" />
                                                                                 </KeyFrame>
                                                                                 <KeyFrame Cue="100%">
-                                                                                    <Setter Property="Opacity"
-                                                                                        Value="0.2" />
-                                                                                    <Setter
-                                                                                        Property="ScaleTransform.ScaleX"
-                                                                                        Value="0.8" />
-                                                                                    <Setter
-                                                                                        Property="ScaleTransform.ScaleY"
-                                                                                        Value="0.8" />
+                                                                                    <Setter Property="Opacity" Value="0.2" />
+                                                                                    <Setter Property="ScaleTransform.ScaleX" Value="0.8" />
+                                                                                    <Setter Property="ScaleTransform.ScaleY" Value="0.8" />
                                                                                 </KeyFrame>
                                                                             </Animation>
                                                                         </Style.Animations>
@@ -1379,34 +1317,19 @@
                                                                                 IterationCount="Infinite"
                                                                                 Duration="0:0:1.2">
                                                                                 <KeyFrame Cue="0%">
-                                                                                    <Setter Property="Opacity"
-                                                                                        Value="0.2" />
-                                                                                    <Setter
-                                                                                        Property="ScaleTransform.ScaleX"
-                                                                                        Value="0.8" />
-                                                                                    <Setter
-                                                                                        Property="ScaleTransform.ScaleY"
-                                                                                        Value="0.8" />
+                                                                                    <Setter Property="Opacity" Value="0.2" />
+                                                                                    <Setter Property="ScaleTransform.ScaleX" Value="0.8" />
+                                                                                    <Setter Property="ScaleTransform.ScaleY" Value="0.8" />
                                                                                 </KeyFrame>
                                                                                 <KeyFrame Cue="50%">
-                                                                                    <Setter Property="Opacity"
-                                                                                        Value="1" />
-                                                                                    <Setter
-                                                                                        Property="ScaleTransform.ScaleX"
-                                                                                        Value="1.2" />
-                                                                                    <Setter
-                                                                                        Property="ScaleTransform.ScaleY"
-                                                                                        Value="1.2" />
+                                                                                    <Setter Property="Opacity" Value="1" />
+                                                                                    <Setter Property="ScaleTransform.ScaleX" Value="1.2" />
+                                                                                    <Setter Property="ScaleTransform.ScaleY" Value="1.2" />
                                                                                 </KeyFrame>
                                                                                 <KeyFrame Cue="100%">
-                                                                                    <Setter Property="Opacity"
-                                                                                        Value="0.2" />
-                                                                                    <Setter
-                                                                                        Property="ScaleTransform.ScaleX"
-                                                                                        Value="0.8" />
-                                                                                    <Setter
-                                                                                        Property="ScaleTransform.ScaleY"
-                                                                                        Value="0.8" />
+                                                                                    <Setter Property="Opacity" Value="0.2" />
+                                                                                    <Setter Property="ScaleTransform.ScaleX" Value="0.8" />
+                                                                                    <Setter Property="ScaleTransform.ScaleY" Value="0.8" />
                                                                                 </KeyFrame>
                                                                             </Animation>
                                                                         </Style.Animations>
@@ -1418,34 +1341,19 @@
                                                                                 IterationCount="Infinite"
                                                                                 Duration="0:0:1.2">
                                                                                 <KeyFrame Cue="0%">
-                                                                                    <Setter Property="Opacity"
-                                                                                        Value="0.2" />
-                                                                                    <Setter
-                                                                                        Property="ScaleTransform.ScaleX"
-                                                                                        Value="0.8" />
-                                                                                    <Setter
-                                                                                        Property="ScaleTransform.ScaleY"
-                                                                                        Value="0.8" />
+                                                                                    <Setter Property="Opacity" Value="0.2" />
+                                                                                    <Setter Property="ScaleTransform.ScaleX" Value="0.8" />
+                                                                                    <Setter Property="ScaleTransform.ScaleY" Value="0.8" />
                                                                                 </KeyFrame>
                                                                                 <KeyFrame Cue="50%">
-                                                                                    <Setter Property="Opacity"
-                                                                                        Value="1" />
-                                                                                    <Setter
-                                                                                        Property="ScaleTransform.ScaleX"
-                                                                                        Value="1.2" />
-                                                                                    <Setter
-                                                                                        Property="ScaleTransform.ScaleY"
-                                                                                        Value="1.2" />
+                                                                                    <Setter Property="Opacity" Value="1" />
+                                                                                    <Setter Property="ScaleTransform.ScaleX" Value="1.2" />
+                                                                                    <Setter Property="ScaleTransform.ScaleY" Value="1.2" />
                                                                                 </KeyFrame>
                                                                                 <KeyFrame Cue="100%">
-                                                                                    <Setter Property="Opacity"
-                                                                                        Value="0.2" />
-                                                                                    <Setter
-                                                                                        Property="ScaleTransform.ScaleX"
-                                                                                        Value="0.8" />
-                                                                                    <Setter
-                                                                                        Property="ScaleTransform.ScaleY"
-                                                                                        Value="0.8" />
+                                                                                    <Setter Property="Opacity" Value="0.2" />
+                                                                                    <Setter Property="ScaleTransform.ScaleX" Value="0.8" />
+                                                                                    <Setter Property="ScaleTransform.ScaleY" Value="0.8" />
                                                                                 </KeyFrame>
                                                                             </Animation>
                                                                         </Style.Animations>
@@ -1491,8 +1399,7 @@
                                             TextWrapping="Wrap">
                                             <SelectableTextBlock.ContextMenu>
                                                 <ContextMenu>
-                                                    <MenuItem Command="{Binding #ErrorTextBlock.Copy}"
-                                                              Header="Копировать">
+                                                    <MenuItem Command="{Binding #ErrorTextBlock.Copy}" Header="Копировать">
                                                         <MenuItem.Icon>
                                                             <LucideIcon Kind="Copy" Size="20" />
                                                         </MenuItem.Icon>
@@ -1510,16 +1417,12 @@
                                             Command="{Binding CloseErrorMessageCommand}"
                                             Foreground="{DynamicResource SystemErrorTextColor}">
                                             <Button.Styles>
-                                                <Style
-                                                    Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-                                                    <Setter Property="Foreground"
-                                                            Value="{DynamicResource SystemErrorTextColor}" />
+                                                <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                                                    <Setter Property="Foreground" Value="{DynamicResource SystemErrorTextColor}" />
                                                     <Setter Property="Background" Value="{DynamicResource ErrorColor}" />
                                                 </Style>
-                                                <Style
-                                                    Selector="Button:pressed /template/ ContentPresenter#PART_ContentPresenter">
-                                                    <Setter Property="Foreground"
-                                                            Value="{DynamicResource SystemErrorTextColor}" />
+                                                <Style Selector="Button:pressed /template/ ContentPresenter#PART_ContentPresenter">
+                                                    <Setter Property="Foreground" Value="{DynamicResource SystemErrorTextColor}" />
                                                     <Setter Property="Background" Value="{DynamicResource ErrorColor}" />
                                                 </Style>
                                             </Button.Styles>
@@ -1537,16 +1440,12 @@
                                             CommandParameter="{Binding #ErrorTextBlock}"
                                             Foreground="{DynamicResource SystemErrorTextColor}">
                                             <Button.Styles>
-                                                <Style
-                                                    Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-                                                    <Setter Property="Foreground"
-                                                            Value="{DynamicResource SystemErrorTextColor}" />
+                                                <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                                                    <Setter Property="Foreground" Value="{DynamicResource SystemErrorTextColor}" />
                                                     <Setter Property="Background" Value="{DynamicResource ErrorColor}" />
                                                 </Style>
-                                                <Style
-                                                    Selector="Button:pressed /template/ ContentPresenter#PART_ContentPresenter">
-                                                    <Setter Property="Foreground"
-                                                            Value="{DynamicResource SystemErrorTextColor}" />
+                                                <Style Selector="Button:pressed /template/ ContentPresenter#PART_ContentPresenter">
+                                                    <Setter Property="Foreground" Value="{DynamicResource SystemErrorTextColor}" />
                                                     <Setter Property="Background" Value="{DynamicResource ErrorColor}" />
                                                 </Style>
                                             </Button.Styles>
@@ -1645,13 +1544,10 @@
                                             TextWrapping="Wrap"
                                             Watermark="Сообщение...">
                                             <TextBox.Resources>
-                                                <SolidColorBrush x:Key="TextControlBorderBrushPointerOver"
-                                                                 Color="Transparent" />
+                                                <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="Transparent" />
                                                 <SolidColorBrush x:Key="TextControlBorderBrush" Color="Transparent" />
-                                                <SolidColorBrush x:Key="TextControlBorderBrushDisabled"
-                                                                 Color="Transparent" />
-                                                <SolidColorBrush x:Key="TextControlBorderBrushFocused"
-                                                                 Color="Transparent" />
+                                                <SolidColorBrush x:Key="TextControlBorderBrushDisabled" Color="Transparent" />
+                                                <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="Transparent" />
                                                 <SolidColorBrush x:Key="TextControlBackgroundFocused">Transparent</SolidColorBrush>
                                                 <SolidColorBrush x:Key="TextControlBackgroundPointerOver">Transparent</SolidColorBrush>
                                             </TextBox.Resources>
@@ -1661,13 +1557,11 @@
                                                 </Style>
                                             </TextBox.Styles>
                                             <TextBox.KeyBindings>
-                                                <KeyBinding 
-                                                    Gesture="Shift+Enter"
+                                                <KeyBinding
                                                     Command="{Binding InsertNewLineCommand}"
-                                                    CommandParameter="{Binding #TextBox}" />
-                                                <KeyBinding 
-                                                    Gesture="Enter"
-                                                    Command="{Binding RequestCommand}" />
+                                                    CommandParameter="{Binding #TextBox}"
+                                                    Gesture="Shift+Enter" />
+                                                <KeyBinding Command="{Binding RequestCommand}" Gesture="Enter" />
                                             </TextBox.KeyBindings>
                                         </TextBox>
                                         <StackPanel
@@ -1676,8 +1570,8 @@
                                             Margin="3"
                                             HorizontalAlignment="Right"
                                             VerticalAlignment="Bottom"
-                                            Orientation="Horizontal"
-                                            IsVisible="{Binding Source={x:Static vm:SettingsVM.Instance}, Path=!IsSleeping, Mode=TwoWay}">
+                                            IsVisible="{Binding Source={x:Static vm:SettingsVM.Instance}, Path=!IsSleeping, Mode=TwoWay}"
+                                            Orientation="Horizontal">
                                             <Button
                                                 Margin="3"
                                                 Classes="icon-button"
@@ -1689,25 +1583,25 @@
                                             </Button>
                                         </StackPanel>
                                         <Border
-                                            Background="{DynamicResource ErrorColor}"
                                             Grid.Row="1"
                                             Grid.Column="1"
+                                            Height="24"
                                             Margin="8"
                                             HorizontalAlignment="Right"
                                             VerticalAlignment="Bottom"
-                                            Height="24"
+                                            Background="{DynamicResource ErrorColor}"
                                             CornerRadius="12"
                                             IsVisible="{Binding Source={x:Static vm:SettingsVM.Instance}, Path=IsSleeping, Mode=TwoWay}">
                                             <Grid VerticalAlignment="Center">
                                                 <TextBlock
-                                                    VerticalAlignment="Center"
                                                     Margin="8,0,8,0"
-                                                    Foreground="{DynamicResource SystemErrorTextColor}"
-                                                    Text="{Binding RemainingSleepTimeMask}"
-                                                    Opacity="0" />
-                                                <TextBlock
                                                     VerticalAlignment="Center"
+                                                    Foreground="{DynamicResource SystemErrorTextColor}"
+                                                    Opacity="0"
+                                                    Text="{Binding RemainingSleepTimeMask}" />
+                                                <TextBlock
                                                     HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center"
                                                     Foreground="{DynamicResource SystemErrorTextColor}"
                                                     Text="{Binding RemainingSleepTimeText}" />
                                             </Grid>
@@ -1773,12 +1667,10 @@
                                                             <Style Selector="MenuItem">
                                                                 <Setter Property="Foreground" Value="Red" />
                                                             </Style>
-                                                            <Style
-                                                                Selector="MenuItem:pointerover /template/ ContentPresenter#PART_HeaderPresenter, MenuItem:selected /template/ ContentPresenter#PART_HeaderPresenter">
+                                                            <Style Selector="MenuItem:pointerover /template/ ContentPresenter#PART_HeaderPresenter, MenuItem:selected /template/ ContentPresenter#PART_HeaderPresenter">
                                                                 <Setter Property="Foreground" Value="Red" />
                                                             </Style>
-                                                            <Style
-                                                                Selector="MenuItem:pointerover /template/ Border#PART_LayoutRoot, MenuItem:selected /template/ Border#PART_LayoutRoot">
+                                                            <Style Selector="MenuItem:pointerover /template/ Border#PART_LayoutRoot, MenuItem:selected /template/ Border#PART_LayoutRoot">
                                                                 <Setter Property="Background">
                                                                     <SolidColorBrush Opacity="0.15" Color="Red" />
                                                                 </Setter>
@@ -1823,26 +1715,19 @@
                                                     IsChecked="{Binding IsFavorite, Mode=TwoWay}">
                                                     <LucideIcon Kind="Star" Size="18" />
                                                     <ToggleButton.Styles>
-                                                        <Style
-                                                            Selector="ToggleButton:checked /template/ ContentPresenter#PART_ContentPresenter">
+                                                        <Style Selector="ToggleButton:checked /template/ ContentPresenter#PART_ContentPresenter">
                                                             <Setter Property="Background" Value="Transparent" />
                                                         </Style>
-                                                        <Style
-                                                            Selector="ToggleButton:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                                                        <Style Selector="ToggleButton:pointerover /template/ ContentPresenter#PART_ContentPresenter">
                                                             <Setter Property="Background" Value="Transparent" />
-                                                            <Setter Property="Foreground"
-                                                                    Value="{DynamicResource SystemBaseMediumColor}" />
+                                                            <Setter Property="Foreground" Value="{DynamicResource SystemBaseMediumColor}" />
                                                         </Style>
-                                                        <Style
-                                                            Selector="ToggleButton:unchecked:pressed /template/ ContentPresenter#PART_ContentPresenter">
+                                                        <Style Selector="ToggleButton:unchecked:pressed /template/ ContentPresenter#PART_ContentPresenter">
                                                             <Setter Property="Background" Value="Transparent" />
-                                                            <Setter Property="Foreground"
-                                                                    Value="{DynamicResource SystemBaseMediumLowColor}" />
+                                                            <Setter Property="Foreground" Value="{DynamicResource SystemBaseMediumLowColor}" />
                                                         </Style>
-                                                        <Style
-                                                            Selector="ToggleButton:checked /template/ ContentPresenter#PART_ContentPresenter">
-                                                            <Setter Property="Foreground"
-                                                                    Value="{DynamicResource SystemAccentColor}" />
+                                                        <Style Selector="ToggleButton:checked /template/ ContentPresenter#PART_ContentPresenter">
+                                                            <Setter Property="Foreground" Value="{DynamicResource SystemAccentColor}" />
                                                         </Style>
                                                     </ToggleButton.Styles>
                                                 </ToggleButton>
@@ -1941,10 +1826,10 @@
                                         Icon="{LucideIconContent Cake,
                                                                  Size=20}">
                                         <TextBox
-                                            Text="{Binding Birthday, Mode=TwoWay}"
-                                            Watermark="ГГГГ-ММ-ДД"
                                             Width="110"
-                                            HorizontalContentAlignment="Center" />
+                                            HorizontalContentAlignment="Center"
+                                            Text="{Binding Birthday, Mode=TwoWay}"
+                                            Watermark="ГГГГ-ММ-ДД" />
                                     </views:SideCard>
                                     <TextBlock
                                         Margin="0,4,0,4"
@@ -1977,12 +1862,10 @@
                                                 </Style>
                                             </Style>
                                             <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
-                                                <Setter Property="Background"
-                                                        Value="{DynamicResource SystemChromeHighColor}" />
+                                                <Setter Property="Background" Value="{DynamicResource SystemChromeHighColor}" />
                                             </Style>
                                             <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
-                                                <Setter Property="Background"
-                                                        Value="{DynamicResource SystemListLowColor}" />
+                                                <Setter Property="Background" Value="{DynamicResource SystemListLowColor}" />
                                             </Style>
                                         </ListBox.Styles>
                                         <ListBox.ItemTemplate>
@@ -2036,8 +1919,7 @@
                                                         TextWrapping="Wrap">
                                                         <TextBlock.Styles>
                                                             <Style Selector="TextBlock[Tag=False]">
-                                                                <Setter Property="Foreground"
-                                                                        Value="{DynamicResource SystemBaseMediumHighColor}" />
+                                                                <Setter Property="Foreground" Value="{DynamicResource SystemBaseMediumHighColor}" />
                                                             </Style>
                                                         </TextBlock.Styles>
                                                     </TextBlock>
@@ -2045,6 +1927,204 @@
                                             </DataTemplate>
                                         </ListBox.ItemTemplate>
                                     </ListBox>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </views:SidePanel>
+
+                        <!--  Model Parameters  -->
+                        <views:SidePanel Header="Параметры ИИ" IsVisible="{Binding #ParametersButton.IsChecked}">
+                            <ScrollViewer>
+                                <StackPanel
+                                    MaxWidth="720"
+                                    Margin="16,8"
+                                    x:DataType="vm:SettingsVM"
+                                    DataContext="{x:Static vm:SettingsVM.Instance}"
+                                    Spacing="8">
+
+                                    <views:SideCard
+                                        Description="Управляет степенью вариативности и креативности генерируемого текста"
+                                        Header="Температура"
+                                        Icon="{LucideIconContent Thermometer,
+                                                                 Size=20}">
+                                        <TextBox
+                                            Width="64"
+                                            HorizontalContentAlignment="Center"
+                                            Text="{Binding Temperature, Mode=TwoWay}"
+                                            Watermark="0.7" />
+                                    </views:SideCard>
+
+                                    <views:SideCard
+                                        Description="Задает желаемую длину ответа"
+                                        Header="Длина ответа"
+                                        Icon="{LucideIconContent Ruler,
+                                                                 Size=16,
+                                                                 StrokeWidth=2}"
+                                        IsBigTextBox="True">
+                                        <StackPanel>
+                                            <Slider
+                                                Width="NaN"
+                                                Margin="0,-11,0,-4"
+                                                IsSnapToTickEnabled="True"
+                                                Maximum="4"
+                                                Minimum="0"
+                                                SmallChange="1"
+                                                TickFrequency="1"
+                                                Value="{Binding ResponseLengthValue, Mode=TwoWay}" />
+                                            <Grid ColumnDefinitions="16,*,16,*,16">
+                                                <Border
+                                                    Width="1"
+                                                    Height="14"
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Top"
+                                                    Background="{DynamicResource SystemBaseLowColor}" />
+                                                <Border
+                                                    Grid.Column="1"
+                                                    Width="1"
+                                                    Height="10"
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Top"
+                                                    Background="{DynamicResource SystemBaseLowColor}" />
+                                                <Border
+                                                    Grid.Column="2"
+                                                    Width="1"
+                                                    Height="14"
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Top"
+                                                    Background="{DynamicResource SystemBaseLowColor}" />
+                                                <Border
+                                                    Grid.Column="3"
+                                                    Width="1"
+                                                    Height="10"
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Top"
+                                                    Background="{DynamicResource SystemBaseLowColor}" />
+                                                <Border
+                                                    Grid.Column="4"
+                                                    Width="1"
+                                                    Height="14"
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Top"
+                                                    Background="{DynamicResource SystemBaseLowColor}" />
+                                            </Grid>
+                                            <Grid Margin="0,2,0,0">
+                                                <TextBlock
+                                                    HorizontalAlignment="Left"
+                                                    FontSize="12"
+                                                    Foreground="{DynamicResource SystemBaseMediumColor}"
+                                                    Text="Short" />
+                                                <TextBlock
+                                                    HorizontalAlignment="Center"
+                                                    FontSize="12"
+                                                    Foreground="{DynamicResource SystemBaseMediumColor}"
+                                                    Text="Medium" />
+                                                <TextBlock
+                                                    HorizontalAlignment="Right"
+                                                    FontSize="12"
+                                                    Foreground="{DynamicResource SystemBaseMediumColor}"
+                                                    Text="Long" />
+                                            </Grid>
+                                        </StackPanel>
+                                    </views:SideCard>
+
+                                    <views:SideCard
+                                        Description="Задает жесткий лимит на максимальное количество токенов в одном сообщении"
+                                        Header="Макс. длина ответа"
+                                        Icon="{LucideIconContent OctagonMinus,
+                                                                 Size=16,
+                                                                 StrokeWidth=2}"
+                                        IsBigTextBox="True">
+                                        <TextBox Text="{Binding MaxTokens, Mode=TwoWay}" />
+                                    </views:SideCard>
+
+                                    <views:SideCard
+                                        Description="Определяет объем сохраняемой истории переписки для поддержания связности диалога"
+                                        Header="Длина контекста"
+                                        Icon="{LucideIconContent RulerDimensionLine,
+                                                                 Size=16,
+                                                                 StrokeWidth=2}"
+                                        IsBigTextBox="True">
+                                        <TextBox Text="{Binding ContextLength, Mode=TwoWay}" />
+                                    </views:SideCard>
+
+                                </StackPanel>
+                            </ScrollViewer>
+                        </views:SidePanel>
+
+                        <!--  Model Source  -->
+                        <views:SidePanel Header="Источник модели" IsVisible="{Binding #ModelButton.IsChecked}">
+                            <ScrollViewer>
+                                <StackPanel
+                                    MaxWidth="720"
+                                    Margin="16,8"
+                                    x:DataType="vm:SettingsVM"
+                                    DataContext="{x:Static vm:SettingsVM.Instance}"
+                                    Spacing="8">
+                                    <RadioButton
+                                        x:Name="ServerButton"
+                                        GroupName="ModelSource"
+                                        IsChecked="{Binding IsServerQuery}">
+                                        <TextBlock
+                                            VerticalAlignment="Center"
+                                            FontSize="16"
+                                            FontWeight="DemiBold"
+                                            Text="Сервер"
+                                            TextTrimming="CharacterEllipsis" />
+                                    </RadioButton>
+                                    <views:SideCard
+                                        Header="Порт"
+                                        Icon="{LucideIconContent Hash,
+                                                                 Size=16,
+                                                                 StrokeWidth=2}"
+                                        IsBigTextBox="True"
+                                        IsEnabled="{Binding IsServerQuery}">
+                                        <TextBox Text="{Binding Port, Mode=TwoWay}" />
+                                    </views:SideCard>
+                                    <views:SideCard
+                                        Header="IP-адрес"
+                                        Icon="{LucideIconContent Network,
+                                                                 Size=16,
+                                                                 StrokeWidth=2}"
+                                        IsBigTextBox="True"
+                                        IsEnabled="{Binding IsServerQuery}">
+                                        <TextBox Text="{Binding IpAddress, Mode=TwoWay}" />
+                                    </views:SideCard>
+                                    <RadioButton
+                                        x:Name="ProviderButton"
+                                        GroupName="ModelSource"
+                                        IsChecked="{Binding !IsServerQuery}">
+                                        <TextBlock
+                                            VerticalAlignment="Center"
+                                            FontSize="16"
+                                            FontWeight="DemiBold"
+                                            Text="Облачный провайдер" />
+                                    </RadioButton>
+                                    <views:SideCard
+                                        Header="API Ключ"
+                                        Icon="{LucideIconContent KeyRound,
+                                                                 Size=16,
+                                                                 StrokeWidth=2}"
+                                        IsBigTextBox="True"
+                                        IsEnabled="{Binding !IsServerQuery}">
+                                        <TextBox Text="{Binding ApiKey, Mode=TwoWay}" />
+                                    </views:SideCard>
+                                    <views:SideCard
+                                        Header="API URL"
+                                        Icon="{LucideIconContent Link,
+                                                                 Size=16,
+                                                                 StrokeWidth=2}"
+                                        IsBigTextBox="True"
+                                        IsEnabled="{Binding !IsServerQuery}">
+                                        <TextBox Text="{Binding ApiUrl, Mode=TwoWay}" />
+                                    </views:SideCard>
+                                    <views:SideCard
+                                        Header="Модель"
+                                        Icon="{LucideIconContent Bot,
+                                                                 Size=16,
+                                                                 StrokeWidth=2}"
+                                        IsBigTextBox="True"
+                                        IsEnabled="{Binding !IsServerQuery}">
+                                        <TextBox Text="{Binding AiModel, Mode=TwoWay}" />
+                                    </views:SideCard>
                                 </StackPanel>
                             </ScrollViewer>
                         </views:SidePanel>
@@ -2124,7 +2204,7 @@
 
 
                 <!--  RightPanel  -->
-                <Border
+                <!-- <Border
                     Grid.Column="3"
                     x:DataType="vm:SettingsVM"
                     Background="{DynamicResource SystemChromeMediumColor}"
@@ -2142,202 +2222,13 @@
                     </Border.Styles>
                     <Panel>
 
-                        <!-- Model Parameters -->
-                        <views:SidePanel Header="Параметры ИИ" IsVisible="{Binding #ParametersButton.IsChecked}">
-                            <ScrollViewer>
-                                <StackPanel
-                                    MaxWidth="720"
-                                    Margin="16,8"
-                                    x:DataType="vm:SettingsVM"
-                                    DataContext="{x:Static vm:SettingsVM.Instance}"
-                                    Spacing="8">
 
-                                    <views:SideCard
-                                        Header="Температура"
-                                        Icon="{LucideIconContent Thermometer, Size=20}"
-                                        Description="Управляет степенью вариативности и креативности генерируемого текста">
-                                        <TextBox
-                                            Text="{Binding Temperature, Mode=TwoWay}"
-                                            Width="64"
-                                            HorizontalContentAlignment="Center"
-                                            Watermark="0.7" />
-                                    </views:SideCard>
-
-                                    <views:SideCard
-                                        Header="Длина ответа"
-                                        Icon="{LucideIconContent Ruler, Size=16, StrokeWidth=2}"
-                                        Description="Задает желаемую длину ответа"
-                                        IsBigTextBox="True">
-                                        <StackPanel>
-                                            <Slider
-                                                Width="NaN"
-                                                Value="{Binding ResponseLengthValue, Mode=TwoWay}"
-                                                Minimum="0"
-                                                Maximum="4"
-                                                TickFrequency="1"
-                                                SmallChange="1"
-                                                IsSnapToTickEnabled="True"
-                                                Margin="0,-11,0,-4" />
-                                            <Grid ColumnDefinitions="16,*,16,*,16">
-                                                <Border
-                                                    HorizontalAlignment="Center"
-                                                    VerticalAlignment="Top"
-                                                    Width="1"
-                                                    Height="14"
-                                                    Background="{DynamicResource SystemBaseLowColor}" />
-                                                <Border
-                                                    HorizontalAlignment="Center"
-                                                    VerticalAlignment="Top"
-                                                    Width="1"
-                                                    Height="10"
-                                                    Grid.Column="1"
-                                                    Background="{DynamicResource SystemBaseLowColor}" />
-                                                <Border
-                                                    HorizontalAlignment="Center"
-                                                    VerticalAlignment="Top"
-                                                    Width="1"
-                                                    Height="14"
-                                                    Grid.Column="2"
-                                                    Background="{DynamicResource SystemBaseLowColor}" />
-                                                <Border
-                                                    HorizontalAlignment="Center"
-                                                    VerticalAlignment="Top"
-                                                    Width="1"
-                                                    Height="10"
-                                                    Grid.Column="3"
-                                                    Background="{DynamicResource SystemBaseLowColor}" />
-                                                <Border
-                                                    HorizontalAlignment="Center"
-                                                    VerticalAlignment="Top"
-                                                    Width="1"
-                                                    Height="14"
-                                                    Grid.Column="4"
-                                                    Background="{DynamicResource SystemBaseLowColor}" />
-                                            </Grid>
-                                            <Grid Margin="0,2,0,0">
-                                                <TextBlock
-                                                    FontSize="12"
-                                                    Text="Short"
-                                                    Foreground="{DynamicResource SystemBaseMediumColor}"
-                                                    HorizontalAlignment="Left" />
-                                                <TextBlock
-                                                    FontSize="12"
-                                                    Text="Medium"
-                                                    Foreground="{DynamicResource SystemBaseMediumColor}"
-                                                    HorizontalAlignment="Center" />
-                                                <TextBlock
-                                                    FontSize="12"
-                                                    Text="Long"
-                                                    Foreground="{DynamicResource SystemBaseMediumColor}"
-                                                    HorizontalAlignment="Right" />
-                                            </Grid>
-                                        </StackPanel>
-                                    </views:SideCard>
-
-                                    <views:SideCard
-                                        Header="Макс. длина ответа"
-                                        Icon="{LucideIconContent OctagonMinus, Size=16, StrokeWidth=2}"
-                                        Description="Задает жесткий лимит на максимальное количество токенов в одном сообщении"
-                                        IsBigTextBox="True">
-                                        <TextBox Text="{Binding MaxTokens, Mode=TwoWay}" />
-                                    </views:SideCard>
-
-                                    <views:SideCard
-                                        Header="Длина контекста"
-                                        Icon="{LucideIconContent RulerDimensionLine, Size=16, StrokeWidth=2}"
-                                        Description="Определяет объем сохраняемой истории переписки для поддержания связности диалога"
-                                        IsBigTextBox="True">
-                                        <TextBox Text="{Binding ContextLength, Mode=TwoWay}" />
-                                    </views:SideCard>
-
-                                </StackPanel>
-                            </ScrollViewer>
-                        </views:SidePanel>
-
-                        <!-- Model Source -->
-                        <views:SidePanel Header="Источник модели" IsVisible="{Binding #ModelButton.IsChecked}">
-                            <ScrollViewer>
-                                <StackPanel
-                                    MaxWidth="720"
-                                    Margin="16,8"
-                                    x:DataType="vm:SettingsVM"
-                                    DataContext="{x:Static vm:SettingsVM.Instance}"
-                                    Spacing="8">
-                                    <RadioButton
-                                        x:Name="ServerButton"
-                                        GroupName="ModelSource"
-                                        IsChecked="{Binding IsServerQuery}">
-                                        <TextBlock
-                                            VerticalAlignment="Center"
-                                            FontSize="16"
-                                            FontWeight="DemiBold"
-                                            Text="Сервер"
-                                            TextTrimming="CharacterEllipsis" />
-                                    </RadioButton>
-                                    <views:SideCard
-                                        Header="Порт"
-                                        Icon="{LucideIconContent Hash,
-                                                                Size=16,
-                                                                StrokeWidth=2}"
-                                        IsBigTextBox="True"
-                                        IsEnabled="{Binding IsServerQuery}">
-                                        <TextBox Text="{Binding Port, Mode=TwoWay}" />
-                                    </views:SideCard>
-                                    <views:SideCard
-                                        Header="IP-адрес"
-                                        Icon="{LucideIconContent Network,
-                                                                Size=16,
-                                                                StrokeWidth=2}"
-                                        IsBigTextBox="True"
-                                        IsEnabled="{Binding IsServerQuery}">
-                                        <TextBox Text="{Binding IpAddress, Mode=TwoWay}" />
-                                    </views:SideCard>
-                                    <RadioButton
-                                        x:Name="ProviderButton"
-                                        GroupName="ModelSource"
-                                        IsChecked="{Binding !IsServerQuery}">
-                                        <TextBlock
-                                            VerticalAlignment="Center"
-                                            FontSize="16"
-                                            FontWeight="DemiBold"
-                                            Text="Облачный провайдер" />
-                                    </RadioButton>
-                                    <views:SideCard
-                                        Header="API Ключ"
-                                        Icon="{LucideIconContent KeyRound,
-                                                                Size=16,
-                                                                StrokeWidth=2}"
-                                        IsBigTextBox="True"
-                                        IsEnabled="{Binding !IsServerQuery}">
-                                        <TextBox Text="{Binding ApiKey, Mode=TwoWay}" />
-                                    </views:SideCard>
-                                    <views:SideCard
-                                        Header="API URL"
-                                        Icon="{LucideIconContent Link,
-                                                                Size=16,
-                                                                StrokeWidth=2}"
-                                        IsBigTextBox="True"
-                                        IsEnabled="{Binding !IsServerQuery}">
-                                        <TextBox Text="{Binding ApiUrl, Mode=TwoWay}" />
-                                    </views:SideCard>
-                                    <views:SideCard
-                                        Header="Модель"
-                                        Icon="{LucideIconContent Bot,
-                                                                Size=16,
-                                                                StrokeWidth=2}"
-                                        IsBigTextBox="True"
-                                        IsEnabled="{Binding !IsServerQuery}">
-                                        <TextBox Text="{Binding AiModel, Mode=TwoWay}" />
-                                    </views:SideCard>
-                                </StackPanel>
-                            </ScrollViewer>
-                        </views:SidePanel>
 
                     </Panel>
-                </Border>
+                </Border>-->
 
 
-                <GridSplitter
+                <!-- <GridSplitter
                     Grid.Column="3"
                     Width="4"
                     HorizontalAlignment="Left"
@@ -2349,8 +2240,8 @@
                             <Binding ElementName="ParametersButton" Path="IsChecked" />
                         </MultiBinding>
                     </GridSplitter.IsVisible>
-                </GridSplitter>
-                <Border
+                </GridSplitter>-->
+                <!-- <Border
                     Grid.Column="4"
                     Background="{DynamicResource SystemChromeMediumColor}"
                     BorderThickness="1,0,0,0">
@@ -2358,27 +2249,9 @@
                         Margin="5"
                         HorizontalAlignment="Center"
                         Spacing="4">
-                        <ToggleButton
-                            x:Name="ParametersButton"
-                            IsCheckedChanged="RightToggleButton_OnIsCheckedChanged"
-                            ToolTip.HorizontalOffset="4"
-                            ToolTip.Placement="Left"
-                            ToolTip.Tip="Параметры ИИ"
-                            ToolTip.VerticalOffset="0">
-                            <LucideIcon Kind="Settings2" Size="20" />
-                        </ToggleButton>
-                        <ToggleButton
-                            x:Name="ModelButton"
-                            IsChecked="True"
-                            IsCheckedChanged="RightToggleButton_OnIsCheckedChanged"
-                            ToolTip.HorizontalOffset="4"
-                            ToolTip.Placement="Left"
-                            ToolTip.Tip="Источник модели"
-                            ToolTip.VerticalOffset="0">
-                            <LucideIcon Kind="Server" Size="20" />
-                        </ToggleButton>
+
                     </StackPanel>
-                </Border>
+                </Border>-->
             </Grid>
         </Grid>
 
@@ -2393,11 +2266,9 @@
                     <Binding Path="IsDeletingRecordDialogOpen" />
                 </MultiBinding>
             </Grid.IsVisible>
-            
-            <!-- Tinting -->
-            <Border
-                Background="Black"
-                Opacity="0.15"/>
+
+            <!--  Tinting  -->
+            <Border Background="Black" Opacity="0.15" />
 
             <!--  Settings  -->
             <Border
@@ -2420,30 +2291,32 @@
 
                     <Border
                         x:Name="FakeBorder"
-                        Grid.ColumnSpan="2"
                         Grid.RowSpan="2"
+                        Grid.ColumnSpan="2"
                         MaxWidth="{StaticResource SettingsPopupEdgeWidth}" />
 
                     <LucideIcon
-                        Grid.Column="0"
                         Grid.Row="0"
-                        Kind="Settings"
-                        StrokeWidth="2.25"
-                        Size="24"
+                        Grid.Column="0"
                         Height="48"
+                        Margin="10,0,0,0"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
-                        Margin="10,0,0,0"
-                        IsVisible="{Binding #FakeBorder.Bounds.Width, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter={StaticResource SettingsPopupEdgeWidth}}" />
-                    <Border Grid.Column="0"
-                            Grid.Row="0"
-                            Margin="16,0"
-                            Height="48"
-                            IsVisible="{Binding #FakeBorder.Bounds.Width, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={StaticResource SettingsPopupEdgeWidth}}">
-                        <TextBlock VerticalAlignment="Center"
-                                   FontSize="22"
-                                   FontWeight="DemiBold"
-                                   Text="Настройки" />
+                        IsVisible="{Binding #FakeBorder.Bounds.Width, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter={StaticResource SettingsPopupEdgeWidth}}"
+                        Kind="Settings"
+                        Size="24"
+                        StrokeWidth="2.25" />
+                    <Border
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        Height="48"
+                        Margin="16,0"
+                        IsVisible="{Binding #FakeBorder.Bounds.Width, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={StaticResource SettingsPopupEdgeWidth}}">
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontSize="22"
+                            FontWeight="DemiBold"
+                            Text="Настройки" />
                     </Border>
 
                     <ListBox
@@ -2474,9 +2347,7 @@
                         </ListBox.Styles>
                         <ListBoxItem x:Name="General">
                             <Grid ColumnDefinitions="Auto,*">
-                                <LucideIcon
-                                    Kind="Wrench"
-                                    Size="18" />
+                                <LucideIcon Kind="Wrench" Size="18" />
                                 <TextBlock
                                     Grid.Column="1"
                                     Margin="8,0,0,0"
@@ -2487,9 +2358,7 @@
                         </ListBoxItem>
                         <ListBoxItem x:Name="Sound" IsSelected="True">
                             <Grid ColumnDefinitions="Auto,*">
-                                <LucideIcon
-                                    Kind="Volume2"
-                                    Size="18" />
+                                <LucideIcon Kind="Volume2" Size="18" />
                                 <TextBlock
                                     Grid.Column="1"
                                     Margin="8,0,0,0"
@@ -2500,9 +2369,7 @@
                         </ListBoxItem>
                         <ListBoxItem x:Name="ModelAppearence">
                             <Grid ColumnDefinitions="Auto,*">
-                                <LucideIcon
-                                    Kind="Shirt"
-                                    Size="18" />
+                                <LucideIcon Kind="Shirt" Size="18" />
                                 <TextBlock
                                     Grid.Column="1"
                                     Margin="8,0,0,0"
@@ -2513,9 +2380,7 @@
                         </ListBoxItem>
                         <ListBoxItem>
                             <Grid ColumnDefinitions="Auto,*">
-                                <LucideIcon
-                                    Kind="Info"
-                                    Size="18" />
+                                <LucideIcon Kind="Info" Size="18" />
                                 <TextBlock
                                     Grid.Column="1"
                                     Margin="8,0,0,0"
@@ -2598,8 +2463,7 @@
                                             Header="Шрифт"
                                             Icon="{LucideIconContent Type,
                                                                      20}">
-                                            <ComboBox ItemsSource="{Binding Fonts}"
-                                                      SelectedItem="{Binding SelectedFont, Mode=TwoWay}">
+                                            <ComboBox ItemsSource="{Binding Fonts}" SelectedItem="{Binding SelectedFont, Mode=TwoWay}">
                                                 <Interaction.Behaviors>
                                                     <EventTriggerBehavior EventName="DropDownOpened">
                                                         <InvokeCommandAction Command="{Binding RefreshFontsCommand}" />
@@ -2613,12 +2477,10 @@
                                             Header="Моноширинный шрифт"
                                             Icon="{LucideIconContent SquareTerminal,
                                                                      20}">
-                                            <ComboBox ItemsSource="{Binding MonospaceFonts}"
-                                                      SelectedItem="{Binding SelectedMonoFont, Mode=TwoWay}">
+                                            <ComboBox ItemsSource="{Binding MonospaceFonts}" SelectedItem="{Binding SelectedMonoFont, Mode=TwoWay}">
                                                 <Interaction.Behaviors>
                                                     <EventTriggerBehavior EventName="DropDownOpened">
-                                                        <InvokeCommandAction
-                                                            Command="{Binding RefreshMonoFontsCommand}" />
+                                                        <InvokeCommandAction Command="{Binding RefreshMonoFontsCommand}" />
                                                     </EventTriggerBehavior>
                                                 </Interaction.Behaviors>
                                             </ComboBox>
@@ -2637,12 +2499,10 @@
                                             Header="Язык интерфейса"
                                             Icon="{LucideIconContent Globe,
                                                                      20}">
-                                            <ComboBox ItemsSource="{Binding AppLanguages}"
-                                                      SelectedItem="{Binding SelectedAppLanguage}">
+                                            <ComboBox ItemsSource="{Binding AppLanguages}" SelectedItem="{Binding SelectedAppLanguage}">
                                                 <ComboBox.ItemTemplate>
                                                     <DataTemplate>
-                                                        <TextBlock
-                                                            Text="{Binding Converter={StaticResource StringValueConverter}}" />
+                                                        <TextBlock Text="{Binding Converter={StaticResource StringValueConverter}}" />
                                                     </DataTemplate>
                                                 </ComboBox.ItemTemplate>
                                             </ComboBox>
@@ -2653,8 +2513,7 @@
                                             Header="Язык модели"
                                             Icon="{LucideIconContent Languages,
                                                                      20}">
-                                            <ComboBox ItemsSource="{Binding Languages}"
-                                                      SelectedItem="{Binding SelectedLanguage}">
+                                            <ComboBox ItemsSource="{Binding Languages}" SelectedItem="{Binding SelectedLanguage}">
                                                 <ComboBox.IsEnabled>
                                                     <MultiBinding Converter="{x:Static BoolConverters.And}">
                                                         <Binding Path="!IsSpeakersLoading" />
@@ -2663,8 +2522,7 @@
                                                 </ComboBox.IsEnabled>
                                                 <ComboBox.ItemTemplate>
                                                     <DataTemplate>
-                                                        <TextBlock
-                                                            Text="{Binding Converter={StaticResource StringValueConverter}}" />
+                                                        <TextBlock Text="{Binding Converter={StaticResource StringValueConverter}}" />
                                                     </DataTemplate>
                                                 </ComboBox.ItemTemplate>
                                             </ComboBox>
@@ -2685,8 +2543,7 @@
                                             Header="Источник"
                                             Icon="{LucideIconContent Cpu,
                                                                      20}">
-                                            <ComboBox ItemsSource="{Binding Sources}"
-                                                      SelectedItem="{Binding SelectedSource}">
+                                            <ComboBox ItemsSource="{Binding Sources}" SelectedItem="{Binding SelectedSource}">
                                                 <ComboBox.IsEnabled>
                                                     <MultiBinding Converter="{x:Static BoolConverters.And}">
                                                         <Binding Path="!IsSpeakersLoading" />
@@ -2719,8 +2576,7 @@
                                                     </Grid>
                                                     <ProgressBar MinWidth="160" Value="{Binding DownloadProgress}" />
                                                 </StackPanel>
-                                                <Button Classes="icon-button"
-                                                        Command="{Binding DownloadVoiceModelCommand}">
+                                                <Button Classes="icon-button" Command="{Binding DownloadVoiceModelCommand}">
                                                     <Button.IsVisible>
                                                         <MultiBinding Converter="{x:Static BoolConverters.And}">
                                                             <Binding Path="!IsSelectedVoiceModelLoaded" />
@@ -2735,8 +2591,7 @@
                                                     IsVisible="{Binding IsDownloading}">
                                                     <LucideIcon Kind="CircleX" Size="18" />
                                                 </Button>
-                                                <ComboBox ItemsSource="{Binding Models}"
-                                                          SelectedItem="{Binding SelectedVoiceModel}">
+                                                <ComboBox ItemsSource="{Binding Models}" SelectedItem="{Binding SelectedVoiceModel}">
                                                     <ComboBox.IsEnabled>
                                                         <MultiBinding Converter="{x:Static BoolConverters.And}">
                                                             <Binding Path="!IsSpeakersLoading" />
@@ -2753,8 +2608,7 @@
                                             Icon="{LucideIconContent Speech,
                                                                      20}">
                                             <Grid>
-                                                <ComboBox ItemsSource="{Binding Speakers}"
-                                                          SelectedItem="{Binding SelectedSpeaker}">
+                                                <ComboBox ItemsSource="{Binding Speakers}" SelectedItem="{Binding SelectedSpeaker}">
                                                     <ComboBox.IsVisible>
                                                         <MultiBinding Converter="{x:Static BoolConverters.And}">
                                                             <Binding Path="!IsSpeakersLoading" />
@@ -2915,11 +2769,11 @@
                                         Description="Включает потоковое воспроизведение речи, позволяя генерировать звук на лету.&#x0a;Примечание: на некоторых провайдерах может ухудшиться качество воспроизведения"
                                         Header="Потоковое воспроизведение"
                                         Icon="{LucideIconContent WavesVertical,
-                                                                     20}">
+                                                                 20}">
                                         <ToggleSwitch
+                                            IsChecked="{Binding IsStream, Mode=TwoWay}"
                                             OffContent=""
-                                            OnContent=""
-                                            IsChecked="{Binding IsStream, Mode=TwoWay}" />
+                                            OnContent="" />
                                     </views:SettingsCard>
                                 </Border>
                             </StackPanel>
@@ -2960,16 +2814,14 @@
                                                         SweepAngle="270">
                                                         <Arc.Transitions>
                                                             <Transitions>
-                                                                <DoubleTransition Property="RotateTransform.Angle"
-                                                                        Duration="0:0:1" />
+                                                                <DoubleTransition Property="RotateTransform.Angle" Duration="0:0:1" />
                                                             </Transitions>
                                                         </Arc.Transitions>
                                                         <Arc.RenderTransform>
                                                             <RotateTransform />
                                                         </Arc.RenderTransform>
                                                     </Arc>
-                                                    <TextBlock Foreground="{DynamicResource SystemAccentColor}"
-                                                               Text="Загрузка модели" />
+                                                    <TextBlock Foreground="{DynamicResource SystemAccentColor}" Text="Загрузка модели" />
                                                 </StackPanel>
                                             </Grid>
                                         </views:SettingsCard>
@@ -2986,34 +2838,22 @@
                                                     <Setter Property="VerticalContentAlignment" Value="Center" />
                                                     <Setter Property="Margin" Value="3" />
                                                     <Setter Property="CornerRadius" Value="15" />
-                                                    <Setter Property="Background"
-                                                            Value="{DynamicResource SystemAccentColorLight3}" />
-                                                    <Setter Property="Foreground"
-                                                            Value="{DynamicResource SystemAccentColorDark3}" />
+                                                    <Setter Property="Background" Value="{DynamicResource SystemAccentColorLight3}" />
+                                                    <Setter Property="Foreground" Value="{DynamicResource SystemAccentColorDark3}" />
                                                 </Style>
-                                                <Style
-                                                    Selector="ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-                                                    <Setter Property="Background"
-                                                            Value="{DynamicResource SystemAccentColorLight2}" />
-                                                    <Setter Property="Foreground"
-                                                            Value="{DynamicResource SystemAccentColorDark3}" />
+                                                <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                                                    <Setter Property="Background" Value="{DynamicResource SystemAccentColorLight2}" />
+                                                    <Setter Property="Foreground" Value="{DynamicResource SystemAccentColorDark3}" />
                                                 </Style>
-                                                <Style
-                                                    Selector="ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
-                                                    <Setter Property="Background"
-                                                            Value="{DynamicResource SystemAccentColorDark3}" />
-                                                    <Setter Property="Foreground"
-                                                            Value="{DynamicResource SystemAccentColorLight3}" />
+                                                <Style Selector="ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+                                                    <Setter Property="Background" Value="{DynamicResource SystemAccentColorDark3}" />
+                                                    <Setter Property="Foreground" Value="{DynamicResource SystemAccentColorLight3}" />
                                                 </Style>
-                                                <Style
-                                                    Selector="ListBoxItem:disabled /template/ ContentPresenter#PART_ContentPresenter">
-                                                    <Setter Property="Background"
-                                                            Value="{DynamicResource SystemListLowColor}" />
+                                                <Style Selector="ListBoxItem:disabled /template/ ContentPresenter#PART_ContentPresenter">
+                                                    <Setter Property="Background" Value="{DynamicResource SystemListLowColor}" />
                                                 </Style>
-                                                <Style
-                                                    Selector="ListBoxItem:disabled:selected /template/ ContentPresenter#PART_ContentPresenter">
-                                                    <Setter Property="Background"
-                                                            Value="{DynamicResource SystemListMediumColor}" />
+                                                <Style Selector="ListBoxItem:disabled:selected /template/ ContentPresenter#PART_ContentPresenter">
+                                                    <Setter Property="Background" Value="{DynamicResource SystemListMediumColor}" />
                                                 </Style>
                                             </ListBox.Styles>
                                             <ListBox.ItemsPanel>
@@ -3022,7 +2862,7 @@
                                                 </ItemsPanelTemplate>
                                             </ListBox.ItemsPanel>
                                         </ListBox>
-                                        
+
                                         <Separator />
                                         <views:SettingsCard
                                             Description="Путь к папке, в которую должны добавляться модели"
@@ -3057,7 +2897,7 @@
                                             Icon="{LucideIconContent ScanEye,
                                                                      Size=20}">
                                             <ComboBox SelectedIndex="{Binding Camera, Mode=TwoWay}">
-                                                <ComboBoxItem Content="Близко"/>
+                                                <ComboBoxItem Content="Близко" />
                                                 <ComboBoxItem Content="Средне" />
                                                 <ComboBoxItem Content="Далеко" />
                                             </ComboBox>
@@ -3291,4 +3131,3 @@
         </StackPanel>
     </Grid>
 </Window>
-
