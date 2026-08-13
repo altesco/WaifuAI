@@ -12,6 +12,8 @@
     xmlns:views="using:WaifuAI.Views"
     xmlns:vm="using:WaifuAI.ViewModels"
     xmlns:wv="clr-namespace:WebViewControl;assembly=WebViewControl.Avalonia"
+    xmlns:translations="clr-namespace:WaifuAI.Translations;assembly=WaifuAI.Translations"
+    xmlns:echoes="clr-namespace:Echoes;assembly=Echoes.Avalonia"
     Title="WaifuAI"
     d:DesignHeight="720"
     d:DesignWidth="1024"
@@ -156,7 +158,7 @@
                         <ContextMenu>
                             <MenuItem
                                 Command="{Binding $parent[TextBox].Copy}"
-                                Header="Копировать"
+                                Header="{echoes:Translate {x:Static translations:Strings+context_menu.copy}}"
                                 IsEnabled="{Binding $parent[TextBox].CanCopy}">
                                 <MenuItem.Icon>
                                     <LucideIcon Kind="Copy" Size="20" />
@@ -165,7 +167,7 @@
                             <MenuItem
                                 Command="{Binding ManualCut}"
                                 CommandParameter="{Binding $parent[TextBox]}"
-                                Header="Вырезать"
+                                Header="{echoes:Translate {x:Static translations:Strings+context_menu.cut}}"
                                 IsEnabled="{Binding $parent[TextBox].CanCut}">
                                 <MenuItem.Icon>
                                     <LucideIcon Kind="Scissors" Size="20" />
@@ -173,13 +175,13 @@
                             </MenuItem>
                             <MenuItem
                                 Command="{Binding $parent[TextBox].Paste}"
-                                Header="Вставить"
+                                Header="{echoes:Translate {x:Static translations:Strings+context_menu.paste}}"
                                 IsEnabled="{Binding $parent[TextBox].CanPaste}">
                                 <MenuItem.Icon>
                                     <LucideIcon Kind="ClipboardPaste" Size="20" />
                                 </MenuItem.Icon>
                             </MenuItem>
-                            <MenuItem Command="{Binding $parent[TextBox].SelectAll}" Header="Выделить все">
+                            <MenuItem Command="{Binding $parent[TextBox].SelectAll}" Header="{echoes:Translate {x:Static translations:Strings+context_menu.select_all}}">
                                 <MenuItem.Icon>
                                     <LucideIcon Kind="SquareDashed" Size="20" />
                                 </MenuItem.Icon>
@@ -409,7 +411,7 @@
                             Background="Transparent"
                             ToolTip.HorizontalOffset="0"
                             ToolTip.Placement="Bottom"
-                            ToolTip.Tip="{Binding Affection, StringFormat={}Affection [{0:F0}/100]}"
+                            ToolTip.Tip="{Binding AffectionText}"
                             ToolTip.VerticalOffset="4">
                             <ProgressBar
                                 MinWidth="0"
@@ -463,7 +465,7 @@
                             Background="Transparent"
                             ToolTip.HorizontalOffset="0"
                             ToolTip.Placement="Bottom"
-                            ToolTip.Tip="{Binding Engagement, StringFormat={}Engagement [{0:F0}/100]}"
+                            ToolTip.Tip="{Binding EngagementText}"
                             ToolTip.VerticalOffset="4">
                             <ProgressBar
                                 MinWidth="0"
@@ -529,7 +531,7 @@
                             Background="Transparent"
                             ToolTip.HorizontalOffset="0"
                             ToolTip.Placement="Bottom"
-                            ToolTip.Tip="{Binding Mood, StringFormat={}Mood [{0:F0}/100]}"
+                            ToolTip.Tip="{Binding MoodText}"
                             ToolTip.VerticalOffset="4">
                             <ProgressBar
                                 MinWidth="0"
@@ -577,7 +579,7 @@
                             Background="Transparent"
                             ToolTip.HorizontalOffset="0"
                             ToolTip.Placement="Bottom"
-                            ToolTip.Tip="{Binding Energy, StringFormat={}Energy [{0:F0}/100]}"
+                            ToolTip.Tip="{Binding EnergyText}"
                             ToolTip.VerticalOffset="4">
                             <ProgressBar
                                 MinWidth="0"
@@ -644,14 +646,6 @@
                         Orientation="Horizontal"
                         Spacing="2"
                         Tag="{Binding IsWindows}">
-                        <!-- <StackPanel.Styles>
-                            <Style Selector="StackPanel[Tag=False]">
-                                <Setter Property="Margin" Value="6,0,6,0" />
-                            </Style>
-                            <Style Selector="StackPanel[Tag=True]">
-                                <Setter Property="Margin" Value="6,0,0,0" />
-                            </Style>
-                        </StackPanel.Styles>-->
                         <CaptionButtons
                             MaxHeight="100"
                             IsVisible="{Binding IsWindows}"
@@ -718,7 +712,7 @@
                                 IsCheckedChanged="LeftToggleButton_OnIsCheckedChanged"
                                 ToolTip.HorizontalOffset="4"
                                 ToolTip.Placement="Right"
-                                ToolTip.Tip="Чат"
+                                ToolTip.Tip="{echoes:Translate {x:Static translations:Strings+sidepanel.chat}}"
                                 ToolTip.VerticalOffset="0">
                                 <LucideIcon Kind="MessageSquareText" Size="20" />
                             </ToggleButton>
@@ -727,7 +721,7 @@
                                 IsCheckedChanged="LeftToggleButton_OnIsCheckedChanged"
                                 ToolTip.HorizontalOffset="4"
                                 ToolTip.Placement="Right"
-                                ToolTip.Tip="База знаний"
+                                ToolTip.Tip="{echoes:Translate {x:Static translations:Strings+sidepanel.knowledge_base}}"
                                 ToolTip.VerticalOffset="0">
                                 <LucideIcon Kind="BookText" Size="20" />
                             </ToggleButton>
@@ -736,7 +730,7 @@
                                 IsCheckedChanged="LeftToggleButton_OnIsCheckedChanged"
                                 ToolTip.HorizontalOffset="4"
                                 ToolTip.Placement="Right"
-                                ToolTip.Tip="Личность"
+                                ToolTip.Tip="{echoes:Translate {x:Static translations:Strings+sidepanel.personality}}"
                                 ToolTip.VerticalOffset="0">
                                 <LucideIcon Kind="Brain" Size="20" />
                             </ToggleButton>
@@ -752,7 +746,7 @@
                                 IsCheckedChanged="LeftToggleButton_OnIsCheckedChanged"
                                 ToolTip.HorizontalOffset="4"
                                 ToolTip.Placement="Right"
-                                ToolTip.Tip="Параметры ИИ"
+                                ToolTip.Tip="{echoes:Translate {x:Static translations:Strings+sidepanel.ai_parameters}}"
                                 ToolTip.VerticalOffset="0">
                                 <LucideIcon Kind="Settings2" Size="20" />
                             </ToggleButton>
@@ -761,7 +755,7 @@
                                 IsCheckedChanged="LeftToggleButton_OnIsCheckedChanged"
                                 ToolTip.HorizontalOffset="4"
                                 ToolTip.Placement="Right"
-                                ToolTip.Tip="Источник модели"
+                                ToolTip.Tip="{echoes:Translate {x:Static translations:Strings+sidepanel.model_source}}"
                                 ToolTip.VerticalOffset="0">
                                 <LucideIcon Kind="Server" Size="20" />
                             </ToggleButton>
@@ -770,7 +764,7 @@
                                 Command="{Binding SettingsCommand}"
                                 ToolTip.HorizontalOffset="4"
                                 ToolTip.Placement="Right"
-                                ToolTip.Tip="Настройки"
+                                ToolTip.Tip="{echoes:Translate {x:Static translations:Strings.settings}}"
                                 ToolTip.VerticalOffset="0">
                                 <LucideIcon Kind="Settings" Size="20"/>
                             </Button>
@@ -788,7 +782,7 @@
                     <Panel>
 
                         <!--  Chat  -->
-                        <views:SidePanel Header="Чат" IsVisible="{Binding #ChatButton.IsChecked}">
+                        <views:SidePanel Header="{echoes:Translate {x:Static translations:Strings+sidepanel.chat}}" IsVisible="{Binding #ChatButton.IsChecked}">
                             <Grid RowDefinitions="*,Auto">
                                 <ListBox
                                     x:Name="MessageList"
@@ -859,7 +853,7 @@
                                                                 x:DataType="vm:MainVM"
                                                                 Command="{Binding ToggleMultiSelectCommand}"
                                                                 DataContext="{Binding $parent[ListBox].DataContext}"
-                                                                Header="Выбрать"
+                                                                Header="{echoes:Translate {x:Static translations:Strings+context_menu.select}}"
                                                                 IsVisible="{Binding !$parent[ListBox].Tag}">
                                                                 <MenuItem.Icon>
                                                                     <LucideIcon Kind="CircleCheck" Size="20" />
@@ -869,7 +863,7 @@
                                                                 x:DataType="vm:MainVM"
                                                                 Command="{Binding ToggleMultiSelectCommand}"
                                                                 DataContext="{Binding $parent[ListBox].DataContext}"
-                                                                Header="Отменить выбор"
+                                                                Header="{echoes:Translate {x:Static translations:Strings+context_menu.cancel_select}}"
                                                                 IsVisible="{Binding $parent[ListBox].Tag}">
                                                                 <MenuItem.Icon>
                                                                     <LucideIcon Kind="CircleX" Size="20" />
@@ -900,7 +894,7 @@
                                                                                 Command="{Binding CopyMessageTextCommand}"
                                                                                 CommandParameter="{Binding #PART_SelectableTextBlock}"
                                                                                 DataContext="{Binding $parent[ListBox].DataContext}"
-                                                                                Header="Копировать текст">
+                                                                                Header="{echoes:Translate {x:Static translations:Strings+context_menu.copy_text}}">
                                                                                 <MenuItem.Icon>
                                                                                     <LucideIcon Kind="Copy" Size="20" />
                                                                                 </MenuItem.Icon>
@@ -909,7 +903,7 @@
                                                                                 x:DataType="vm:MainVM"
                                                                                 Command="{Binding MakeReplyCommand}"
                                                                                 DataContext="{Binding $parent[ListBox].DataContext}"
-                                                                                Header="Ответить на сообщение"
+                                                                                Header="{echoes:Translate {x:Static translations:Strings+context_menu.reply}}"
                                                                                 IsVisible="{Binding !$parent[ListBoxItem].((vm:MessageVM)DataContext).IsFailed}">
                                                                                 <MenuItem.Icon>
                                                                                     <LucideIcon Kind="MessageSquareReply" Size="20" />
@@ -919,7 +913,7 @@
                                                                                 x:DataType="vm:MainVM"
                                                                                 Command="{Binding ToggleMultiSelectCommand}"
                                                                                 DataContext="{Binding $parent[ListBox].DataContext}"
-                                                                                Header="Выбрать"
+                                                                                Header="{echoes:Translate {x:Static translations:Strings+context_menu.select}}"
                                                                                 IsVisible="{Binding !IsMultiSelect}">
                                                                                 <MenuItem.Icon>
                                                                                     <LucideIcon Kind="CircleCheck" Size="20" />
@@ -929,7 +923,7 @@
                                                                                 x:DataType="vm:MainVM"
                                                                                 Command="{Binding ToggleMultiSelectCommand}"
                                                                                 DataContext="{Binding $parent[ListBox].DataContext}"
-                                                                                Header="Отменить выбор"
+                                                                                Header="{echoes:Translate {x:Static translations:Strings+context_menu.cancel_select}}"
                                                                                 IsVisible="{Binding IsMultiSelect}">
                                                                                 <MenuItem.Icon>
                                                                                     <LucideIcon Kind="CircleX" Size="20" />
@@ -939,7 +933,7 @@
                                                                                 x:DataType="vm:MainVM"
                                                                                 Command="{Binding DeletingMessageDialogCommand}"
                                                                                 DataContext="{Binding $parent[ListBox].DataContext}"
-                                                                                Header="Удалить">
+                                                                                Header="{echoes:Translate {x:Static translations:Strings+context_menu.delete}}">
                                                                                 <MenuItem.Icon>
                                                                                     <LucideIcon Kind="Trash2" Size="20" />
                                                                                 </MenuItem.Icon>
@@ -972,7 +966,7 @@
                                                                                 Command="{Binding CopyMessageTextCommand}"
                                                                                 CommandParameter="{Binding #PART_SelectableTextBlock}"
                                                                                 DataContext="{Binding $parent[ListBox].DataContext}"
-                                                                                Header="Копировать текст">
+                                                                                Header="{echoes:Translate {x:Static translations:Strings+context_menu.copy_text}}">
                                                                                 <MenuItem.Icon>
                                                                                     <LucideIcon Kind="Copy" Size="20" />
                                                                                 </MenuItem.Icon>
@@ -981,7 +975,7 @@
                                                                                 x:DataType="vm:MainVM"
                                                                                 Command="{Binding MakeReplyCommand}"
                                                                                 DataContext="{Binding $parent[ListBox].DataContext}"
-                                                                                Header="Ответить на сообщение"
+                                                                                Header="{echoes:Translate {x:Static translations:Strings+context_menu.reply}}"
                                                                                 IsVisible="{Binding !$parent[ListBoxItem].((vm:MessageVM)DataContext).IsFailed}">
                                                                                 <MenuItem.Icon>
                                                                                     <LucideIcon Kind="MessageSquareReply" Size="20" />
@@ -991,7 +985,7 @@
                                                                                 x:DataType="vm:MainVM"
                                                                                 Command="{Binding ToggleMultiSelectCommand}"
                                                                                 DataContext="{Binding $parent[ListBox].DataContext}"
-                                                                                Header="Выбрать"
+                                                                                Header="{echoes:Translate {x:Static translations:Strings+context_menu.select}}"
                                                                                 IsVisible="{Binding !IsMultiSelect}">
                                                                                 <MenuItem.Icon>
                                                                                     <LucideIcon Kind="CircleCheck" Size="20" />
@@ -1001,7 +995,7 @@
                                                                                 x:DataType="vm:MainVM"
                                                                                 Command="{Binding ToggleMultiSelectCommand}"
                                                                                 DataContext="{Binding $parent[ListBox].DataContext}"
-                                                                                Header="Отменить выбор"
+                                                                                Header="{echoes:Translate {x:Static translations:Strings+context_menu.cancel_select}}"
                                                                                 IsVisible="{Binding IsMultiSelect}">
                                                                                 <MenuItem.Icon>
                                                                                     <LucideIcon Kind="CircleX" Size="20" />
@@ -1011,7 +1005,7 @@
                                                                                 x:DataType="vm:MainVM"
                                                                                 Command="{Binding DeletingMessageDialogCommand}"
                                                                                 DataContext="{Binding $parent[ListBox].DataContext}"
-                                                                                Header="Удалить">
+                                                                                Header="{echoes:Translate {x:Static translations:Strings+context_menu.delete}}">
                                                                                 <MenuItem.Icon>
                                                                                     <LucideIcon Kind="Trash2" Size="20" />
                                                                                 </MenuItem.Icon>
@@ -1117,7 +1111,7 @@
                                                                                     </Style>
                                                                                     <Style Selector="TextBlock[Tag=user]">
                                                                                         <Setter Property="Foreground" Value="{DynamicResource SystemAccentColor}" />
-                                                                                        <Setter Property="Text" Value="{Binding Source={x:Static vm:SettingsVM.Instance}, Path=UserName, TargetNullValue='Пользователь'}" />
+                                                                                        <Setter Property="Text" Value="{Binding Source={x:Static vm:SettingsVM.Instance}, Path=UserName, TargetNullValue='User'}" />
                                                                                     </Style>
                                                                                 </TextBlock.Styles>
                                                                             </TextBlock>
@@ -1151,11 +1145,11 @@
                                                                                 </MenuItem.Icon>
                                                                                 <MenuItem.Styles>
                                                                                     <Style Selector="MenuItem[Tag=True]">
-                                                                                        <Setter Property="Header" Value="Копировать выделенное" />
+                                                                                        <Setter Property="Header" Value="{echoes:Translate {x:Static translations:Strings+context_menu.copy_selected}}" />
                                                                                         <Setter Property="Command" Value="{Binding #PART_SelectableTextBlock.Copy}" />
                                                                                     </Style>
                                                                                     <Style Selector="MenuItem[Tag=False]">
-                                                                                        <Setter Property="Header" Value="Копировать текст" />
+                                                                                        <Setter Property="Header" Value="{echoes:Translate {x:Static translations:Strings+context_menu.copy_text}}" />
                                                                                         <Setter Property="Command" Value="{Binding CopyMessageTextCommand}" />
                                                                                         <Setter Property="CommandParameter" Value="{Binding #PART_SelectableTextBlock}" />
                                                                                     </Style>
@@ -1168,7 +1162,7 @@
                                                                                 Tag="{Binding #PART_SelectableTextBlock.CanCopy}">
                                                                                 <MenuItem.Styles>
                                                                                     <Style Selector="MenuItem[Tag=True]">
-                                                                                        <Setter Property="Header" Value="Ответить на цитату" />
+                                                                                        <Setter Property="Header" Value="{echoes:Translate {x:Static translations:Strings+context_menu.reply_quote}}" />
                                                                                         <Setter Property="Icon">
                                                                                             <Setter.Value>
                                                                                                 <Template>
@@ -1180,7 +1174,7 @@
                                                                                         <Setter Property="CommandParameter" Value="{Binding #PART_SelectableTextBlock.SelectedText}" />
                                                                                     </Style>
                                                                                     <Style Selector="MenuItem[Tag=False]">
-                                                                                        <Setter Property="Header" Value="Ответить на сообщение" />
+                                                                                        <Setter Property="Header" Value="{echoes:Translate {x:Static translations:Strings+context_menu.reply}}" />
                                                                                         <Setter Property="Icon">
                                                                                             <Setter.Value>
                                                                                                 <Template>
@@ -1196,7 +1190,7 @@
                                                                                 x:DataType="vm:MainVM"
                                                                                 Command="{Binding ToggleMultiSelectCommand}"
                                                                                 DataContext="{Binding $parent[ListBox].DataContext}"
-                                                                                Header="Выбрать"
+                                                                                Header="{echoes:Translate {x:Static translations:Strings+context_menu.select}}"
                                                                                 IsVisible="{Binding !IsMultiSelect}">
                                                                                 <MenuItem.Icon>
                                                                                     <LucideIcon Kind="CircleCheck" Size="20" />
@@ -1206,7 +1200,7 @@
                                                                                 x:DataType="vm:MainVM"
                                                                                 Command="{Binding ToggleMultiSelectCommand}"
                                                                                 DataContext="{Binding $parent[ListBox].DataContext}"
-                                                                                Header="Отменить выбор"
+                                                                                Header="{echoes:Translate {x:Static translations:Strings+context_menu.cancel_select}}"
                                                                                 IsVisible="{Binding IsMultiSelect}">
                                                                                 <MenuItem.Icon>
                                                                                     <LucideIcon Kind="CircleX" Size="20" />
@@ -1216,7 +1210,7 @@
                                                                                 x:DataType="vm:MainVM"
                                                                                 Command="{Binding DeletingMessageDialogCommand}"
                                                                                 DataContext="{Binding $parent[ListBox].DataContext}"
-                                                                                Header="Удалить">
+                                                                                Header="{echoes:Translate {x:Static translations:Strings+context_menu.delete}}">
                                                                                 <MenuItem.Icon>
                                                                                     <LucideIcon Kind="Trash2" Size="20" />
                                                                                 </MenuItem.Icon>
@@ -1247,7 +1241,7 @@
                                                                         Grid.Column="1"
                                                                         FontSize="12"
                                                                         Foreground="{DynamicResource SystemBaseMediumColor}"
-                                                                        Text="{Binding MessageModel.Tokens, StringFormat={}Токены: {0}}" />
+                                                                        Text="{Binding TokensText}" />
                                                                     <Separator
                                                                         Grid.Column="2"
                                                                         Width="1"
@@ -1399,7 +1393,7 @@
                                             TextWrapping="Wrap">
                                             <SelectableTextBlock.ContextMenu>
                                                 <ContextMenu>
-                                                    <MenuItem Command="{Binding #ErrorTextBlock.Copy}" Header="Копировать">
+                                                    <MenuItem Command="{Binding #ErrorTextBlock.Copy}" Header="{echoes:Translate {x:Static translations:Strings+context_menu.copy}}">
                                                         <MenuItem.Icon>
                                                             <LucideIcon Kind="Copy" Size="20" />
                                                         </MenuItem.Icon>
@@ -1499,10 +1493,10 @@
                                                 TextTrimming="CharacterEllipsis">
                                                 <TextBlock.Styles>
                                                     <Style Selector="TextBlock[Tag=true]">
-                                                        <Setter Property="Text" Value="Ответ на сообщение" />
+                                                        <Setter Property="Text" Value="{echoes:Translate {x:Static translations:Strings+sidepanel+chat_panel.reply}}" />
                                                     </Style>
                                                     <Style Selector="TextBlock[Tag=false]">
-                                                        <Setter Property="Text" Value="Ответ на цитату" />
+                                                        <Setter Property="Text" Value="{echoes:Translate {x:Static translations:Strings+sidepanel+chat_panel.reply_quote}}" />
                                                     </Style>
                                                 </TextBlock.Styles>
                                             </TextBlock>
@@ -1542,7 +1536,7 @@
                                             ScrollViewer.VerticalScrollBarVisibility="Hidden"
                                             Text="{Binding Question, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                             TextWrapping="Wrap"
-                                            Watermark="Сообщение...">
+                                            Watermark="{echoes:Translate {x:Static translations:Strings+sidepanel+chat_panel.write_a_message}}">
                                             <TextBox.Resources>
                                                 <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="Transparent" />
                                                 <SolidColorBrush x:Key="TextControlBorderBrush" Color="Transparent" />
@@ -1627,7 +1621,7 @@
                                                     VerticalAlignment="Center"
                                                     FontSize="12"
                                                     Foreground="{DynamicResource SystemBaseMediumColor}"
-                                                    Text="{Binding Tokens, StringFormat={}Токены: {0}}" />
+                                                    Text="{Binding TokensText}" />
                                             </StackPanel>
                                         </Border>
                                     </Grid>
@@ -1636,7 +1630,9 @@
                         </views:SidePanel>
 
                         <!--  Knowledge Base  -->
-                        <views:SidePanel Header="База знаний" IsVisible="{Binding #MemoryButton.IsChecked}">
+                        <views:SidePanel 
+                            Header="{echoes:Translate {x:Static translations:Strings+sidepanel.knowledge_base}}" 
+                            IsVisible="{Binding #MemoryButton.IsChecked}">
                             <DataGrid
                                 VerticalAlignment="Top"
                                 AutoGenerateColumns="False"
@@ -1659,7 +1655,7 @@
                                                         x:DataType="vm:MainVM"
                                                         Command="{Binding DeletingRecordDialogCommand}"
                                                         DataContext="{Binding $parent[DataGrid].DataContext}"
-                                                        Header="Удалить">
+                                                        Header="{echoes:Translate {x:Static translations:Strings+context_menu.delete}}">
                                                         <MenuItem.Icon>
                                                             <LucideIcon Kind="Trash2" Size="20" />
                                                         </MenuItem.Icon>
@@ -1736,7 +1732,7 @@
                                     </DataGridTemplateColumn>
                                     <DataGridTemplateColumn
                                         Width="2*"
-                                        Header="Факт"
+                                        Header="{echoes:Translate {x:Static translations:Strings+sidepanel+knowledge_base_panel.fact}}"
                                         SortMemberPath="Key">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
@@ -1751,7 +1747,7 @@
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
-                                    <DataGridTemplateColumn Width="2*" Header="Отношение">
+                                    <DataGridTemplateColumn Width="2*" Header="{echoes:Translate {x:Static translations:Strings+sidepanel+knowledge_base_panel.attitude}}">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <TextBlock
@@ -1770,7 +1766,7 @@
                                     </DataGridTemplateColumn>
                                     <DataGridTemplateColumn
                                         Width="2*"
-                                        Header="Категория"
+                                        Header="{echoes:Translate {x:Static translations:Strings+sidepanel+knowledge_base_panel.category}}"
                                         SortMemberPath="Category">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
@@ -1790,7 +1786,9 @@
                         </views:SidePanel>
 
                         <!--  Personality  -->
-                        <views:SidePanel Header="Личность" IsVisible="{Binding #PersonalityButton.IsChecked}">
+                        <views:SidePanel 
+                            Header="{echoes:Translate {x:Static translations:Strings+sidepanel.personality}}" 
+                            IsVisible="{Binding #PersonalityButton.IsChecked}">
                             <ScrollViewer>
                                 <StackPanel
                                     MaxWidth="720"
@@ -1802,10 +1800,10 @@
                                         VerticalAlignment="Center"
                                         FontSize="16"
                                         FontWeight="DemiBold"
-                                        Text="Профиль"
+                                        Text="{echoes:Translate {x:Static translations:Strings+sidepanel+personality_panel.profile}}"
                                         TextTrimming="CharacterEllipsis" />
                                     <views:SideCard
-                                        Header="Имя"
+                                        Header="{echoes:Translate {x:Static translations:Strings+sidepanel+personality_panel.name}}"
                                         Icon="{LucideIconContent User,
                                                                  Size=16,
                                                                  StrokeWidth=2}"
@@ -1815,14 +1813,18 @@
                                             <Button
                                                 Grid.Column="1"
                                                 Margin="6,0,0,0"
-                                                Classes="icon-button">
+                                                Classes="icon-button"
+                                                ToolTip.Tip="{echoes:Translate {x:Static translations:Strings+sidepanel+personality_panel.random_name}}"
+                                                ToolTip.HorizontalOffset="0"
+                                                ToolTip.VerticalOffset="4"
+                                                ToolTip.Placement="Bottom">
                                                 <LucideIcon Kind="Dices" Size="20" />
                                             </Button>
                                         </Grid>
                                     </views:SideCard>
                                     <views:SideCard
-                                        Description="Её лучший день в году"
-                                        Header="День рождения"
+                                        Description="{echoes:Translate {x:Static translations:Strings+sidepanel+personality_panel.birthday_description}}"
+                                        Header="{echoes:Translate {x:Static translations:Strings+sidepanel+personality_panel.birthday}}"
                                         Icon="{LucideIconContent Cake,
                                                                  Size=20}">
                                         <TextBox
@@ -1836,7 +1838,7 @@
                                         VerticalAlignment="Center"
                                         FontSize="16"
                                         FontWeight="DemiBold"
-                                        Text="Архетип"
+                                        Text="{echoes:Translate {x:Static translations:Strings+sidepanel+personality_panel.archetype}}"
                                         TextTrimming="CharacterEllipsis" />
                                     <ListBox
                                         Margin="-16,0"
@@ -1883,7 +1885,7 @@
                                                             DataContext="{Binding $parent[views:SidePanel].DataContext}"
                                                             IsVisible="{Binding $parent[ListBoxItem].IsSelected}"
                                                             ToolTip.Placement="Bottom"
-                                                            ToolTip.Tip="Изменить промпт"
+                                                            ToolTip.Tip="{echoes:Translate {x:Static translations:Strings+sidepanel+personality_panel.edit_prompt}}"
                                                             ToolTip.VerticalOffset="4">
                                                             <LucideIcon Kind="Pencil" Size="14" />
                                                         </Button>
@@ -1932,7 +1934,7 @@
                         </views:SidePanel>
 
                         <!--  Model Parameters  -->
-                        <views:SidePanel Header="Параметры ИИ" IsVisible="{Binding #ParametersButton.IsChecked}">
+                        <views:SidePanel Header="{echoes:Translate {x:Static translations:Strings+sidepanel.ai_parameters}}" IsVisible="{Binding #ParametersButton.IsChecked}">
                             <ScrollViewer>
                                 <StackPanel
                                     MaxWidth="720"
@@ -1942,8 +1944,8 @@
                                     Spacing="8">
 
                                     <views:SideCard
-                                        Description="Управляет степенью вариативности и креативности генерируемого текста"
-                                        Header="Температура"
+                                        Description="{echoes:Translate {x:Static translations:Strings+sidepanel+ai_parameters_panel.temperature_description}}"
+                                        Header="{echoes:Translate {x:Static translations:Strings+sidepanel+ai_parameters_panel.temperature}}"
                                         Icon="{LucideIconContent Thermometer,
                                                                  Size=20}">
                                         <TextBox
@@ -1954,8 +1956,8 @@
                                     </views:SideCard>
 
                                     <views:SideCard
-                                        Description="Задает желаемую длину ответа"
-                                        Header="Длина ответа"
+                                        Description="{echoes:Translate {x:Static translations:Strings+sidepanel+ai_parameters_panel.response_length_description}}"
+                                        Header="{echoes:Translate {x:Static translations:Strings+sidepanel+ai_parameters_panel.response_length}}"
                                         Icon="{LucideIconContent Ruler,
                                                                  Size=16,
                                                                  StrokeWidth=2}"
@@ -2011,24 +2013,24 @@
                                                     HorizontalAlignment="Left"
                                                     FontSize="12"
                                                     Foreground="{DynamicResource SystemBaseMediumColor}"
-                                                    Text="Short" />
+                                                    Text="{echoes:Translate {x:Static translations:Strings+sidepanel+ai_parameters_panel.response_short}}" />
                                                 <TextBlock
                                                     HorizontalAlignment="Center"
                                                     FontSize="12"
                                                     Foreground="{DynamicResource SystemBaseMediumColor}"
-                                                    Text="Medium" />
+                                                    Text="{echoes:Translate {x:Static translations:Strings+sidepanel+ai_parameters_panel.medium}}" />
                                                 <TextBlock
                                                     HorizontalAlignment="Right"
                                                     FontSize="12"
                                                     Foreground="{DynamicResource SystemBaseMediumColor}"
-                                                    Text="Long" />
+                                                    Text="{echoes:Translate {x:Static translations:Strings+sidepanel+ai_parameters_panel.response_long}}" />
                                             </Grid>
                                         </StackPanel>
                                     </views:SideCard>
 
                                     <views:SideCard
-                                        Description="Задает жесткий лимит на максимальное количество токенов в одном сообщении"
-                                        Header="Макс. длина ответа"
+                                        Description="{echoes:Translate {x:Static translations:Strings+sidepanel+ai_parameters_panel.max_response_length_description}}"
+                                        Header="{echoes:Translate {x:Static translations:Strings+sidepanel+ai_parameters_panel.max_response_length}}"
                                         Icon="{LucideIconContent OctagonMinus,
                                                                  Size=16,
                                                                  StrokeWidth=2}"
@@ -2037,8 +2039,8 @@
                                     </views:SideCard>
 
                                     <views:SideCard
-                                        Description="Определяет объем сохраняемой истории переписки для поддержания связности диалога"
-                                        Header="Длина контекста"
+                                        Description="{echoes:Translate {x:Static translations:Strings+sidepanel+ai_parameters_panel.context_length_description}}"
+                                        Header="{echoes:Translate {x:Static translations:Strings+sidepanel+ai_parameters_panel.context_length}}"
                                         Icon="{LucideIconContent RulerDimensionLine,
                                                                  Size=16,
                                                                  StrokeWidth=2}"
@@ -2051,7 +2053,9 @@
                         </views:SidePanel>
 
                         <!--  Model Source  -->
-                        <views:SidePanel Header="Источник модели" IsVisible="{Binding #ModelButton.IsChecked}">
+                        <views:SidePanel 
+                            Header="{echoes:Translate {x:Static translations:Strings+sidepanel.model_source}}" 
+                            IsVisible="{Binding #ModelButton.IsChecked}">
                             <ScrollViewer>
                                 <StackPanel
                                     MaxWidth="720"
@@ -2067,11 +2071,11 @@
                                             VerticalAlignment="Center"
                                             FontSize="16"
                                             FontWeight="DemiBold"
-                                            Text="Сервер"
+                                            Text="{echoes:Translate {x:Static translations:Strings+sidepanel+model_source_panel.server}}"
                                             TextTrimming="CharacterEllipsis" />
                                     </RadioButton>
                                     <views:SideCard
-                                        Header="Порт"
+                                        Header="{echoes:Translate {x:Static translations:Strings+sidepanel+model_source_panel.port}}"
                                         Icon="{LucideIconContent Hash,
                                                                  Size=16,
                                                                  StrokeWidth=2}"
@@ -2080,7 +2084,7 @@
                                         <TextBox Text="{Binding Port, Mode=TwoWay}" />
                                     </views:SideCard>
                                     <views:SideCard
-                                        Header="IP-адрес"
+                                        Header="{echoes:Translate {x:Static translations:Strings+sidepanel+model_source_panel.ip}}"
                                         Icon="{LucideIconContent Network,
                                                                  Size=16,
                                                                  StrokeWidth=2}"
@@ -2096,10 +2100,10 @@
                                             VerticalAlignment="Center"
                                             FontSize="16"
                                             FontWeight="DemiBold"
-                                            Text="Облачный провайдер" />
+                                            Text="{echoes:Translate {x:Static translations:Strings+sidepanel+model_source_panel.provider}}" />
                                     </RadioButton>
                                     <views:SideCard
-                                        Header="API Ключ"
+                                        Header="{echoes:Translate {x:Static translations:Strings+sidepanel+model_source_panel.api_key}}"
                                         Icon="{LucideIconContent KeyRound,
                                                                  Size=16,
                                                                  StrokeWidth=2}"
@@ -2117,7 +2121,7 @@
                                         <TextBox Text="{Binding ApiUrl, Mode=TwoWay}" />
                                     </views:SideCard>
                                     <views:SideCard
-                                        Header="Модель"
+                                        Header="{echoes:Translate {x:Static translations:Strings+sidepanel+model_source_panel.model}}"
                                         Icon="{LucideIconContent Bot,
                                                                  Size=16,
                                                                  StrokeWidth=2}"
@@ -2316,7 +2320,7 @@
                             VerticalAlignment="Center"
                             FontSize="22"
                             FontWeight="DemiBold"
-                            Text="Настройки" />
+                            Text="{echoes:Translate {x:Static translations:Strings.settings}}" />
                     </Border>
 
                     <ListBox
@@ -2352,7 +2356,7 @@
                                     Grid.Column="1"
                                     Margin="8,0,0,0"
                                     VerticalAlignment="Center"
-                                    Text="Общие"
+                                    Text="{echoes:Translate {x:Static translations:Strings+settings_popup.general}}"
                                     TextTrimming="CharacterEllipsis" />
                             </Grid>
                         </ListBoxItem>
@@ -2363,7 +2367,7 @@
                                     Grid.Column="1"
                                     Margin="8,0,0,0"
                                     VerticalAlignment="Center"
-                                    Text="Звук"
+                                    Text="{echoes:Translate {x:Static translations:Strings+settings_popup.audio}}"
                                     TextTrimming="CharacterEllipsis" />
                             </Grid>
                         </ListBoxItem>
@@ -2374,7 +2378,7 @@
                                     Grid.Column="1"
                                     Margin="8,0,0,0"
                                     VerticalAlignment="Center"
-                                    Text="Внешний вид"
+                                    Text="{echoes:Translate {x:Static translations:Strings+settings_popup.appearance}}"
                                     TextTrimming="CharacterEllipsis" />
                             </Grid>
                         </ListBoxItem>
@@ -2385,7 +2389,7 @@
                                     Grid.Column="1"
                                     Margin="8,0,0,0"
                                     VerticalAlignment="Center"
-                                    Text="О программе"
+                                    Text="{echoes:Translate {x:Static translations:Strings+settings_popup.about}}"
                                     TextTrimming="CharacterEllipsis" />
                             </Grid>
                         </ListBoxItem>
@@ -2420,24 +2424,24 @@
                                     Margin="24,6,0,0"
                                     FontSize="15"
                                     FontWeight="Bold"
-                                    Text="Оформление" />
+                                    Text="{echoes:Translate {x:Static translations:Strings+settings_popup+general_panel.app_design}}" />
                                 <Border Theme="{DynamicResource SettingsGroup}">
                                     <StackPanel>
                                         <views:SettingsCard
-                                            Description="Основная тема приложения"
-                                            Header="Тема"
+                                            Description="{echoes:Translate {x:Static translations:Strings+settings_popup+general_panel.theme_description}}"
+                                            Header="{echoes:Translate {x:Static translations:Strings+settings_popup+general_panel.theme}}"
                                             Icon="{LucideIconContent SunMoon,
                                                                      20}">
                                             <ComboBox SelectedIndex="{Binding SelectedTheme, Mode=TwoWay}">
-                                                <ComboBoxItem Content="Светлая" />
-                                                <ComboBoxItem Content="Темная" />
-                                                <ComboBoxItem Content="Система" />
+                                                <ComboBoxItem Content="{echoes:Translate {x:Static translations:Strings+settings_popup+general_panel.light}}" />
+                                                <ComboBoxItem Content="{echoes:Translate {x:Static translations:Strings+settings_popup+general_panel.dark}}" />
+                                                <ComboBoxItem Content="{echoes:Translate {x:Static translations:Strings+settings_popup+general_panel.system}}" />
                                             </ComboBox>
                                         </views:SettingsCard>
                                         <Separator />
                                         <views:SettingsCard
-                                            Description="Выбор акцентного цвета приложения"
-                                            Header="Акцентный цвет"
+                                            Description="{echoes:Translate {x:Static translations:Strings+settings_popup+general_panel.accent_description}}"
+                                            Header="{echoes:Translate {x:Static translations:Strings+settings_popup+general_panel.accent}}"
                                             Icon="{LucideIconContent Pipette,
                                                                      20}">
                                             <StackPanel Orientation="Horizontal" Spacing="8">
@@ -2459,8 +2463,8 @@
                                         </views:SettingsCard>
                                         <Separator />
                                         <views:SettingsCard
-                                            Description="Выбор шрифта интерфейса приложения"
-                                            Header="Шрифт"
+                                            Description="{echoes:Translate {x:Static translations:Strings+settings_popup+general_panel.font_description}}"
+                                            Header="{echoes:Translate {x:Static translations:Strings+settings_popup+general_panel.font}}"
                                             Icon="{LucideIconContent Type,
                                                                      20}">
                                             <ComboBox ItemsSource="{Binding Fonts}" SelectedItem="{Binding SelectedFont, Mode=TwoWay}">
@@ -2473,8 +2477,8 @@
                                         </views:SettingsCard>
                                         <Separator />
                                         <views:SettingsCard
-                                            Description="Выбор используемого в приложении моноширинного шрифта"
-                                            Header="Моноширинный шрифт"
+                                            Description="{echoes:Translate {x:Static translations:Strings+settings_popup+general_panel.monospace_font_description}}"
+                                            Header="{echoes:Translate {x:Static translations:Strings+settings_popup+general_panel.monospace_font}}"
                                             Icon="{LucideIconContent SquareTerminal,
                                                                      20}">
                                             <ComboBox ItemsSource="{Binding MonospaceFonts}" SelectedItem="{Binding SelectedMonoFont, Mode=TwoWay}">
@@ -2491,12 +2495,12 @@
                                     Margin="24,0,0,0"
                                     FontSize="15"
                                     FontWeight="Bold"
-                                    Text="Язык" />
+                                    Text="{echoes:Translate {x:Static translations:Strings+settings_popup+general_panel.language}}" />
                                 <Border Theme="{DynamicResource SettingsGroup}">
                                     <StackPanel>
                                         <views:SettingsCard
-                                            Description="Язык интерфейса всего приложения"
-                                            Header="Язык интерфейса"
+                                            Description="{echoes:Translate {x:Static translations:Strings+settings_popup+general_panel.ui_language_description}}"
+                                            Header="{echoes:Translate {x:Static translations:Strings+settings_popup+general_panel.ui_language}}"
                                             Icon="{LucideIconContent Globe,
                                                                      20}">
                                             <ComboBox ItemsSource="{Binding AppLanguages}" SelectedItem="{Binding SelectedAppLanguage}">
@@ -2509,8 +2513,8 @@
                                         </views:SettingsCard>
                                         <Separator />
                                         <views:SettingsCard
-                                            Description="Язык, на котором будет происходить общение с моделью. От этого параметра зависит список доступных голосовых моделей"
-                                            Header="Язык модели"
+                                            Description="{echoes:Translate {x:Static translations:Strings+settings_popup+general_panel.ai_language_description}}"
+                                            Header="{echoes:Translate {x:Static translations:Strings+settings_popup+general_panel.ai_language}}"
                                             Icon="{LucideIconContent Languages,
                                                                      20}">
                                             <ComboBox ItemsSource="{Binding Languages}" SelectedItem="{Binding SelectedLanguage}">
@@ -2535,12 +2539,12 @@
                                     Margin="24,6,0,0"
                                     FontSize="15"
                                     FontWeight="Bold"
-                                    Text="Провайдер" />
+                                    Text="{echoes:Translate {x:Static translations:Strings+settings_popup+audio_panel.provider}}" />
                                 <Border Theme="{DynamicResource SettingsGroup}">
                                     <StackPanel>
                                         <views:SettingsCard
-                                            Description="Выбор технологии синтеза речи"
-                                            Header="Источник"
+                                            Description="{echoes:Translate {x:Static translations:Strings+settings_popup+audio_panel.provider_description}}"
+                                            Header="{echoes:Translate {x:Static translations:Strings+settings_popup+audio_panel.provider}}"
                                             Icon="{LucideIconContent Cpu,
                                                                      20}">
                                             <ComboBox ItemsSource="{Binding Sources}" SelectedItem="{Binding SelectedSource}">
@@ -2554,8 +2558,8 @@
                                         </views:SettingsCard>
                                         <Separator />
                                         <views:SettingsCard
-                                            Description="Технологическая база для генерации речи"
-                                            Header="Модель синтеза"
+                                            Description="{echoes:Translate {x:Static translations:Strings+settings_popup+audio_panel.model_description}}"
+                                            Header="{echoes:Translate {x:Static translations:Strings+settings_popup+audio_panel.model}}"
                                             Icon="{LucideIconContent Bot,
                                                                      20}">
                                             <StackPanel Orientation="Horizontal" Spacing="8">
@@ -2603,8 +2607,8 @@
                                         </views:SettingsCard>
                                         <Separator />
                                         <views:SettingsCard
-                                            Description="Конкретный голос и тембр, доступный в рамках выбранной модели"
-                                            Header="Голос"
+                                            Description="{echoes:Translate {x:Static translations:Strings+settings_popup+audio_panel.speaker_description}}"
+                                            Header="{echoes:Translate {x:Static translations:Strings+settings_popup+audio_panel.speaker}}"
                                             Icon="{LucideIconContent Speech,
                                                                      20}">
                                             <Grid>
@@ -2650,12 +2654,12 @@
                                     Margin="24,0,0,0"
                                     FontSize="15"
                                     FontWeight="Bold"
-                                    Text="Голос" />
+                                    Text="{echoes:Translate {x:Static translations:Strings+settings_popup+audio_panel.voice}}" />
                                 <Border Theme="{DynamicResource SettingsGroup}">
                                     <StackPanel>
                                         <views:SettingsCard
-                                            Description="Общая громкость голоса"
-                                            Header="Громкость"
+                                            Description="{echoes:Translate {x:Static translations:Strings+settings_popup+audio_panel.volume_description}}"
+                                            Header="{echoes:Translate {x:Static translations:Strings+settings_popup+audio_panel.volume}}"
                                             Tag="{Binding VolumeLevel}">
                                             <views:SettingsCard.Styles>
                                                 <Style Selector="views|SettingsCard[Tag=0]">
@@ -2708,8 +2712,8 @@
                                         </views:SettingsCard>
                                         <Separator />
                                         <views:SettingsCard
-                                            Description="Регулировка высоты тона: низкие значения делают голос более грубым и глубоким, высокие — тонким и звонким"
-                                            Header="Высота голоса"
+                                            Description="{echoes:Translate {x:Static translations:Strings+settings_popup+audio_panel.pitch_description}}"
+                                            Header="{echoes:Translate {x:Static translations:Strings+settings_popup+audio_panel.pitch}}"
                                             Icon="{LucideIconContent AudioLines,
                                                                      20}">
                                             <StackPanel Orientation="Horizontal" Spacing="10">
@@ -2725,8 +2729,8 @@
                                         </views:SettingsCard>
                                         <Separator />
                                         <views:SettingsCard
-                                            Description="Ясность и звонкость произношения. Повышает четкость и разборчивость слов"
-                                            Header="Верхние частоты"
+                                            Description="{echoes:Translate {x:Static translations:Strings+settings_popup+audio_panel.treble_description}}"
+                                            Header="{echoes:Translate {x:Static translations:Strings+settings_popup+audio_panel.treble}}"
                                             Icon="{LucideIconContent ChartNoAxesColumnIncreasing,
                                                                      20}">
                                             <StackPanel Orientation="Horizontal" Spacing="10">
@@ -2742,8 +2746,8 @@
                                         </views:SettingsCard>
                                         <Separator />
                                         <views:SettingsCard
-                                            Description="Глубина и плотность голоса. Помогает убрать писклявость"
-                                            Header="Нижние частоты"
+                                            Description="{echoes:Translate {x:Static translations:Strings+settings_popup+audio_panel.bass_description}}"
+                                            Header="{echoes:Translate {x:Static translations:Strings+settings_popup+audio_panel.bass}}"
                                             Icon="{LucideIconContent ChartNoAxesColumnDecreasing,
                                                                      20}">
                                             <StackPanel Orientation="Horizontal" Spacing="10">
@@ -2763,11 +2767,11 @@
                                     Margin="24,0,0,0"
                                     FontSize="15"
                                     FontWeight="Bold"
-                                    Text="Расширенные настройки" />
+                                    Text="{echoes:Translate {x:Static translations:Strings+settings_popup+audio_panel.advanced_settings}}" />
                                 <Border Theme="{DynamicResource SettingsGroup}">
                                     <views:SettingsCard
-                                        Description="Включает потоковое воспроизведение речи, позволяя генерировать звук на лету.&#x0a;Примечание: на некоторых провайдерах может ухудшиться качество воспроизведения"
-                                        Header="Потоковое воспроизведение"
+                                        Description="{echoes:Translate {x:Static translations:Strings+settings_popup+audio_panel.stream_description}}"
+                                        Header="{echoes:Translate {x:Static translations:Strings+settings_popup+audio_panel.stream}}"
                                         Icon="{LucideIconContent WavesVertical,
                                                                  20}">
                                         <ToggleSwitch
@@ -2782,19 +2786,19 @@
                                     Margin="24,6,0,0"
                                     FontSize="15"
                                     FontWeight="Bold"
-                                    Text="Модель" />
+                                    Text="{echoes:Translate {x:Static translations:Strings+settings_popup+appearance_panel.model}}" />
                                 <Border Theme="{DynamicResource SettingsGroup}">
                                     <StackPanel>
                                         <views:SettingsCard
-                                            Description="Выбор модели персонажа с устройства. Скачанные .vrm файлы моделей доступны по пути /какой-то/путь. В эту же директорию файл модели копируется при добавлении"
-                                            Header="Модель персонажа"
+                                            Description="{Binding ModelDescription}"
+                                            Header="{echoes:Translate {x:Static translations:Strings+settings_popup+appearance_panel.character}}"
                                             Icon="{LucideIconContent Box,
                                                                      Size=20}">
                                             <Grid>
                                                 <Button
                                                     Classes="word-button"
                                                     Command="{Binding OpenModel3DFileCommand}"
-                                                    Content="Добавить"
+                                                    Content="{echoes:Translate {x:Static translations:Strings+settings_popup+appearance_panel.add}}"
                                                     IsVisible="{Binding !IsModel3DLoading}" />
                                                 <StackPanel
                                                     HorizontalAlignment="Center"
@@ -2865,8 +2869,8 @@
 
                                         <Separator />
                                         <views:SettingsCard
-                                            Description="Путь к папке, в которую должны добавляться модели"
-                                            Header="Папка моделей"
+                                            Description="{echoes:Translate {x:Static translations:Strings+settings_popup+appearance_panel.models_folder_description}}"
+                                            Header="{echoes:Translate {x:Static translations:Strings+settings_popup+appearance_panel.models_folder}}"
                                             Icon="{LucideIconContent FolderClosed,
                                                                      Size=20}">
                                             <StackPanel Orientation="Horizontal" Spacing="10">
@@ -2886,20 +2890,20 @@
                                                 <Button
                                                     Classes="word-button"
                                                     Command="{Binding ChangeModel3DFolderCommand}"
-                                                    Content="Изменить" />
+                                                    Content="{echoes:Translate {x:Static translations:Strings+settings_popup+appearance_panel.edit}}" />
                                             </StackPanel>
                                         </views:SettingsCard>
 
                                         <Separator />
                                         <views:SettingsCard
-                                            Description="Устанавливает, как делеко персонаж находится от экрана"
-                                            Header="Дальность камеры"
+                                            Description="{echoes:Translate {x:Static translations:Strings+settings_popup+appearance_panel.camera_description}}"
+                                            Header="{echoes:Translate {x:Static translations:Strings+settings_popup+appearance_panel.camera}}"
                                             Icon="{LucideIconContent ScanEye,
                                                                      Size=20}">
                                             <ComboBox SelectedIndex="{Binding Camera, Mode=TwoWay}">
-                                                <ComboBoxItem Content="Близко" />
-                                                <ComboBoxItem Content="Средне" />
-                                                <ComboBoxItem Content="Далеко" />
+                                                <ComboBoxItem Content="{echoes:Translate {x:Static translations:Strings+settings_popup+appearance_panel.close}}" />
+                                                <ComboBoxItem Content="{echoes:Translate {x:Static translations:Strings+settings_popup+appearance_panel.medium}}" />
+                                                <ComboBoxItem Content="{echoes:Translate {x:Static translations:Strings+settings_popup+appearance_panel.far}}" />
                                             </ComboBox>
                                         </views:SettingsCard>
 
@@ -2941,7 +2945,7 @@
                         VerticalAlignment="Center"
                         FontSize="22"
                         FontWeight="DemiBold"
-                        Text="Редактировать промпт" />
+                        Text="{echoes:Translate {x:Static translations:Strings+dialogs.edit_prompt}}" />
                     <TextBox
                         Grid.Row="1"
                         Height="NaN"
@@ -2963,11 +2967,11 @@
                         <Button
                             Classes="word-button"
                             Command="{Binding SavePromptCommand}"
-                            Content="Сохранить" />
+                            Content="{echoes:Translate {x:Static translations:Strings+dialogs.save}}" />
                         <Button
                             Classes="word-button"
                             Command="{Binding PromptEditorCommand}"
-                            Content="Отмена" />
+                            Content="{echoes:Translate {x:Static translations:Strings+dialogs.cancel}}" />
                     </StackPanel>
                     <Button
                         Grid.Row="0"
@@ -2996,14 +3000,14 @@
                         VerticalAlignment="Center"
                         FontSize="22"
                         FontWeight="DemiBold"
-                        Text="Удаление" />
+                        Text="{echoes:Translate {x:Static translations:Strings+dialogs.deleting}}" />
                     <TextBlock
                         Grid.Row="1"
                         Padding="0,12"
                         HorizontalAlignment="Left"
                         VerticalAlignment="Top"
                         FontSize="16"
-                        Text="Вы уверены, что хотите удалить выбранные сообщения?"
+                        Text="{Binding DeletingDialogMessage}"
                         TextWrapping="Wrap" />
                     <StackPanel
                         Grid.Row="2"
@@ -3016,7 +3020,8 @@
                             BorderBrush="{DynamicResource SystemErrorTextColor}"
                             Classes="word-button"
                             Command="{Binding DeleteMessageCommand}"
-                            Content="Удалить"
+                            FontWeight="DemiBold"
+                            Content="{echoes:Translate {x:Static translations:Strings+dialogs.delete}}"
                             Foreground="{DynamicResource SystemErrorTextColor}">
                             <Button.Styles>
                                 <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
@@ -3034,7 +3039,7 @@
                         <Button
                             Classes="word-button"
                             Command="{Binding DeletingMessageDialogCommand}"
-                            Content="Отмена" />
+                            Content="{echoes:Translate {x:Static translations:Strings+dialogs.cancel}}" />
                     </StackPanel>
                     <Button
                         Grid.Row="0"
@@ -3063,14 +3068,14 @@
                         VerticalAlignment="Center"
                         FontSize="22"
                         FontWeight="DemiBold"
-                        Text="Удаление" />
+                        Text="{echoes:Translate {x:Static translations:Strings+dialogs.deleting}}" />
                     <TextBlock
                         Grid.Row="1"
                         Padding="0,12"
                         HorizontalAlignment="Left"
                         VerticalAlignment="Top"
                         FontSize="16"
-                        Text="Вы уверены, что хотите удалить выбранную запись из базы знаний?"
+                        Text="{echoes:Translate {x:Static translations:Strings+dialogs.deleting_knowledge_record}}"
                         TextWrapping="Wrap" />
                     <StackPanel
                         Grid.Row="2"
@@ -3082,8 +3087,9 @@
                             Background="{DynamicResource ErrorLowColor}"
                             BorderBrush="{DynamicResource SystemErrorTextColor}"
                             Classes="word-button"
+                            FontWeight="DemiBold"
                             Command="{Binding DeleteKnowledgeRecordCommand}"
-                            Content="Удалить"
+                            Content="{echoes:Translate {x:Static translations:Strings+dialogs.delete}}"
                             Foreground="{DynamicResource SystemErrorTextColor}">
                             <Button.Styles>
                                 <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
@@ -3101,7 +3107,7 @@
                         <Button
                             Classes="word-button"
                             Command="{Binding DeletingRecordDialogCommand}"
-                            Content="Отмена" />
+                            Content="{echoes:Translate {x:Static translations:Strings+dialogs.cancel}}" />
                     </StackPanel>
                     <Button
                         Grid.Row="0"

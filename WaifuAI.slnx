@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="WaifuAI.Translations/WaifuAI.Translations.csproj" />
   <Project Path="WaifuAI\WaifuAI.csproj" />
 </Solution>

@@ -7,11 +7,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using WaifuAI.Models;
 using WaifuAI.ViewModels;
+using WaifuAI.Translations;
 
 namespace WaifuAI.Services;
 
 public static class RequestService
-{   
+{
+    public static string ErrorWord => Strings.error.CurrentValue;
+
     public static async Task<Message> DoServerQuery(RequestModel queryModel, CancellationToken cancellationToken = default)
     {
         try
@@ -31,10 +34,10 @@ public static class RequestService
                     return new Message
                     {
                         Role = "system", 
-                        Content = $"Ошибка {(int)answer.StatusCode}: {messageElement.GetString()}"
+                        Content = $"{ErrorWord} {(int)answer.StatusCode}: {messageElement.GetString()}"
                     };
                 }
-                return new Message { Role = "system", Content = $"Ошибка {(int)answer.StatusCode}" };
+                return new Message { Role = "system", Content = $"{ErrorWord} {(int)answer.StatusCode}" };
             }
             var model = JsonSerializer.Deserialize<ResponseModel>(json);
             if (model == null)
@@ -54,7 +57,7 @@ public static class RequestService
             return new Message 
             { 
                 Role = "system",
-                Content = "Ошибка: " + e.Message 
+                Content = $"{ErrorWord}: " + e.Message 
             };
         }
     }
@@ -97,11 +100,11 @@ public static class RequestService
                     return new Message
                     {
                         Role = "system", 
-                        Content = $"Ошибка {(int)response.StatusCode}: {messageElement.GetString()}"
+                        Content = $"{ErrorWord} {(int)response.StatusCode}: {messageElement.GetString()}"
                     };
                 }
                 
-                return new Message { Role = "system", Content = $"Ошибка {(int)response.StatusCode}" };
+                return new Message { Role = "system", Content = $"{ErrorWord} {(int)response.StatusCode}" };
             }
 
             var deserializeOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
@@ -119,7 +122,7 @@ public static class RequestService
             return new Message 
             { 
                 Role = "system",
-                Content = "Ошибка: " + ex.Message 
+                Content = $"{ErrorWord}: " + ex.Message 
             };
         }
     }

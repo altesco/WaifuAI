@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Echoes" Version="0.4.0" />
+    <PackageReference Include="Echoes.Base" Version="0.4.0" GeneratePathProperty="true" />
+    <PackageReference Include="Echoes.Generator" Version="0.4.0">
+      <OutputItemType>Analyzer</OutputItemType>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </PackageReference>
+    <PackageReference Include="Echoes.Avalonia" Version="0.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Analyzer Include="$(PkgEchoes_Base)/lib/netstandard2.0/Echoes.Base.dll" Condition="Exists('$(PkgEchoes_Base)/lib/netstandard2.0/Echoes.Base.dll')" />
+    <Analyzer Include="$(PkgEchoes_Base)/lib/net8.0/Echoes.Base.dll" Condition="Exists('$(PkgEchoes_Base)/lib/net8.0/Echoes.Base.dll')" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="**/*.toml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="Translations/Strings.toml" />
+  </ItemGroup>
+
+</Project>

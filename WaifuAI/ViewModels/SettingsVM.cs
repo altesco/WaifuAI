@@ -23,6 +23,7 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using WaifuAI.Models;
 using WaifuAI.Services;
+using Echoes;
 
 namespace WaifuAI.ViewModels;
 
@@ -331,7 +332,7 @@ public partial class SettingsVM : ObservableValidator
 
     public ObservableCollection<string> AppLanguages { get; } =
     [
-        "ru", "en"
+        "ru", "en", "de", "es", "fr"
     ];
     [ObservableProperty] private string _selectedAppLanguage = "ru";
 
@@ -346,7 +347,7 @@ public partial class SettingsVM : ObservableValidator
         if (!VoiceService.LanguageModels.ContainsKey(value))
         {
             var systemLanguage = CultureInfo.CurrentCulture.TwoLetterISOLanguageName.ToLower();
-            SelectedLanguage = systemLanguage is "ru" or "en" or "de" or "es" or "fr"
+            SelectedLanguage = Languages.Contains(systemLanguage)
                     ? systemLanguage
                     : "en";
             return;
@@ -357,6 +358,16 @@ public partial class SettingsVM : ObservableValidator
             Models.Add(model);
         if (Models.Count > 0)
             SelectedVoiceModel = Models[0];
+    }
+
+    partial void OnSelectedAppLanguageChanged(string value)
+    {
+        TranslationProvider.SetCulture(CultureInfo.GetCultureInfo(value));
+
+        foreach (var archetype in Archetypes)
+        {
+            archetype.RefreshLocalization();
+        }
     }
 
     partial void OnSelectedThemeChanged(int value)
@@ -606,7 +617,12 @@ public partial class SettingsVM : ObservableValidator
     private static readonly string BaseModel3DFolder = 
         Path.Combine(WebAssets, "models");
 
-    [ObservableProperty] private string _model3DFolder = BaseModel3DFolder;
+    [ObservableProperty] 
+    [NotifyPropertyChangedFor(nameof(ModelDescription))]
+    private string _model3DFolder = BaseModel3DFolder;
+
+    public string ModelDescription =>
+        string.Format(Translations.Strings.settings_popup.appearance_panel.character_description.CurrentValue, Model3DFolder);
 
     public ObservableCollection<string> Models3D { get; } = [];
     [ObservableProperty] private string _selectedModel3D;
@@ -797,8 +813,7 @@ public partial class SettingsVM : ObservableValidator
         new()
         {
             Name = "tsundere",
-            Description =
-                "Колючая снаружи, но мягкая и заботливая внутри. Проявления симпатии через напускную грубость.",
+            DescriptionTranslation = Translations.Strings.sidepanel.personality_panel.tsundere_description,
             Emoji = "🔥",
             Color = Color.Parse("#ff5c5c"),
             BreakUpAffection = 25f,
@@ -823,7 +838,7 @@ public partial class SettingsVM : ObservableValidator
         new()
         {
             Name = "kuudere",
-            Description = "Хладнокровная, молчаливая и внешне безэмоциональная.",
+            DescriptionTranslation = Translations.Strings.sidepanel.personality_panel.kuudere_description,
             Emoji = "🧊",
             Color = Color.Parse("#0008ff"),
             BreakUpAffection = 20f,
@@ -848,7 +863,7 @@ public partial class SettingsVM : ObservableValidator
         new()
         {
             Name = "dandere",
-            Description = "Крайне стеснительная и молчаливая личность.",
+            DescriptionTranslation = Translations.Strings.sidepanel.personality_panel.dandere_description,
             Emoji = "😳",
             Color = Color.Parse("#544dc2"),
             BreakUpAffection = 15f,
@@ -873,7 +888,7 @@ public partial class SettingsVM : ObservableValidator
         new()
         {
             Name = "deredere",
-            Description = "Воплощение чистой любви и оптимизма.",
+            DescriptionTranslation = Translations.Strings.sidepanel.personality_panel.deredere_description,
             Emoji = "💓",
             Color = Color.Parse("#ff4b8a"),
             BreakUpAffection = 35f,
@@ -898,7 +913,7 @@ public partial class SettingsVM : ObservableValidator
         new()
         {
             Name = "genki",
-            Description = "Неиссякаемый источник энергии.",
+            DescriptionTranslation = Translations.Strings.sidepanel.personality_panel.genki_description,
             Emoji = "🌞",
             Color = Color.Parse("#dfa017"),
             BreakUpAffection = 30f,
@@ -923,7 +938,7 @@ public partial class SettingsVM : ObservableValidator
         new()
         {
             Name = "yandere",
-            Description = "Одержимая и пугающе преданная.",
+            DescriptionTranslation = Translations.Strings.sidepanel.personality_panel.yandere_description,
             Emoji = "🔪",
             Color = Color.Parse("#cb0e0e"),
             BreakUpAffection = 10f,
@@ -948,7 +963,7 @@ public partial class SettingsVM : ObservableValidator
         new()
         {
             Name = "teasedere",
-            Description = "Мастер подколов и легкого кокетства.",
+            DescriptionTranslation = Translations.Strings.sidepanel.personality_panel.teasedere_description,
             Emoji = "❤️‍🔥",
             Color = Color.Parse("#ff9431"),
             BreakUpAffection = 25f,
@@ -973,7 +988,7 @@ public partial class SettingsVM : ObservableValidator
         new()
         {
             Name = "dorodere",
-            Description = "Милая на первый взгляд, но хранит внутри жестокую сторону.",
+            DescriptionTranslation = Translations.Strings.sidepanel.personality_panel.dorodere_description,
             Emoji = "⚫",
             Color = Colors.SlateGray,
             BreakUpAffection = 15f,
@@ -998,7 +1013,7 @@ public partial class SettingsVM : ObservableValidator
         new()
         {
             Name = "utsudere",
-            Description = "Меланхоличная личность, склонная к грусти.",
+            DescriptionTranslation = Translations.Strings.sidepanel.personality_panel.utsudere_description,
             Emoji = "💧",
             Color = Color.Parse("#0876d6"),
             BreakUpAffection = 10f,
@@ -1023,7 +1038,7 @@ public partial class SettingsVM : ObservableValidator
         new()
         {
             Name = "bakadere",
-            Description = "Наивная, неуклюжая и очень открытая.",
+            DescriptionTranslation = Translations.Strings.sidepanel.personality_panel.bakadere_description,
             Emoji = "🐔",
             Color = Colors.Brown,
             BreakUpAffection = 30f,
@@ -1048,7 +1063,7 @@ public partial class SettingsVM : ObservableValidator
         new()
         {
             Name = "darudere",
-            Description = "Ленивая и слегка отстраненная.",
+            DescriptionTranslation = Translations.Strings.sidepanel.personality_panel.darudere_description,
             Emoji = "💤",
             Color = Color.Parse("#1d6bc5"),
             BreakUpAffection = 20f,
@@ -1073,7 +1088,7 @@ public partial class SettingsVM : ObservableValidator
         new()
         {
             Name = "hinedere",
-            Description = "Циничная и высокомерная снаружи.",
+            DescriptionTranslation = Translations.Strings.sidepanel.personality_panel.hinedere_description,
             Emoji = "🚬",
             Color = Color.Parse("#318eb0"),
             BreakUpAffection = 15f,
@@ -1098,7 +1113,7 @@ public partial class SettingsVM : ObservableValidator
         new()
         {
             Name = "sadodere",
-            Description = "Любит доминировать и манипулировать чувствами.",
+            DescriptionTranslation = Translations.Strings.sidepanel.personality_panel.sadodere_description,
             Emoji = "🩸",
             Color = Color.Parse("#be2edd"),
             BreakUpAffection = 15f,
@@ -1130,7 +1145,7 @@ public partial class SettingsVM : ObservableValidator
     #region MoodSettings
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(AffectionLevel))]
+    [NotifyPropertyChangedFor(nameof(AffectionLevel), nameof(AffectionText))]
     private float _affection;
 
     public AffectionType AffectionLevel => Affection switch
@@ -1142,7 +1157,7 @@ public partial class SettingsVM : ObservableValidator
     };
 
     [ObservableProperty] 
-    [NotifyPropertyChangedFor(nameof(EnergyLevel))]
+    [NotifyPropertyChangedFor(nameof(EnergyLevel), nameof(EnergyText))]
     private float _energy;
 
     public EnergyType EnergyLevel => Energy switch
@@ -1153,7 +1168,7 @@ public partial class SettingsVM : ObservableValidator
     };
     
     [ObservableProperty] 
-    [NotifyPropertyChangedFor(nameof(EngagementLevel))]
+    [NotifyPropertyChangedFor(nameof(EngagementLevel), nameof(EngagementText))]
     private float _engagement;
 
     public EngagementType EngagementLevel => Engagement switch
@@ -1164,7 +1179,7 @@ public partial class SettingsVM : ObservableValidator
     };
     
     [ObservableProperty] 
-    [NotifyPropertyChangedFor(nameof(MoodLevel))]
+    [NotifyPropertyChangedFor(nameof(MoodLevel), nameof(MoodText))]
     private float _mood;
 
     public MoodType MoodLevel => Mood switch
@@ -1173,6 +1188,11 @@ public partial class SettingsVM : ObservableValidator
         <= 65 => MoodType.Normal,
         _ => MoodType.Best
     };
+
+    public string AffectionText => string.Format(Translations.Strings.top_panel.affection.CurrentValue, Affection);
+    public string EngagementText => string.Format(Translations.Strings.top_panel.engagement.CurrentValue, Engagement);
+    public string MoodText => string.Format(Translations.Strings.top_panel.mood.CurrentValue, Mood);
+    public string EnergyText => string.Format(Translations.Strings.top_panel.energy.CurrentValue, Energy);
 
     #endregion
 

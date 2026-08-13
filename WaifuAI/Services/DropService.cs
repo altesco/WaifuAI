@@ -66,6 +66,35 @@ public static class DropService
         );
 
         DropEnergy(s.EnergyDropRate);
+        CheckSleepChance();
+    }
+
+    private static void CheckSleepChance()
+    {
+        var settings = SettingsVM.Instance;
+        var archetype = settings.SelectedArchetype;
+        var s = archetype.Sensitivity;
+        var now = DateTime.UtcNow;
+
+        // 1. Проверяем, не наступило ли жёсткое время отбоя
+        bool isBedtime = now.Hour > s.LatestBedtime.Hour ||
+                         (now.Hour == s.LatestBedtime.Hour && now.Minute >= s.LatestBedtime.Minute);
+
+        // 2. Считаем вероятность: 100% при отбое, иначе берём расчёт из PromptService
+        float sleepProbability = isBedtime
+            ? 1.0f
+            : PromptService.CalculateSleepProbability(settings.Energy, settings.Affection, archetype);
+
+        // 3. Проверяем случайное число против вероятности
+        if (Random.Shared.NextDouble() < sleepProbability)
+        {
+            int sleepHours = Random.Shared.Next(
+                s.BaseSleepDurationRange.Min,
+                s.BaseSleepDurationRange.Max + 1
+            );
+
+            settings.WakeUpTime = now.AddHours(sleepHours);
+        }
     }
 
     public static void DropEngagement(
@@ -172,7 +201,6 @@ public static class DropService
                     double sleptHours = (s.WakeUpTime - currentTime).TotalHours;
                     s.Energy = Math.Min(100.0f, s.Energy + (float)(sleptHours * sensitivity.EnergyRecoveryRate));
 
-                    //s.IsSleeping = false;
                     SetRandomMorningMood();
                     wokeUpOffline = true;
                     currentTime = s.WakeUpTime;

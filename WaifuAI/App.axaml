@@ -4,7 +4,7 @@
     x:Class="WaifuAI.App"
     xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
     RequestedThemeVariant="Default">
-    <Application.Resources>
+    <Application.Resources> 
         <ResourceDictionary>
             <SolidColorBrush x:Key="ButtonBackgroundDisabled" Color="Transparent" />
             <SolidColorBrush x:Key="ListBoxBorderThemeBrush" Color="{DynamicResource SystemBaseLowColor}" />

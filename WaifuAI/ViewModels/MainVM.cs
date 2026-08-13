@@ -5,7 +5,6 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Controls;
@@ -14,10 +13,11 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using WaifuAI.Models;
 using WaifuAI.Services;
 using CommunityToolkit.Mvvm.Messaging;
-using ElBruno.LocalEmbeddings;
-using ElBruno.LocalEmbeddings.Extensions;
+using Microsoft.VisualBasic;
 using SharpToken;
 using WaifuAI.CustomClasses;
+using WaifuAI.Translations;
+using Strings = WaifuAI.Translations.Strings;
 
 namespace WaifuAI.ViewModels;
 
@@ -31,33 +31,33 @@ public partial class MainVM : ObservableValidator
 
     private async Task InitializeAsync()
     {
-        InitializingMessage = "Загрузка данных...";
+        InitializingMessage = Strings.loading.settings_load.CurrentValue;
         await SettingsVM.Instance.Load();
 
-        InitializingMessage = "Запуск веб-сервера...";
+        InitializingMessage = Strings.loading.start_web_server.CurrentValue;
         WebAddress = await Model3DService.StartWebServer();
         await Model3DService.WaitForResponce();
 
         await SettingsVM.Instance.InitializeModel3D();
 
-        InitializingMessage = "Запуск звукового сервера...";
+        InitializingMessage = Strings.loading.start_voice_server.CurrentValue;
         VoiceService.StartPythonServer();
         await VoiceService.WaitForPythonServerAsync();
 
         await SettingsVM.Instance.InitializeSpeakers();
 
-        InitializingMessage = "Создание векторного генератора...";
+        InitializingMessage = Strings.loading.create_vector_generator.CurrentValue;
         await MessageParser.CreateVectorGenerator();
 
-        InitializingMessage = "Подготовка лингвистических модулей...";
+        InitializingMessage = Strings.loading.get_encoding.CurrentValue;
         await Task.Run(() => _encoder = GptEncoding.GetEncoding("cl100k_base"));
 
-        InitializingMessage = "Загрузка базы знаний...";
+        InitializingMessage = Strings.loading.db_load.CurrentValue;
         await DatabaseService.InitializeDatabases();
         var records = await DatabaseService.KnowledgeDb.Table<KnowledgeRecord>().ToListAsync();
         KnowledgeBase.AddRange(records);
 
-        InitializingMessage = "Загрузка истории чата...";
+        InitializingMessage = Strings.loading.chat_load.CurrentValue;
         var messages = await DatabaseService.HistoryDb.Table<Message>()
             .OrderBy(m => m.Time)
             .ToListAsync();
@@ -108,6 +108,9 @@ public partial class MainVM : ObservableValidator
         };
 
         SettingsVM.Instance.LastUserEntry = DateTime.UtcNow;
+
+        SelectedMessages.CollectionChanged += (_, _) => 
+            OnPropertyChanged(nameof(DeletingDialogMessage));
     }
 
     private static GptEncoding _encoder;
@@ -121,7 +124,12 @@ public partial class MainVM : ObservableValidator
     [NotifyCanExecuteChangedFor(nameof(RequestCommand))]
     private string _question = string.Empty;
 
-    [ObservableProperty] private int? _tokens;
+    [ObservableProperty] 
+    [NotifyPropertyChangedFor(nameof(TokensText))]
+    private int? _tokens;
+
+    public string TokensText => string.Format(Strings.sidepanel.chat_panel.tokens.CurrentValue, Tokens);
+
     [ObservableProperty] private MessageVM? _selectedMessage;
 
     public ObservableCollection<MessageVM> SelectedMessages { get; } = [];
@@ -156,6 +164,9 @@ public partial class MainVM : ObservableValidator
 
     public string RemainingSleepTimeMask =>
         RemainingSleepTimeText.Length >= 8 ? "00:00:00" : "00:00";    
+
+    public string DeletingDialogMessage => 
+        string.Format(Strings.dialogs.deleting_message.CurrentValue, SelectedMessages.Count);
 
 
     private void StartSleepTimer()
@@ -406,7 +417,7 @@ public partial class MainVM : ObservableValidator
         }
         catch (Exception e)
         {
-            Console.WriteLine("Ошибка в запросе: " + e.Message);
+            Console.WriteLine("Request error: " + e.Message);
         }
         finally
         {
@@ -495,7 +506,6 @@ public partial class MainVM : ObservableValidator
         var sleepTime = MessageParser.ParseWakeUpTime(text);
         if (sleepTime != null)
         {
-            //s.IsSleeping = true;
             s.WakeUpTime = timestamp.AddMinutes((int)(sleepTime * 60));
         }
 
@@ -752,329 +762,5 @@ public partial class MainVM : ObservableValidator
         textBox.Text = text.Insert(caretIndex, Environment.NewLine);
         textBox.CaretIndex = caretIndex + Environment.NewLine.Length;
     }
-
-
-
-
-
-   /*  [RelayCommand]
-    private async Task RunQaTest()
-    {
-        string logFilePath = Path.Combine(AppContext.BaseDirectory, "qa_test_log.txt");
-        await File.WriteAllTextAsync(logFilePath,
-            $"=== STARTING FULL QA TEST AT {DateTime.Now:yyyy-MM-dd HH:mm:ss} ===\n\n");
-
-        Console.WriteLine("==================================================");
-        Console.WriteLine("   STARTING COMPREHENSIVE WAIFU AI QA TEST       ");
-        Console.WriteLine("==================================================");
-
-        // 1. Инициализируем тестовые настройки для Цундэрэ
-        var settings = SettingsVM.Instance;
-        var tsundereArchetype =
-            settings.Archetypes.FirstOrDefault(a => a.Name.Equals("Tsundere", StringComparison.OrdinalIgnoreCase))
-            ?? settings.SelectedArchetype;
-
-        settings.SelectedArchetype = tsundereArchetype;
-        settings.UserName = null; // Начинаем как незнакомец
-        settings.IsDating = false;
-        settings.IsSleeping = false;
-        settings.Affection = 50.0f;
-        settings.Mood = 50.0f;
-        settings.Engagement = 50.0f;
-        settings.Energy = 100.0f;
-        settings.RandomDailyNoise = 0; // Исходный шум
-
-        // История сообщений только в памяти (в БД НЕ сохраняем)
-        List<Message> testHistory = new List<Message>();
-        DateTime simulatedTime = DateTime.UtcNow;
-
-        // Сценарий тестирования (12 шагов)
-        var testSteps = new (string UserInput, TimeSpan TimeGap, string Description, Action<SettingsVM>? PreCondition)[]
-        {
-            (
-                "Привет! Как тебя зовут?",
-                TimeSpan.Zero,
-                "1. Первое знакомство (Незнакомец, проверяем определение имени)",
-                null
-            ),
-            (
-                "Меня зовут Александр. Запомни мое имя!",
-                TimeSpan.FromMinutes(2),
-                "2. Передача имени (Проверка [LEARNED_NAME: Александр])",
-                null
-            ),
-            (
-                "Расскажи о своих вкусах. Какая твоя самая любимая еда?",
-                TimeSpan.FromMinutes(5),
-                "3. Тест RAG / Запись в память (Проверка [UPDATE: Вкусы|...])",
-                null
-            ),
-            (
-                "Извини, что пропал! Было очень много работы за эти дни.",
-                TimeSpan.FromDays(3),
-                "4. Симуляция пауз (3 дня молчания, проверка реакции)",
-                null
-            ),
-            (
-                "Ты потрясающая и очень умная! Я правда очень ценю, что мы общаемся.",
-                TimeSpan.FromHours(1),
-                "5. Поднятие симпатии (Похвала, рост Affection)",
-                s => s.Affection = 80.0f
-            ),
-            (
-                "Я понял, что ты мне очень нравишься. Давай станем парой и будем встречаться?",
-                TimeSpan.FromMinutes(10),
-                "6. Вход в отношения (Проверка [RELATIONSHIP: DATING_START])",
-                s => s.Affection = 90.0f
-            ),
-            (
-                "Как думаешь, чем нам заняться вечером?",
-                TimeSpan.FromMinutes(5),
-                "7. Проверка статуса отношений (Dating active) и обычного диалога",
-                null
-            ),
-            (
-                "Ты выглядишь очень уставшей.",
-                TimeSpan.FromHours(4),
-                "8. Симуляция низкой энергии (Energy = 15)",
-                s => s.Energy = 15.0f
-            ),
-            (
-                "Тебе точно пора отдохнуть, иди спать.",
-                TimeSpan.FromMinutes(2),
-                "9. Критическое истощение и уход в сон (Energy = 2, проверка [SLEEP: X])",
-                s => s.Energy = 2.0f
-            ),
-            (
-                "[SIMULATED WAKE UP]",
-                TimeSpan.FromHours(8),
-                "10. Пробуждение (Проверка генерации RandomDailyNoise [-2..2] и нового Mood [1..100])",
-                s =>
-                {
-                    s.IsSleeping = false;
-                    s.Energy = 100.0f;
-                    s.RandomDailyNoise = Random.Shared.Next(-2, 3);
-
-                    float moodVectorMidpoint = (tsundereArchetype.BaseMoodVector.Mood.MinDelta +
-                                                tsundereArchetype.BaseMoodVector.Mood.MaxDelta) / 2.0f;
-                    float baseTarget = 50.0f + moodVectorMidpoint;
-                    float noiseImpact = s.RandomDailyNoise * 2.0f;
-                    float targetMean = Math.Max(tsundereArchetype.Sensitivity.MoodFloor, baseTarget + noiseImpact);
-
-                    double u1 = 1.0 - Random.Shared.NextDouble();
-                    double u2 = 1.0 - Random.Shared.NextDouble();
-                    double randStdNormal = Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Sin(2.0 * Math.PI * u2);
-
-                    s.Mood = Math.Clamp(targetMean + (float)(randStdNormal * 20.0f), 1.0f, 100.0f);
-                }
-            ),
-            (
-                "Знаешь, ты сегодня ужасно себя ведешь и меня раздражаешь!",
-                TimeSpan.FromMinutes(15),
-                "11. Провокация конфликта (Снижение Affection & Mood)",
-                null
-            ),
-            (
-                "Я устал от твоих капризов, нам лучше расстаться.",
-                TimeSpan.FromMinutes(5),
-                "12. Разрыв отношений (Проверка авто-разрыва или [RELATIONSHIP: BREAKUP])",
-                s => s.Affection = 40.0f
-            )
-        };
-
-        for (int i = 0; i < testSteps.Length; i++)
-        {
-            var step = testSteps[i];
-            simulatedTime = simulatedTime.Add(step.TimeGap);
-
-            // Применяем предусловия этапа
-            step.PreCondition?.Invoke(settings);
-
-            var logBuilder = new System.Text.StringBuilder();
-            logBuilder.AppendLine($"==================================================");
-            logBuilder.AppendLine($"STEP {i + 1}/{testSteps.Length}: {step.Description}");
-            logBuilder.AppendLine($"Timestamp: {simulatedTime:yyyy-MM-dd HH:mm:ss} UTC (Gap: {step.TimeGap})");
-            logBuilder.AppendLine($"-- STATES BEFORE REQUEST --");
-            logBuilder.AppendLine($"Affection: {settings.Affection:F1} ({settings.AffectionLevel})");
-            logBuilder.AppendLine($"Mood: {settings.Mood:F1} ({settings.MoodLevel})");
-            logBuilder.AppendLine($"Energy: {settings.Energy:F1} ({settings.EnergyLevel})");
-            logBuilder.AppendLine($"Engagement: {settings.Engagement:F1} ({settings.EngagementLevel})");
-            logBuilder.AppendLine($"RandomDailyNoise: {settings.RandomDailyNoise}");
-            logBuilder.AppendLine(
-                $"IsDating: {settings.IsDating}, IsSleeping: {settings.IsSleeping}, UserName: {settings.UserName ?? "<null>"}");
-
-            // Расчет и логирование вероятностей
-            float sleepP =
-                PromptService.CalculateSleepProbability(settings.Energy, settings.Affection, tsundereArchetype);
-            float questionP = PromptService.CalculateQuestionProbability(
-                tsundereArchetype.Sensitivity.ResponseQuestionChance, settings.Engagement, settings.EnergyLevel,
-                settings.MoodLevel);
-
-            logBuilder.AppendLine($"-- CALCULATED PROBABILITIES --");
-            logBuilder.AppendLine($"Sleep Chance (on low energy): {sleepP * 100:F1}%");
-            logBuilder.AppendLine($"Follow-up Question Chance: {questionP * 100:F1}%");
-
-            // Расчет динамических дельт
-            var factors = new Factors
-            {
-                DaysKnown = testHistory.Select(m => m.Time.Date).Distinct().Count(),
-                TimeSinceLastMessage = step.TimeGap,
-                RandomDailyNoise = settings.RandomDailyNoise
-            };
-            var deltas = PromptService.CalculateDynamicDeltas(tsundereArchetype.BaseMoodVector, factors,
-                tsundereArchetype.Sensitivity);
-
-            logBuilder.AppendLine($"-- BOUNDS FOR AI DELTAS --");
-            logBuilder.AppendLine($"Affection Bounds: {deltas.Affection.MinDelta}..{deltas.Affection.MaxDelta}");
-            logBuilder.AppendLine($"Mood Bounds: {deltas.Mood.MinDelta}..{deltas.Mood.MaxDelta}");
-            logBuilder.AppendLine($"Energy Bounds: {deltas.Energy.MinDelta}..{deltas.Energy.MaxDelta}");
-            logBuilder.AppendLine($"Engagement Bounds: {deltas.Engagement.MinDelta}..{deltas.Engagement.MaxDelta}");
-
-            // Подготавливаем модель запроса к ИИ
-            var requestModel = new RequestModel
-            {
-                Temperature = settings.Temperature,
-                MaxTokens = settings.MaxTokens
-            };
-
-            if (step.UserInput == "[SIMULATED WAKE UP]")
-            {
-                logBuilder.AppendLine($"User Action: Internal Wake-up Triggered");
-
-                // 1. Формируем отдельный объект базового системного промпта с утренней директивой (без мутации оригинала)
-                var customBasePrompt = await PromptService.GetFullSystemPrompt(
-                    _baseSystemPrompt,
-                    testHistory,
-                    KnowledgeBase,
-                    question: string.Empty,
-                    factors,
-                    isInitiative: true);
-
-                var cuttedHistory = GetCuttedHistory(customBasePrompt, testHistory, settings.ContextLength);
-                requestModel.Messages.AddRange(cuttedHistory);
-            }
-            else
-            {
-                logBuilder.AppendLine($"User Input: \"{step.UserInput}\"");
-                var userMsg = new Message
-                {
-                    Role = "user",
-                    Content = step.UserInput,
-                    CleanText = step.UserInput,
-                    Time = simulatedTime
-                };
-                testHistory.Add(userMsg);
-
-                var systemPrompt = await PromptService.GetFullSystemPrompt(
-                    _baseSystemPrompt,
-                    testHistory,
-                    KnowledgeBase,
-                    question: userMsg.CleanText,
-                    factors);
-
-                var cuttedHistory = GetCuttedHistory(systemPrompt, testHistory, settings.ContextLength);
-                requestModel.Messages.AddRange(cuttedHistory);
-            }
-
-            // Отправка с ретраями (до 30 попыток)
-            Message responseModel = null!;
-            bool success = false;
-            int maxRetries = 30;
-
-            Console.WriteLine($"\n[QA Step {i + 1}] Sending request to server...");
-
-            for (int retry = 1; retry <= maxRetries; retry++)
-            {
-                try
-                {
-                    using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(25));
-
-                    responseModel = settings.IsServerQuery
-                        ? await RequestService.DoServerQuery(requestModel, cts.Token)
-                        : await RequestService.DoProviderQuery(requestModel, cts.Token);
-
-                    if (responseModel != null && responseModel.Role != "system")
-                    {
-                        Console.WriteLine($"[QA Step {i + 1}] Attempt {retry}/{maxRetries} -> HTTP 200 OK (Success)");
-                        success = true;
-                        break;
-                    }
-                    else
-                    {
-                        string err = responseModel?.Content ?? "Unknown Error";
-                        Console.WriteLine($"[QA Step {i + 1}] Attempt {retry}/{maxRetries} -> Failed Response: {err}");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"[QA Step {i + 1}] Attempt {retry}/{maxRetries} -> Exception: {ex.Message}");
-                }
-
-                await Task.Delay(1000);
-            }
-
-            if (!success)
-            {
-                Console.WriteLine($"[QA Step {i + 1}] CRITICAL: All 30 attempts failed. Skipping step.");
-                logBuilder.AppendLine($"-- RESULT: SKIPPED (30/30 Attempts Failed) --\n");
-                await File.AppendAllTextAsync(logFilePath, logBuilder.ToString());
-                continue;
-            }
-
-            // Парсим и обрабатываем ответ ИИ без сохранения в БД
-            testHistory.Add(responseModel);
-
-            logBuilder.AppendLine($"-- AI RESPONSE --");
-            logBuilder.AppendLine($"Raw Content:\n{responseModel.Content}");
-
-            var learnedName = MessageParser.ParseTextForLearnedName(responseModel.Content);
-            var datingChange = MessageParser.ParseTextForDatingChange(responseModel.Content);
-            var sleepDuration = MessageParser.ParseWakeUpTime(responseModel.Content);
-            var extractedDeltas = MessageParser.ExtractDeltas(responseModel.Content);
-
-            if (learnedName != null)
-            {
-                settings.UserName = learnedName;
-                logBuilder.AppendLine($"[TAG DETECTED] Learned Name: {learnedName}");
-            }
-
-            if (datingChange.HasValue)
-            {
-                settings.IsDating = datingChange.Value;
-                logBuilder.AppendLine($"[TAG DETECTED] Dating State Changed: {datingChange.Value}");
-            }
-
-            if (sleepDuration.HasValue)
-            {
-                settings.IsSleeping = true;
-                settings.WakeUpTime = simulatedTime.AddHours(sleepDuration.Value);
-                logBuilder.AppendLine(
-                    $"[TAG DETECTED] Sleep Initiated: {sleepDuration.Value} hours (WakeUp at {settings.WakeUpTime:yyyy-MM-dd HH:mm:ss})");
-            }
-
-            if (extractedDeltas != null)
-            {
-                logBuilder.AppendLine(
-                    $"[DELTAS RECEIVED] Affection: {extractedDeltas.AffectionDelta:+#;-#;0}, Mood: {extractedDeltas.MoodDelta:+#;-#;0}, Energy: {extractedDeltas.EnergyDelta:+#;-#;0}, Engagement: {extractedDeltas.EngagementDelta:+#;-#;0}");
-                UpdateEmotionalStates(responseModel.Content);
-            }
-
-            logBuilder.AppendLine($"-- STATES AFTER RESPONSE --");
-            logBuilder.AppendLine(
-                $"Affection: {settings.Affection:F1}, Mood: {settings.Mood:F1}, Energy: {settings.Energy:F1}, Engagement: {settings.Engagement:F1}");
-            logBuilder.AppendLine($"RandomDailyNoise: {settings.RandomDailyNoise}\n");
-
-            await File.AppendAllTextAsync(logFilePath, logBuilder.ToString());
-        }
-
-        Console.WriteLine("==================================================");
-        Console.WriteLine("   QA TEST COMPLETED! Check qa_test_log.txt       ");
-        Console.WriteLine("==================================================");
-    }
-
- */
-
-
-
 
 }

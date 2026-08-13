@@ -56,6 +56,10 @@
     <PackageReference Include="WebViewControl-Avalonia" Version="3.120.11" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\WaifuAI.Translations\WaifuAI.Translations.csproj" />
+  </ItemGroup>
+
   <Target Name="BuildFrontend" BeforeTargets="BeforeBuild">
     <Message Importance="high" Text="Building Frontend..." />
     <Exec Command="npm run build" WorkingDirectory="$(ProjectDir)../Model3D" />
