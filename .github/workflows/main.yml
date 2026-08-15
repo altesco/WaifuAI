@@ -50,16 +50,16 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Build VENV (Linux)
+      - name: Build Executable (Linux)
         run: |
           python -m venv venv
           source venv/bin/activate
           pip install --upgrade pip
           pip install -r requirements.txt
-          rm -rf venv/lib64
+          pyinstaller say.py
 
-      - name: Upload VENV Linux
+      - name: Upload Linux Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: venv-linux
-          path: venv/
+          name: say-linux
+          path: dist/say/
