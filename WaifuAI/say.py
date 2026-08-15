@@ -1,5 +1,18 @@
-import io
+import sys
 import os
+import ctypes
+
+if getattr(sys, 'frozen', False):
+    lib_dir = os.path.join(sys._MEIPASS, 'torch', 'lib')
+    for lib in ['libc10.so', 'libtorch.so', 'libtorch_cpu.so', 'libtorch_python.so']:
+        lib_path = os.path.join(lib_dir, lib)
+        if os.path.exists(lib_path):
+            try:
+                ctypes.CDLL(lib_path, mode=ctypes.RTLD_GLOBAL)
+            except Exception:
+                pass
+
+import io
 import re
 import time
 import wave
@@ -25,16 +38,21 @@ app.add_middleware(
 loaded_models = {} 
 
 def get_model(model_path, language):
+    if not os.path.isabs(model_path):
+        base_dir = os.path.dirname(os.path.abspath(sys.executable if getattr(sys, 'frozen', False) else __file__))
+        model_path = os.path.join(base_dir, model_path)
+
     if model_path in loaded_models:
         return loaded_models[model_path]
     if not os.path.exists(model_path):
         print(f"ERROR: Файл не найден: {model_path}")
         return None
+        
     print(f"DEBUG: Попытка загрузки через torch.package: {model_path}")
     for _ in range(5):
         try:
             importer = torch.package.PackageImporter(model_path)
-            model = importer.load_pickle("tts_models", "model")
+            model = importer.load_plugin("tts_models", "model") if hasattr(importer, "load_plugin") else importer.load_pickle("tts_models", "model")
             loaded_models[model_path] = model
             model.to(torch.device('cpu'))
             return model
@@ -45,10 +63,6 @@ def get_model(model_path, language):
             raise e
 
 def split_text_into_chunks(text: str, max_chars: int = 350) -> List[str]:
-    """
-    Разбивает текст по знакам препинания и гарантирует, 
-    что ни один чанк не превысит max_chars (безопасный лимит Silero).
-    """
     raw_chunks = re.split(r'([.!?,\n]+)', text)
     chunks = []
     current_chunk = ""
@@ -63,7 +77,6 @@ def split_text_into_chunks(text: str, max_chars: int = 350) -> List[str]:
             if current_chunk.strip():
                 chunks.append(current_chunk.strip())
             
-            # Если даже одна фраза длиннее max_chars (нет знаков препинания) — режем жестко
             if len(part) > max_chars:
                 for i in range(0, len(part), max_chars):
                     sub = part[i:i + max_chars].strip()
@@ -79,7 +92,6 @@ def split_text_into_chunks(text: str, max_chars: int = 350) -> List[str]:
     return [c for c in chunks if c]
 
 def pcm_tensors_to_wav_bytes(audio_tensors: List[torch.Tensor], sample_rate: int) -> bytes:
-    """Склеивает список тензоров и кодирует их в WAV (PCM 16-bit) в памяти."""
     if not audio_tensors:
         return b""
     
@@ -89,7 +101,7 @@ def pcm_tensors_to_wav_bytes(audio_tensors: List[torch.Tensor], sample_rate: int
     wav_buf = io.BytesIO()
     with wave.open(wav_buf, 'wb') as wf:
         wf.setnchannels(1)
-        wf.setsampwidth(2) # 16-bit
+        wf.setsampwidth(2)
         wf.setframerate(sample_rate)
         wf.writeframes(pcm_int16.tobytes())
     
@@ -117,7 +129,6 @@ async def get_speakers(model_path: str, language: str):
         return {"error": "Model not found"}
     return {"speakers": model.speakers}
 
-# 1. ОБЫЧНЫЙ РЕЖИМ (Сборка любого по длине текста в единый WAV)
 @app.get("/silero_tts")
 async def silero_tts(
     model_path: str, 
@@ -146,7 +157,6 @@ async def silero_tts(
     wav_bytes = pcm_tensors_to_wav_bytes(audio_tensors, sample_rate)
     return Response(content=wav_bytes, media_type="audio/wav")
 
-# 2. ПОТОКОВЫЙ РЕЖИМ (Стриминг PCM кусочками)
 @app.get("/silero_tts_stream")
 async def silero_tts_stream(
     model_path: str, 

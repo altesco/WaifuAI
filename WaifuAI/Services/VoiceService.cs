@@ -62,7 +62,7 @@ public static class VoiceService
             string scriptPath = Path.Combine(baseDir, "say.py");
             string pythonExe = OperatingSystem.IsWindows()
                 ? Path.Combine(baseDir, "python_runtime", "python.exe")
-                : Path.Combine(baseDir, "venv", "bin", "python");
+                : Path.Combine(baseDir, "say", "say");//Path.Combine(baseDir, "venv", "bin", "python");
             ProcessStartInfo info = new ProcessStartInfo
             {
                 FileName = pythonExe,
