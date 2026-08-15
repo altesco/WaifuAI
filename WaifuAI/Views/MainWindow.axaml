@@ -2320,6 +2320,8 @@
                             <Binding ElementName="ChatButton" Path="IsChecked" />
                             <Binding ElementName="MemoryButton" Path="IsChecked" />
                             <Binding ElementName="PersonalityButton" Path="IsChecked" />
+                            <Binding ElementName="ParametersButton" Path="IsChecked"/>
+                            <Binding ElementName="ModelButton" Path="IsChecked"/>
                         </MultiBinding>
                     </GridSplitter.IsVisible>
                 </GridSplitter>
