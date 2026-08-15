@@ -62,4 +62,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: say-linux
-          path: WaifuAI/dist/say/
+          path: dist/say/
