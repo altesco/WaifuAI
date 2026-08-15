@@ -56,10 +56,10 @@ jobs:
           source venv/bin/activate
           pip install --upgrade pip
           pip install -r requirements.txt
-          pyinstaller say.py
+          pyinstaller WaifuAI/say.py
 
       - name: Upload Linux Build Artifact
         uses: actions/upload-artifact@v4
         with:
           name: say-linux
-          path: dist/say/
+          path: WaifuAI/dist/say/
