@@ -23,6 +23,7 @@ public class Message
     [JsonIgnore] public int QuoteStart { get; set; }
     [JsonIgnore] public int QuoteEnd { get; set; }
     [JsonIgnore] public bool? IsReplied { get; set; }
+    [JsonIgnore] public double DesignHeight { get; set; }
 
     [Indexed]
     [JsonIgnore] public Guid? ReplyMessageId { get; set; }

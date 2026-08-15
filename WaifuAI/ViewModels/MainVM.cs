@@ -13,10 +13,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using WaifuAI.Models;
 using WaifuAI.Services;
 using CommunityToolkit.Mvvm.Messaging;
-using Microsoft.VisualBasic;
 using SharpToken;
 using WaifuAI.CustomClasses;
-using WaifuAI.Translations;
 using Strings = WaifuAI.Translations.Strings;
 
 namespace WaifuAI.ViewModels;
@@ -134,7 +132,11 @@ public partial class MainVM : ObservableValidator
 
     public ObservableCollection<MessageVM> SelectedMessages { get; } = [];
 
-    [ObservableProperty] private bool _isMultiSelect;
+    [ObservableProperty] 
+    [NotifyCanExecuteChangedFor(nameof(MultiSelectAddOrRemoveSelectedCommand))]
+    [NotifyCanExecuteChangedFor(nameof(AddOrRemoveSelectedCommand))]
+    private bool _isMultiSelect;
+
     [ObservableProperty] private string? _error;
 
     [ObservableProperty] private MessageVM? _replyMessage;    
@@ -167,6 +169,8 @@ public partial class MainVM : ObservableValidator
 
     public string DeletingDialogMessage => 
         string.Format(Strings.dialogs.deleting_message.CurrentValue, SelectedMessages.Count);
+
+    public double ReplyButtonHeight => 48;
 
 
     private void StartSleepTimer()
@@ -306,8 +310,20 @@ public partial class MainVM : ObservableValidator
 
     private void OnSelectedMessagesChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
-        if (IsMultiSelect && SelectedMessages.Count == 0)
-            Dispatcher.UIThread.Post(() => IsMultiSelect = false);
+        if (!IsMultiSelect || SelectedMessages.Count != 0)
+            return;
+
+        Dispatcher.UIThread.Post(() =>
+        {
+            IsMultiSelect = false;
+
+            if (e.OldItems is null)
+                return;
+
+            foreach (var item in e.OldItems)
+                if (item is MessageVM msg)
+                    msg.IsSelected = false;
+        });
     }
 
     private readonly List<Message> _history = [];
@@ -409,6 +425,10 @@ public partial class MainVM : ObservableValidator
                 return;
             }
 
+            await Dispatcher.UIThread.InvokeAsync(() => { }, DispatcherPriority.Loaded);
+            message.MessageModel.DesignHeight =
+                WeakReferenceMessenger.Default.Send(new RequestMessageHeight<double>(Chat.IndexOf(message)));
+            
             await DatabaseService.HistoryDb.InsertOrReplaceAsync(message.MessageModel);
             message.IsSavedInDb = true;
 
@@ -475,6 +495,10 @@ public partial class MainVM : ObservableValidator
             SettingsVM.Instance.IsStream);
 
         msg.MessageModel.CleanText = MessageParser.GetCleanText(messageText);
+
+        await Dispatcher.UIThread.InvokeAsync(() => { }, DispatcherPriority.Loaded);
+        msg.MessageModel.DesignHeight = 
+            WeakReferenceMessenger.Default.Send(new RequestMessageHeight<double>(Chat.IndexOf(msg)));
 
         _history.Add(msg.MessageModel);
 
@@ -638,11 +662,33 @@ public partial class MainVM : ObservableValidator
     }
 
     [RelayCommand]
-    private void ToggleMultiSelect()
+    private void ToggleMultiSelect(MessageVM sourceMsg)
     {
         if (IsMultiSelect)
+        {
+            foreach (var msg in SelectedMessages)
+            {
+                msg.IsSelected = false;
+            }
+
             SelectedMessages.Clear();
-        IsMultiSelect = !IsMultiSelect;
+            IsMultiSelect = false;
+        }
+        else
+        {
+            foreach (var msg in SelectedMessages)
+            {
+                msg.IsSelected = false;
+            }
+
+            SelectedMessages.Clear();
+
+            sourceMsg.IsSelected = true;
+            SelectedMessages.Add(sourceMsg);
+            SelectedMessage = sourceMsg;
+
+            IsMultiSelect = true;
+        }
     }
 
     [RelayCommand]
@@ -655,9 +701,12 @@ public partial class MainVM : ObservableValidator
     }
     
     [RelayCommand]
-    private void DeleteMessage()
+    private async Task DeleteMessage()
     {
         var messagesToDelete = SelectedMessages.ToList();
+
+        List<MessageVM> messagesWithNewHeight = [];
+
         foreach (var msg in messagesToDelete)
         {
             _history.Remove(msg.MessageModel);
@@ -665,16 +714,26 @@ public partial class MainVM : ObservableValidator
             foreach (var replyingMsg in msg.ReplyingMessages)
             {
                 replyingMsg.MessageModel.Content = replyingMsg.MessageModel.CleanText;
+                
+                messagesWithNewHeight.Add(replyingMsg);
+
                 replyingMsg.ReplyMessage = null;
             }
             msg.ReplyMessage?.ReplyingMessages.Remove(msg);
 
-            DatabaseService.HistoryDb.DeleteAsync(msg.MessageModel);
+            await DatabaseService.HistoryDb.DeleteAsync(msg.MessageModel);
             Chat.Remove(msg);
 
             if (msg.MessageModel.Id == ReplyMessage?.MessageModel.Id)
                 ReleaseReplyAndQuote();
         }
+
+        foreach (var msg in messagesWithNewHeight)
+        {
+            msg.MessageModel.DesignHeight -= ReplyButtonHeight;
+            await DatabaseService.HistoryDb.UpdateAsync(msg.MessageModel);
+        }
+
         SelectedMessages.Clear();
         SelectedMessage = null;
         IsMultiSelect = false;
@@ -686,6 +745,7 @@ public partial class MainVM : ObservableValidator
     {
         if (source is not MessageVM msg || msg.ReplyMessage is null)
             return;
+        
         int sourceIndex = Chat.IndexOf(msg);
         int replyIndex = Chat.IndexOf(msg.ReplyMessage);
         WeakReferenceMessenger.Default.Send(new ScrollMessage((sourceIndex, replyIndex)));
@@ -763,4 +823,38 @@ public partial class MainVM : ObservableValidator
         textBox.CaretIndex = caretIndex + Environment.NewLine.Length;
     }
 
+    public bool CanAddOrRemoveSelected => !IsMultiSelect;
+
+    [RelayCommand(CanExecute = nameof(CanAddOrRemoveSelected))]
+    private void AddOrRemoveSelected(MessageVM msg)
+    {
+        if (SelectedMessage != msg)
+        {
+            SelectedMessage?.IsSelected = false;
+            if (SelectedMessage != null) 
+                SelectedMessages.Remove(SelectedMessage);
+        }
+        msg.IsSelected = true;
+        if (!SelectedMessages.Contains(msg))
+            SelectedMessages.Add(msg);
+        SelectedMessage = msg;
+    }
+
+    public bool CanMultiSelectAddOrRemoveSelected => IsMultiSelect;
+
+    [RelayCommand(CanExecute = nameof(CanMultiSelectAddOrRemoveSelected))]
+    private void MultiSelectAddOrRemoveSelected(MessageVM msg)
+    {
+        if (SelectedMessages.Contains(msg))
+        {
+            SelectedMessages.Remove(msg);
+            msg.IsSelected = false;
+        }
+        else
+        {
+            SelectedMessages.Add(msg);
+            msg.IsSelected = true;
+        }
+    }
+    
 }

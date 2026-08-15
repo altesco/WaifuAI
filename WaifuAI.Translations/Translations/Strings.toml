@@ -68,10 +68,10 @@ api_key = "API Key"
 model = "Model"
 
 [top_panel]
-affection = "Affection [{0}/100]"
-engagement = "Engagement [{0}/100]"
-mood = "Mood [{0}/100]"
-energy = "Energy [{0}/100]"
+affection = "Affection [{0:F0}/100]"
+engagement = "Engagement [{0:F0}/100]"
+mood = "Mood [{0:F0}/100]"
+energy = "Energy [{0:F0}/100]"
 
 [context_menu]
 copy = "Copy"

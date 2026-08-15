@@ -1,6 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using WaifuAI.Models;
 using WaifuAI.Services;
@@ -43,6 +44,23 @@ public partial class MessageVM : ObservableObject
     [ObservableProperty] private bool _isHighlighted;
 
     [ObservableProperty] private bool _isFailed;
+    [ObservableProperty] private bool _isSelected;
+
+    public async Task TriggerHighlightAsync(MessageVM sourceMsg)
+    {
+        // 1. Устанавливаем подсветку и выделение текста
+        IsHighlighted = true;
+        SelectionStart = sourceMsg.QuoteStart;
+        SelectionEnd = sourceMsg.QuoteEnd;
+
+        // 2. Ждём полсекунды
+        await Task.Delay(500);
+
+        // 3. Сбрасываем выделение
+        IsHighlighted = false;
+        SelectionStart = 0;
+        SelectionEnd = 0;
+    }
 
     public DateTime LocalTime => MessageModel.Time.ToLocalTime();
 

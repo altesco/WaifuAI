@@ -14,8 +14,7 @@ const renderer = new THREE.WebGLRenderer({
 });
 renderer.setClearColor(0xeef1f5, 1);
 renderer.setSize(window.innerWidth, window.innerHeight);
-//renderer.setPixelRatio(window.devicePixelRatio, 2);
-renderer.setPixelRatio(1);
+renderer.setPixelRatio(window.devicePixelRatio);
 document.body.appendChild(renderer.domElement);
 
 // --- Camera ---
@@ -665,7 +664,6 @@ function setCameraMode(mode) {
     camPos.set(0, headY * cfg.cameraYFactor, cfg.distance);
   }
 
-  // Мгновенно выставляем позиции без всяких анимаций
   controls.target.copy(targetPos);
   camera.position.copy(camPos);
   controls.update();
@@ -673,3 +671,11 @@ function setCameraMode(mode) {
 
 window.vrmApp.setCameraMode = setCameraMode;
 window.vrmApp.currentCameraMode = currentCameraMode;
+
+window.addEventListener('resize', () => {
+  renderer.setPixelRatio(window.devicePixelRatio);
+
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+});

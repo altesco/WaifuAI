@@ -11,7 +11,6 @@ public partial class ArchetypeVM : ObservableObject
 
     public TranslationUnit DescriptionTranslation { get; init; }
 
-    //[ObservableProperty] private string _description = string.Empty;
     public string Description => DescriptionTranslation?.CurrentValue ?? string.Empty;
     
     public string Emoji { get; set; } = "👤";

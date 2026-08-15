@@ -19,7 +19,7 @@ public class SettingsModel
     public int ContextLength { get; set; } = 120000;
 
     // General Settings
-    public int Theme { get; set; }
+    public ThemeVariant Theme { get; set; }
     public string AccentColor { get; set; } = "#4287f5";
     public string Font { get; set; } = string.Empty;
     public string MonospaceFont { get; set; } = string.Empty;

@@ -74,13 +74,21 @@ public static class DropService
         var settings = SettingsVM.Instance;
         var archetype = settings.SelectedArchetype;
         var s = archetype.Sensitivity;
-        var now = DateTime.UtcNow;
 
-        // 1. Проверяем, не наступило ли жёсткое время отбоя
-        bool isBedtime = now.Hour > s.LatestBedtime.Hour ||
-                         (now.Hour == s.LatestBedtime.Hour && now.Minute >= s.LatestBedtime.Minute);
+        // 1. Используем ЛОКАЛЬНОЕ время пользователя для проверки времени суток
+        var nowLocal = DateTime.Now;
 
-        // 2. Считаем вероятность: 100% при отбое, иначе берём расчёт из PromptService
+        // Время отбоя (от LatestBedtime до 06:00 утра)
+        TimeSpan currentTime = nowLocal.TimeOfDay;
+        TimeSpan bedtime = s.LatestBedtime.TimeOfDay;
+        TimeSpan morning = new TimeSpan(6, 0, 0);
+
+        bool isBedtime = bedtime > morning
+            ? (currentTime >= bedtime || currentTime < morning)
+            : (currentTime >= bedtime && currentTime < morning);
+
+        // 2. Если жесткий отбой — шанс 100% (1.0f).
+        // Если день — шанс зависит ТОЛЬКО от критически низкой энергии (<= 20).
         float sleepProbability = isBedtime
             ? 1.0f
             : PromptService.CalculateSleepProbability(settings.Energy, settings.Affection, archetype);
@@ -93,7 +101,8 @@ public static class DropService
                 s.BaseSleepDurationRange.Max + 1
             );
 
-            settings.WakeUpTime = now.AddHours(sleepHours);
+            // Время пробуждения пишем в UTC, так как таймеры в MainVM сравнивают с UtcNow
+            settings.WakeUpTime = DateTime.UtcNow.AddHours(sleepHours);
         }
     }
 

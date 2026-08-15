@@ -122,17 +122,19 @@ public static class PromptService
 
     public static float CalculateSleepProbability(float energy, float affection, ArchetypeVM archetype)
     {
+        if (energy > 20.0f)
+            return 0.0f;
+
         float baseSleepChance = archetype.Sensitivity.SleepChanceLowEnergy;
 
         // Множитель истощения: при energy = 20.0 factor = 1.0, а при energy -> 0.0 factor стремится к 3.0
-        float energyExhaustionFactor = 1.0f + 2.0f * MathF.Pow((20.0f - Math.Clamp(energy, 0.0f, 20.0f)) / 20.0f, 1.5f);
+        float energyExhaustionFactor = 1.0f + 2.0f * MathF.Pow((20.0f - energy) / 20.0f, 1.5f);
 
         // Сопротивление от привязанности
         float affectionFactor = 1.25f - 0.5f * (affection / 100.0f);
 
         float sleepProbability = baseSleepChance * energyExhaustionFactor * affectionFactor;
 
-        // При критически низкой энергии (ниже 3.0) шанс уйти спать составит не менее 92-98%
         return Math.Clamp(sleepProbability, 0.05f, 0.98f);
     }
 

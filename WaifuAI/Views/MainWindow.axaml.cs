@@ -113,24 +113,44 @@ namespace WaifuAI.Views
 
             WeakReferenceMessenger.Default.Register<MainWindow, ScrollMessage>(this, (_, m) =>
             {
-                Dispatcher.UIThread.Post(async () =>
+                if (MessageList.DataContext is not MainVM mainVM)
+                    return;
+
+                var sourceIndex = m.Value.sourceIndex;
+                var replyIndex = m.Value.replyIndex;
+
+                var currentOffset = ChatScrollViewer.Offset;
+
+                double replyOffset = 0;
+                for (int i = 0; i < replyIndex; i++)
+                    replyOffset += mainVM.Chat[i].MessageModel.DesignHeight;
+
+                if (replyOffset < currentOffset.Y)
                 {
-                    if (MessageList.Items[m.Value.sourceIndex] is not MessageVM sourceMsg ||
-                        MessageList.Items[m.Value.replyIndex] is not MessageVM replyMsg)
-                        return;
+                    double distance = 0;
+                    for (int i = replyIndex; i < m.Value.sourceIndex; i++)
+                        distance += mainVM.Chat[i].MessageModel.DesignHeight;
 
-                    MessageList.ScrollIntoView(replyMsg);
+                    // если source тоже не полностью виден
+                    var sourceOffset = replyOffset + distance;
+                    if (sourceOffset < currentOffset.Y)
+                        distance += currentOffset.Y - sourceOffset;
 
-                    replyMsg.IsHighlighted = true;
-                    replyMsg.SelectionStart = sourceMsg.QuoteStart;
-                    replyMsg.SelectionEnd = sourceMsg.QuoteEnd;
+                    var delta = Math.Min(currentOffset.Y, distance);
 
-                    await Task.Delay(500);
+                    currentOffset = currentOffset.WithY(currentOffset.Y - delta);
+                    ChatScrollViewer.Offset = currentOffset;
+                }
 
-                    replyMsg.IsHighlighted = false;
-                    replyMsg.SelectionStart = 0;
-                    replyMsg.SelectionEnd = 0;
-                });
+                Dispatcher.UIThread.Post(async () =>
+                    await mainVM.Chat[replyIndex].TriggerHighlightAsync(mainVM.Chat[sourceIndex])
+                );
+            });
+
+            WeakReferenceMessenger.Default.Register<MainWindow, RequestMessageHeight<double>>(this, (_, m) =>
+            {
+                var element = MessageList.TryGetElement(m.Index);
+                m.Reply(element is null ? 0 : element.Bounds.Height);
             });
 
             AddHandler(Button.ClickEvent, (_, e) =>
@@ -161,8 +181,6 @@ namespace WaifuAI.Views
 
         private GridLength _lastLeftBarWidth;
 
-
-
         private void OnBackgroundPointerPressed(object? sender, PointerPressedEventArgs e)
         {
             RootPanel.Focus();
@@ -177,7 +195,10 @@ namespace WaifuAI.Views
         {
             if (e.Action != NotifyCollectionChangedAction.Add || e.NewItems == null)
                 return;
-            Dispatcher.UIThread.Post(() => MessageList.ScrollIntoView(e.NewItems[0]));
+            Dispatcher.UIThread.Post(() =>
+            {
+                ChatScrollViewer.ScrollToEnd();
+            });
         }
 
         private void Window_OnLoaded(object? sender, RoutedEventArgs e)
@@ -283,6 +304,33 @@ namespace WaifuAI.Views
             WindowState = WindowState == WindowState.Maximized
                 ? WindowState.Normal
                 : WindowState.Maximized;
+        }
+
+        private void OnElementPrepared(object? sender, ItemsRepeaterElementPreparedEventArgs e)
+        {
+            var element = e.Element;
+
+            element.SizeChanged += OnElementSizeChanged;
+        }
+
+        private void OnElementSizeChanged(object? sender, SizeChangedEventArgs e)
+        {
+            if (sender is not Control control || 
+                control.DataContext is not MessageVM msg ||
+                msg.MessageModel.Role == "temp") 
+                return;
+            
+            double actualHeight = e.NewSize.Height;
+            
+            if (Math.Abs(msg.MessageModel.DesignHeight - actualHeight) < 0.01)
+                return;
+            msg.MessageModel.DesignHeight = actualHeight;
+            SettingsVM.Instance.MessagesWithNewHeights.Add(msg.MessageModel);
+        }
+
+        private void OnElementClearing(object? sender, ItemsRepeaterElementClearingEventArgs e)
+        {
+            e.Element.SizeChanged -= OnElementSizeChanged;
         }
     }
 }

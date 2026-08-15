@@ -58,3 +58,10 @@ public enum CameraVariant
 }
 
 #endregion
+
+public enum ThemeVariant
+{
+    Dark,
+    Light,
+    System
+}

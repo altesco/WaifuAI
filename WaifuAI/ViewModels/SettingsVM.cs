@@ -24,6 +24,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using WaifuAI.Models;
 using WaifuAI.Services;
 using Echoes;
+using ThemeVariant = WaifuAI.Models.ThemeVariant;
 
 namespace WaifuAI.ViewModels;
 
@@ -148,7 +149,7 @@ public partial class SettingsVM : ObservableValidator
         IsSettingsLoading = false;
     }
 
-    private void Save()
+    private async Task Save()
     {
         if (!Directory.Exists(AppDirectory))
             Directory.CreateDirectory(AppDirectory);
@@ -168,7 +169,7 @@ public partial class SettingsVM : ObservableValidator
         SettingsModel.IsServerQuery = IsServerQuery;       
 
         // General Settings
-        SettingsModel.Theme = SelectedTheme;       
+        SettingsModel.Theme = SelectedTheme ?? ThemeVariant.System;       
         SettingsModel.AccentColor = SelectedColor;       
         SettingsModel.Font = SelectedFont;       
         SettingsModel.MonospaceFont = SelectedMonoFont;       
@@ -216,7 +217,12 @@ public partial class SettingsVM : ObservableValidator
 
         var options = new JsonSerializerOptions { WriteIndented = true };
         var json = JsonSerializer.Serialize(SettingsModel, options);
-        File.WriteAllText(FilePath, json);
+        await File.WriteAllTextAsync(FilePath, json);
+
+        // Message heights update
+        foreach (var msg in MessagesWithNewHeights)
+            await DatabaseService.HistoryDb.UpdateAsync(msg);
+        MessagesWithNewHeights.Clear();
     }
 
     protected override void OnPropertyChanged(PropertyChangedEventArgs e)
@@ -224,7 +230,7 @@ public partial class SettingsVM : ObservableValidator
         base.OnPropertyChanged(e);
         if (IsSettingsLoading)
             return;
-        Save();
+        _ = Task.Run(async () => await Save());
     }
 
     #region AIParameters
@@ -279,7 +285,8 @@ public partial class SettingsVM : ObservableValidator
 
     #region GeneralSettings
     
-    [ObservableProperty] private int _selectedTheme = -1;
+    [ObservableProperty] private ThemeVariant? _selectedTheme;
+    public ThemeVariant[] ThemeVariants { get; } = Enum.GetValues<ThemeVariant>();
 
     [ObservableProperty] 
     [NotifyDataErrorInfo]
@@ -292,10 +299,10 @@ public partial class SettingsVM : ObservableValidator
         var theme = app?.Styles.OfType<FluentTheme>().FirstOrDefault();
         if (HasErrors || app is null || theme is null || !Color.TryParse(value, out var color))
             return;
-        if (theme.Palettes.TryGetValue(ThemeVariant.Light, out var lightPalette) &&
+        if (theme.Palettes.TryGetValue(Avalonia.Styling.ThemeVariant.Light, out var lightPalette) &&
             lightPalette is { } light)
             light.Accent = color;
-        if (theme.Palettes.TryGetValue(ThemeVariant.Dark, out var darkPalette) &&
+        if (theme.Palettes.TryGetValue(Avalonia.Styling.ThemeVariant.Dark, out var darkPalette) &&
             darkPalette is { } dark)
             dark.Accent = color;
         app.Resources["SystemAccentColorDark1"] = CreateLighterColor(color, -0.1);
@@ -368,15 +375,20 @@ public partial class SettingsVM : ObservableValidator
         {
             archetype.RefreshLocalization();
         }
+        
+        OnPropertyChanged(nameof(AffectionText));
+        OnPropertyChanged(nameof(EngagementText));
+        OnPropertyChanged(nameof(MoodText));
+        OnPropertyChanged(nameof(EnergyText));
     }
 
-    partial void OnSelectedThemeChanged(int value)
+    partial void OnSelectedThemeChanged(ThemeVariant? value)
     {
         Application.Current!.RequestedThemeVariant = value switch
         {
-            0 => ThemeVariant.Light,
-            1 => ThemeVariant.Dark,
-            _ => ThemeVariant.Default
+            ThemeVariant.Light => Avalonia.Styling.ThemeVariant.Light,
+            ThemeVariant.Dark => Avalonia.Styling.ThemeVariant.Dark,
+            _ => Avalonia.Styling.ThemeVariant.Default
         };
     }
 
@@ -628,6 +640,7 @@ public partial class SettingsVM : ObservableValidator
     [ObservableProperty] private string _selectedModel3D;
 
     [ObservableProperty] private CameraVariant _camera;
+    public CameraVariant[] CameraVariants { get; } = Enum.GetValues<CameraVariant>();
 
     [RelayCommand]
     private async Task OpenModel3DFile()
@@ -1218,6 +1231,13 @@ public partial class SettingsVM : ObservableValidator
     private DateTime _wakeUpTime;
 
     [ObservableProperty] private DateTime _lastUserEntry;
+
+    #endregion
+
+
+    #region MessageHeights
+
+    public List<Message> MessagesWithNewHeights { get; } = [];
 
     #endregion
 }
