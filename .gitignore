@@ -60,6 +60,9 @@ nunit-*.xml
 __pycache__/
 *.py[cod]
 *.pytest_cache/
+**/build/
+**/dist/
+**/say.spec
 
 Model3D/node_modules/
 Model3D/dist/
@@ -68,3 +71,4 @@ Model3D/out/
 Model3D/.eslintcache
 Model3D/.cache/
 Model3D/public/models/*.vrm
+
