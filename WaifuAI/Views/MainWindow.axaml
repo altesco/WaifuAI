@@ -841,7 +841,7 @@
                                                     <Border Background="{DynamicResource SystemAccentColor}"
                                                             IsHitTestVisible="False"
                                                             Classes.highlighted="{Binding IsHighlighted}">
-                                                        
+
                                                         <Border.Styles>
                                                             <Style Selector="Border">
                                                                 <Setter Property="Opacity" Value="0" />
@@ -2521,7 +2521,7 @@
                                 <Setter Property="Background" Value="{DynamicResource ButtonBackgroundPointerOver}" />
                             </Style>
                         </ListBox.Styles>
-                        <ListBoxItem x:Name="General">
+                        <ListBoxItem x:Name="General" IsSelected="True">
                             <Grid ColumnDefinitions="Auto,*">
                                 <LucideIcon Kind="Wrench" Size="18" />
                                 <TextBlock
@@ -2532,7 +2532,7 @@
                                     TextTrimming="CharacterEllipsis" />
                             </Grid>
                         </ListBoxItem>
-                        <ListBoxItem x:Name="Sound" IsSelected="True">
+                        <ListBoxItem x:Name="Sound">
                             <Grid ColumnDefinitions="Auto,*">
                                 <LucideIcon Kind="Volume2" Size="18" />
                                 <TextBlock
@@ -2554,7 +2554,7 @@
                                     TextTrimming="CharacterEllipsis" />
                             </Grid>
                         </ListBoxItem>
-                        <ListBoxItem>
+                        <ListBoxItem x:Name="About">
                             <Grid ColumnDefinitions="Auto,*">
                                 <LucideIcon Kind="Info" Size="18" />
                                 <TextBlock
@@ -2591,6 +2591,7 @@
                                     <Setter Property="IsSnapToTickEnabled" Value="True" />
                                 </Style>
                             </Grid.Styles>
+
                             <StackPanel Margin="24,12" IsVisible="{Binding #General.IsSelected}">
                                 <TextBlock
                                     Margin="24,6,0,0"
@@ -2735,6 +2736,7 @@
                                     </StackPanel>
                                 </Border>
                             </StackPanel>
+
                             <StackPanel Margin="24,12" IsVisible="{Binding #Sound.IsSelected}">
                                 <TextBlock
                                     Margin="24,6,0,0"
@@ -2986,6 +2988,7 @@
                                     </views:SettingsCard>
                                 </Border>
                             </StackPanel>
+
                             <StackPanel Margin="24,12" IsVisible="{Binding #ModelAppearence.IsSelected}">
                                 <TextBlock
                                     Margin="24,6,0,0"
@@ -3154,19 +3157,104 @@
                                     </StackPanel>
                                 </Border>
                             </StackPanel>
+
+                            <StackPanel Margin="24,12" IsVisible="{Binding #About.IsSelected}">
+                                <TextBlock
+                                    Margin="24,6,0,0"
+                                    FontSize="15"
+                                    FontWeight="Bold"
+                                    Text="{echoes:Translate {x:Static translations:Strings+settings_popup.about}}" />
+                                <Border Theme="{DynamicResource SettingsGroup}">
+                                    <StackPanel>
+
+                                        <views:SettingsCard
+                                            Header="{echoes:Translate {x:Static translations:Strings+settings_popup+about_panel.version}}"
+                                            Icon="{LucideIconContent CodeXml,
+                                                                     Size=20}">
+                                            <TextBlock
+                                                Text="0.1.0-beta"
+                                                TextTrimming="CharacterEllipsis" />
+                                        </views:SettingsCard>
+
+                                        <Separator />
+
+                                        <views:SettingsCard
+                                            Header="{echoes:Translate {x:Static translations:Strings+settings_popup+about_panel.repo}}">
+                                            <views:SettingsCard.Icon>
+                                                <PathIcon
+                                                    Data="M970 2301 c-305 -68 -555 -237 -727 -493 -301 -451 -241 -1056 143
+                                                        -1442 115 -116 290 -228 422 -271 49 -16 55 -16 77 -1 24 16 25 20 25 135 l0
+                                                        118 -88 -5 c-103 -5 -183 13 -231 54 -17 14 -50 62 -73 106 -38 74 -66 108
+                                                        -144 177 -26 23 -27 24 -9 37 43 32 130 1 185 -65 96 -117 133 -148 188 -160
+                                                        49 -10 94 -6 162 14 9 3 21 24 27 48 6 23 22 58 35 77 l24 35 -81 16 c-170 35
+                                                        -275 96 -344 200 -64 96 -85 179 -86 334 0 146 16 206 79 288 28 36 31 47 23
+                                                        68 -15 36 -11 188 5 234 13 34 20 40 47 43 45 5 129 -24 214 -72 l73 -42 64
+                                                        15 c91 21 364 20 446 0 l62 -16 58 35 c77 46 175 82 224 82 39 0 39 -1 55 -52
+                                                        17 -59 20 -166 5 -217 -8 -30 -6 -39 16 -68 109 -144 121 -383 29 -579 -62
+                                                        -129 -193 -219 -369 -252 l-84 -16 31 -55 32 -56 3 -223 4 -223 25 -16 c23
+                                                        -15 28 -15 76 2 80 27 217 101 292 158 446 334 590 933 343 1431 -145 293
+                                                        -419 518 -733 602 -137 36 -395 44 -525 15z"
+                                                    Width="20"
+                                                    Height="20"
+                                                    Foreground="{DynamicResource SystemBaseHighColor}">
+                                                    <PathIcon.RenderTransform>
+                                                        <ScaleTransform ScaleY="-1" />
+                                                    </PathIcon.RenderTransform>    
+                                                </PathIcon>
+                                            </views:SettingsCard.Icon>
+                                            <HyperlinkButton 
+                                                NavigateUri="https://github.com/altesco/WaifuAI/"
+                                                Padding="0"
+                                                Margin="0"
+                                                MinWidth="0"
+                                                MinHeight="0">
+                                                <HyperlinkButton.Resources>
+                                                    <Thickness x:Key="ButtonPadding">0</Thickness>
+                                                    <Thickness x:Key="HyperlinkButtonPadding">0</Thickness>
+                                                </HyperlinkButton.Resources>
+                                                <HyperlinkButton.Styles>
+                                                    <Style Selector="HyperlinkButton /template/ ContentPresenter">
+                                                        <Setter Property="Padding" Value="0" />
+                                                        <Setter Property="MinHeight" Value="0" />
+                                                        <Setter Property="MinWidth" Value="0" />
+                                                    </Style>
+                                                    <Style
+                                                        Selector="HyperlinkButton:pointerover /template/ ContentPresenter">
+                                                        <Setter Property="Background" Value="Transparent" />
+                                                        <Setter Property="Padding" Value="0" />
+                                                    </Style>
+                                                    <Style
+                                                        Selector="HyperlinkButton:pressed /template/ ContentPresenter">
+                                                        <Setter Property="Background" Value="Transparent" />
+                                                        <Setter Property="Padding" Value="0" />
+                                                    </Style>
+                                                </HyperlinkButton.Styles>
+                                                <HyperlinkButton.Content>
+                                                    <TextBlock Foreground="#7583ff">
+                                                        <Run Text="altesco/" /><Run FontWeight="DemiBold" Text="WaifuAI" />
+                                                    </TextBlock>
+                                                </HyperlinkButton.Content>    
+                                            </HyperlinkButton>
+
+                                        </views:SettingsCard>
+
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+
                         </Grid>
                     </ScrollViewer>
 
                     <Button
-                        Grid.Row="0"
-                        Grid.RowSpan="2"
-                        Grid.Column="0"
-                        Grid.ColumnSpan="2"
-                        Margin="6"
-                        HorizontalAlignment="Right"
-                        VerticalAlignment="Top"
-                        Classes="icon-button"
-                        Command="{Binding SettingsCommand}">
+Grid.Row="0"
+Grid.RowSpan="2"
+Grid.Column="0"
+Grid.ColumnSpan="2"
+Margin="6"
+HorizontalAlignment="Right"
+VerticalAlignment="Top"
+Classes="icon-button"
+Command="{Binding SettingsCommand}">
                         <LucideIcon Kind="X" Size="18" />
                     </Button>
 
@@ -3175,98 +3263,98 @@
 
             <!--  Prompt Editor  -->
             <Border
-                MaxWidth="800"
-                MaxHeight="500"
-                Margin="52"
-                Padding="16,12,16,12"
-                Background="{DynamicResource SystemChromeLowColor}"
-                BorderThickness="1"
-                CornerRadius="8"
-                IsVisible="{Binding IsPromptEditorOpen}">
+MaxWidth="800"
+MaxHeight="500"
+Margin="52"
+Padding="16,12,16,12"
+Background="{DynamicResource SystemChromeLowColor}"
+BorderThickness="1"
+CornerRadius="8"
+IsVisible="{Binding IsPromptEditorOpen}">
                 <Grid RowDefinitions="Auto,*,Auto">
                     <TextBlock
-                        HorizontalAlignment="Left"
-                        VerticalAlignment="Center"
-                        FontSize="22"
-                        FontWeight="DemiBold"
-                        Text="{echoes:Translate {x:Static translations:Strings+dialogs.edit_prompt}}" />
+HorizontalAlignment="Left"
+VerticalAlignment="Center"
+FontSize="22"
+FontWeight="DemiBold"
+Text="{echoes:Translate {x:Static translations:Strings+dialogs.edit_prompt}}" />
                     <TextBox
-                        Grid.Row="1"
-                        Height="NaN"
-                        Margin="0,12"
-                        Padding="12"
-                        VerticalAlignment="Stretch"
-                        VerticalContentAlignment="Top"
-                        x:DataType="vm:SettingsVM"
-                        AcceptsReturn="True"
-                        AcceptsTab="True"
-                        DataContext="{x:Static vm:SettingsVM.Instance}"
-                        Text="{Binding SelectedArchetype.Prompt, Mode=TwoWay}"
-                        TextWrapping="Wrap" />
+Grid.Row="1"
+Height="NaN"
+Margin="0,12"
+Padding="12"
+VerticalAlignment="Stretch"
+VerticalContentAlignment="Top"
+x:DataType="vm:SettingsVM"
+AcceptsReturn="True"
+AcceptsTab="True"
+DataContext="{x:Static vm:SettingsVM.Instance}"
+Text="{Binding SelectedArchetype.Prompt, Mode=TwoWay}"
+TextWrapping="Wrap" />
                     <StackPanel
-                        Grid.Row="2"
-                        HorizontalAlignment="Right"
-                        Orientation="Horizontal"
-                        Spacing="6">
+Grid.Row="2"
+HorizontalAlignment="Right"
+Orientation="Horizontal"
+Spacing="6">
                         <Button
-                            Classes="word-button"
-                            Command="{Binding SavePromptCommand}"
-                            Content="{echoes:Translate {x:Static translations:Strings+dialogs.save}}" />
+Classes="word-button"
+Command="{Binding SavePromptCommand}"
+Content="{echoes:Translate {x:Static translations:Strings+dialogs.save}}" />
                         <Button
-                            Classes="word-button"
-                            Command="{Binding PromptEditorCommand}"
-                            Content="{echoes:Translate {x:Static translations:Strings+dialogs.cancel}}" />
+Classes="word-button"
+Command="{Binding PromptEditorCommand}"
+Content="{echoes:Translate {x:Static translations:Strings+dialogs.cancel}}" />
                     </StackPanel>
                     <Button
-                        Grid.Row="0"
-                        Grid.RowSpan="2"
-                        HorizontalAlignment="Right"
-                        VerticalAlignment="Top"
-                        Classes="icon-button"
-                        Command="{Binding PromptEditorCommand}">
+Grid.Row="0"
+Grid.RowSpan="2"
+HorizontalAlignment="Right"
+VerticalAlignment="Top"
+Classes="icon-button"
+Command="{Binding PromptEditorCommand}">
                         <LucideIcon Kind="X" Size="18" />
                     </Button>
                 </Grid>
             </Border>
             <!--  Deleting Message Dialog  -->
             <Border
-                MaxWidth="500"
-                MaxHeight="180"
-                Margin="52"
-                Padding="16,12,16,12"
-                Background="{DynamicResource SystemChromeLowColor}"
-                BorderThickness="1"
-                CornerRadius="8"
-                IsVisible="{Binding IsDeletingMessageDialogOpen}">
+MaxWidth="500"
+MaxHeight="180"
+Margin="52"
+Padding="16,12,16,12"
+Background="{DynamicResource SystemChromeLowColor}"
+BorderThickness="1"
+CornerRadius="8"
+IsVisible="{Binding IsDeletingMessageDialogOpen}">
                 <Grid RowDefinitions="Auto,*,Auto">
                     <TextBlock
-                        HorizontalAlignment="Left"
-                        VerticalAlignment="Center"
-                        FontSize="22"
-                        FontWeight="DemiBold"
-                        Text="{echoes:Translate {x:Static translations:Strings+dialogs.deleting}}" />
+HorizontalAlignment="Left"
+VerticalAlignment="Center"
+FontSize="22"
+FontWeight="DemiBold"
+Text="{echoes:Translate {x:Static translations:Strings+dialogs.deleting}}" />
                     <TextBlock
-                        Grid.Row="1"
-                        Padding="0,12"
-                        HorizontalAlignment="Left"
-                        VerticalAlignment="Top"
-                        FontSize="16"
-                        Text="{Binding DeletingDialogMessage}"
-                        TextWrapping="Wrap" />
+Grid.Row="1"
+Padding="0,12"
+HorizontalAlignment="Left"
+VerticalAlignment="Top"
+FontSize="16"
+Text="{Binding DeletingDialogMessage}"
+TextWrapping="Wrap" />
                     <StackPanel
-                        Grid.Row="2"
-                        Margin="4"
-                        HorizontalAlignment="Right"
-                        Orientation="Horizontal"
-                        Spacing="6">
+Grid.Row="2"
+Margin="4"
+HorizontalAlignment="Right"
+Orientation="Horizontal"
+Spacing="6">
                         <Button
-                            Background="{DynamicResource ErrorLowColor}"
-                            BorderBrush="{DynamicResource SystemErrorTextColor}"
-                            Classes="word-button"
-                            Command="{Binding DeleteMessageCommand}"
-                            FontWeight="DemiBold"
-                            Content="{echoes:Translate {x:Static translations:Strings+dialogs.delete}}"
-                            Foreground="{DynamicResource SystemErrorTextColor}">
+Background="{DynamicResource ErrorLowColor}"
+BorderBrush="{DynamicResource SystemErrorTextColor}"
+Classes="word-button"
+Command="{Binding DeleteMessageCommand}"
+FontWeight="DemiBold"
+Content="{echoes:Translate {x:Static translations:Strings+dialogs.delete}}"
+Foreground="{DynamicResource SystemErrorTextColor}">
                             <Button.Styles>
                                 <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
                                     <Setter Property="Foreground" Value="{DynamicResource SystemErrorTextColor}" />
@@ -3281,60 +3369,60 @@
                             </Button.Styles>
                         </Button>
                         <Button
-                            Classes="word-button"
-                            Command="{Binding DeletingMessageDialogCommand}"
-                            Content="{echoes:Translate {x:Static translations:Strings+dialogs.cancel}}" />
+Classes="word-button"
+Command="{Binding DeletingMessageDialogCommand}"
+Content="{echoes:Translate {x:Static translations:Strings+dialogs.cancel}}" />
                     </StackPanel>
                     <Button
-                        Grid.Row="0"
-                        Grid.RowSpan="2"
-                        HorizontalAlignment="Right"
-                        VerticalAlignment="Top"
-                        Classes="icon-button"
-                        Command="{Binding DeletingMessageDialogCommand}">
+Grid.Row="0"
+Grid.RowSpan="2"
+HorizontalAlignment="Right"
+VerticalAlignment="Top"
+Classes="icon-button"
+Command="{Binding DeletingMessageDialogCommand}">
                         <LucideIcon Kind="X" Size="18" />
                     </Button>
                 </Grid>
             </Border>
             <!--  Deleting KnowledgeRecord Dialog  -->
             <Border
-                MaxWidth="500"
-                MaxHeight="180"
-                Margin="52"
-                Padding="16,12,16,12"
-                Background="{DynamicResource SystemChromeLowColor}"
-                BorderThickness="1"
-                CornerRadius="8"
-                IsVisible="{Binding IsDeletingRecordDialogOpen}">
+MaxWidth="500"
+MaxHeight="180"
+Margin="52"
+Padding="16,12,16,12"
+Background="{DynamicResource SystemChromeLowColor}"
+BorderThickness="1"
+CornerRadius="8"
+IsVisible="{Binding IsDeletingRecordDialogOpen}">
                 <Grid RowDefinitions="Auto,*,Auto">
                     <TextBlock
-                        HorizontalAlignment="Left"
-                        VerticalAlignment="Center"
-                        FontSize="22"
-                        FontWeight="DemiBold"
-                        Text="{echoes:Translate {x:Static translations:Strings+dialogs.deleting}}" />
+HorizontalAlignment="Left"
+VerticalAlignment="Center"
+FontSize="22"
+FontWeight="DemiBold"
+Text="{echoes:Translate {x:Static translations:Strings+dialogs.deleting}}" />
                     <TextBlock
-                        Grid.Row="1"
-                        Padding="0,12"
-                        HorizontalAlignment="Left"
-                        VerticalAlignment="Top"
-                        FontSize="16"
-                        Text="{echoes:Translate {x:Static translations:Strings+dialogs.deleting_knowledge_record}}"
-                        TextWrapping="Wrap" />
+Grid.Row="1"
+Padding="0,12"
+HorizontalAlignment="Left"
+VerticalAlignment="Top"
+FontSize="16"
+Text="{echoes:Translate {x:Static translations:Strings+dialogs.deleting_knowledge_record}}"
+TextWrapping="Wrap" />
                     <StackPanel
-                        Grid.Row="2"
-                        Margin="4"
-                        HorizontalAlignment="Right"
-                        Orientation="Horizontal"
-                        Spacing="6">
+Grid.Row="2"
+Margin="4"
+HorizontalAlignment="Right"
+Orientation="Horizontal"
+Spacing="6">
                         <Button
-                            Background="{DynamicResource ErrorLowColor}"
-                            BorderBrush="{DynamicResource SystemErrorTextColor}"
-                            Classes="word-button"
-                            FontWeight="DemiBold"
-                            Command="{Binding DeleteKnowledgeRecordCommand}"
-                            Content="{echoes:Translate {x:Static translations:Strings+dialogs.delete}}"
-                            Foreground="{DynamicResource SystemErrorTextColor}">
+Background="{DynamicResource ErrorLowColor}"
+BorderBrush="{DynamicResource SystemErrorTextColor}"
+Classes="word-button"
+FontWeight="DemiBold"
+Command="{Binding DeleteKnowledgeRecordCommand}"
+Content="{echoes:Translate {x:Static translations:Strings+dialogs.delete}}"
+Foreground="{DynamicResource SystemErrorTextColor}">
                             <Button.Styles>
                                 <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
                                     <Setter Property="Foreground" Value="{DynamicResource SystemErrorTextColor}" />
@@ -3349,17 +3437,17 @@
                             </Button.Styles>
                         </Button>
                         <Button
-                            Classes="word-button"
-                            Command="{Binding DeletingRecordDialogCommand}"
-                            Content="{echoes:Translate {x:Static translations:Strings+dialogs.cancel}}" />
+Classes="word-button"
+Command="{Binding DeletingRecordDialogCommand}"
+Content="{echoes:Translate {x:Static translations:Strings+dialogs.cancel}}" />
                     </StackPanel>
                     <Button
-                        Grid.Row="0"
-                        Grid.RowSpan="2"
-                        HorizontalAlignment="Right"
-                        VerticalAlignment="Top"
-                        Classes="icon-button"
-                        Command="{Binding DeletingRecordDialogCommand}">
+Grid.Row="0"
+Grid.RowSpan="2"
+HorizontalAlignment="Right"
+VerticalAlignment="Top"
+Classes="icon-button"
+Command="{Binding DeletingRecordDialogCommand}">
                         <LucideIcon Kind="X" Size="18" />
                     </Button>
                 </Grid>
@@ -3367,17 +3455,17 @@
         </Grid>
         <!--  Startup  -->
         <StackPanel
-            VerticalAlignment="Center"
-            IsVisible="{Binding IsAppInitializing, Source={x:Static vm:SettingsVM.Instance}}"
-            Spacing="16">
+VerticalAlignment="Center"
+IsVisible="{Binding IsAppInitializing, Source={x:Static vm:SettingsVM.Instance}}"
+Spacing="16">
             <TextBlock HorizontalAlignment="Center" Text="{Binding InitializingMessage}" />
             <ProgressBar
-                Height="8"
-                MaxWidth="1000"
-                Margin="100,0"
-                CornerRadius="3"
-                IsIndeterminate="{Binding IsAppInitializing, Source={x:Static vm:SettingsVM.Instance}}"
-                IsVisible="{Binding IsAppInitializing, Source={x:Static vm:SettingsVM.Instance}}" />
+Height="8"
+MaxWidth="1000"
+Margin="100,0"
+CornerRadius="3"
+IsIndeterminate="{Binding IsAppInitializing, Source={x:Static vm:SettingsVM.Instance}}"
+IsVisible="{Binding IsAppInitializing, Source={x:Static vm:SettingsVM.Instance}}" />
         </StackPanel>
     </Grid>
 </Window>

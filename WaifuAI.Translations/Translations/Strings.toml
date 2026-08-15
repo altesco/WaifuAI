@@ -154,6 +154,10 @@ close = "Close"
 medium = "Medium"
 far = "Far"
 
+[settings_popup.about_panel]
+version = "Version"
+repo = "Repository"
+
 [loading]
 settings_load = "Loading data..."
 start_web_server = "Starting web server..."
