@@ -6,3 +6,4 @@ omegaconf
 fastapi
 uvicorn
 scipy
+pyinstaller
