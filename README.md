@@ -4,7 +4,7 @@
     <img src="docs/images/waifu-ai-logo.png" width="500"/>
 </p>
 
-**WaifuAI** is your personal 3D desktop companion app. The project is designed to simulate communicating with a real girl via AI as detailed as possible, even with weak local models.
+**WaifuAI** is your personal 3D desktop companion app. The project is designed to simulate communicating with a real girl via AI as detailed as possible, even with weak local LLMs.
 
 ## ✨ Main Features
 
