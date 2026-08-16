@@ -27,14 +27,12 @@
 
 ### 👤 Character Model
 
-<table align="center">
-  <tr>
-    <td><img src="docs/images/1.png" width="200"/></td>
-    <td><img src="docs/images/2.png" width="200"/></td>
-    <td><img src="docs/images/3.png" width="200"/></td>
-    <td><img src="docs/images/4.png" width="200"/></td>
-  </tr>
-</table>
+<p align="center">
+  <img src="docs/images/1.png" width="200"/>&emsp;
+  <img src="docs/images/2.png" width="200"/>&emsp;
+  <img src="docs/images/3.png" width="200"/>&emsp;
+  <img src="docs/images/4.png" width="200"/>
+</p>
 
 WaifuAI features the integration of 3D models in the `.vrm` format. For a quick start, 4 base models created by [白い白米](https://hub.vroid.com/en/users/24352731) are already built into the app. A huge selection of free (and paid) models is available on [VRoid Hub](https://hub.vroid.com/en/search/%23BOOTH) or [BOOTH](https://booth.pm/en).
 
@@ -108,7 +106,7 @@ WaifuAI **does not require** any separate dependencies to run, only an externall
 
 WaifuAI is developed using the AvaloniaUI framework in C# and is cross-platform, supporting Windows 10/11 and Linux-based distributions.
 
-**3D Rendering:** Implemented via Three.js inside a WebView; VRM model integration is handled using [three-vrm](https://github.com/pixiv/three-vrm).
+**3D Rendering** implemented via Three.js inside a WebView. VRM model integration is handled using [three-vrm](https://github.com/pixiv/three-vrm).
 
 All settings and dialogue history are stored strictly locally in an SQLite database, so when using local LLMs, your conversations with the AI remain **completely private**.
 
