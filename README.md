@@ -81,13 +81,13 @@ The assistant is sensitive to **time**. She sees when each message was sent and 
 
 ## 🚀 Quickstart
 
-### Installation
+### 📥 Installation
 
 1. Download the archive for your operating system from the [Releases](https://github.com/altesco/WaifuAI/releases) section.
 2. Extract the archive to a convenient location.
 3. On **Windows**, run `WaifuAI.exe`; on **Linux**, run `WaifuAI`.
 
-### Post-installation
+### ⚙️ Post-installation
 
 1. Initially, 4 character models are available, which can be changed in `Settings` &#8594; `Appearance` &#8594; `Character Model`. You can also download models, for example, from [here](https://hub.vroid.com/en/search/%23BOOTH).
 2. Select and download a voice model in `Settings` &#8594; `Audio` &#8594; `Engine`. You can change the voice model language in `Settings` &#8594; `General` &#8594; `AI Language`.
