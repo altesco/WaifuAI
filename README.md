@@ -28,10 +28,10 @@
 ### 👤 Character Model
 
 <p align="center">
-  <img src="docs/images/1.png" width="200"/>&emsp;
-  <img src="docs/images/2.png" width="200"/>&emsp;
-  <img src="docs/images/3.png" width="200"/>&emsp;
-  <img src="docs/images/4.png" width="200"/>
+  <img src="docs/images/1.png" width="180"/>&emsp;
+  <img src="docs/images/2.png" width="180"/>&emsp;
+  <img src="docs/images/3.png" width="180"/>&emsp;
+  <img src="docs/images/4.png" width="180"/>
 </p>
 
 WaifuAI features the integration of 3D models in the `.vrm` format. For a quick start, 4 base models created by [白い白米](https://hub.vroid.com/en/users/24352731) are already built into the app. A huge selection of free (and paid) models is available on [VRoid Hub](https://hub.vroid.com/en/search/%23BOOTH) or [BOOTH](https://booth.pm/en).
