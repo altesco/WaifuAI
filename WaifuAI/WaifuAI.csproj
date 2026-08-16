@@ -16,9 +16,11 @@
 
   <ItemGroup>
     <Content Include="dist\say\**">
+      <Link>say\%(RecursiveDir)%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+
 
   <ItemGroup>
     <None Remove="say.py" />

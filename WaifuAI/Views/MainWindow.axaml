@@ -1984,7 +1984,8 @@
                                                 ToolTip.Tip="{echoes:Translate {x:Static translations:Strings+sidepanel+personality_panel.random_name}}"
                                                 ToolTip.HorizontalOffset="0"
                                                 ToolTip.VerticalOffset="4"
-                                                ToolTip.Placement="Bottom">
+                                                ToolTip.Placement="Bottom"
+                                                Command="{Binding SetRandomNameCommand}">
                                                 <LucideIcon Kind="Dices" Size="20" />
                                             </Button>
                                         </Grid>
@@ -2320,8 +2321,8 @@
                             <Binding ElementName="ChatButton" Path="IsChecked" />
                             <Binding ElementName="MemoryButton" Path="IsChecked" />
                             <Binding ElementName="PersonalityButton" Path="IsChecked" />
-                            <Binding ElementName="ParametersButton" Path="IsChecked"/>
-                            <Binding ElementName="ModelButton" Path="IsChecked"/>
+                            <Binding ElementName="ParametersButton" Path="IsChecked" />
+                            <Binding ElementName="ModelButton" Path="IsChecked" />
                         </MultiBinding>
                     </GridSplitter.IsVisible>
                 </GridSplitter>
@@ -2820,15 +2821,31 @@
                                             Icon="{LucideIconContent Speech,
                                                                      20}">
                                             <Grid>
-                                                <ComboBox ItemsSource="{Binding Speakers}"
-                                                          SelectedItem="{Binding SelectedSpeaker}">
-                                                    <ComboBox.IsVisible>
+
+                                                <StackPanel
+                                                    Orientation="Horizontal"
+                                                    Spacing="8">
+                                                    <StackPanel.IsVisible>
                                                         <MultiBinding Converter="{x:Static BoolConverters.And}">
                                                             <Binding Path="!IsSpeakersLoading" />
                                                             <Binding Path="IsSelectedVoiceModelLoaded" />
                                                         </MultiBinding>
-                                                    </ComboBox.IsVisible>
-                                                </ComboBox>
+                                                    </StackPanel.IsVisible>
+                                                    <Button
+                                                        Classes="icon-button"
+                                                        ToolTip.Tip="{echoes:Translate {x:Static translations:Strings+loading.test}}"
+                                                        ToolTip.VerticalOffset="4"
+                                                        ToolTip.HorizontalOffset="0"
+                                                        ToolTip.Placement="Bottom"
+                                                        Command="{Binding #RootPanel.((vm:MainVM)DataContext).RequestTestCommand}">
+                                                        <LucideIcon
+                                                            Kind="Play"
+                                                            Size="20" />
+                                                    </Button>
+                                                    <ComboBox ItemsSource="{Binding Speakers}"
+                                                              SelectedItem="{Binding SelectedSpeaker}" />
+                                                </StackPanel>
+
                                                 <Arc
                                                     Width="24"
                                                     Height="24"
@@ -2847,7 +2864,7 @@
                                                 <TextBlock
                                                     VerticalAlignment="Center"
                                                     FontWeight="DemiBold"
-                                                    Text="Загрузите модель">
+                                                    Text="{echoes:Translate {x:Static translations:Strings+loading.load_model}}">
                                                     <TextBlock.IsVisible>
                                                         <MultiBinding Converter="{x:Static BoolConverters.And}">
                                                             <Binding Path="!IsSpeakersLoading" />
@@ -3037,7 +3054,7 @@
                                                         </Arc.RenderTransform>
                                                     </Arc>
                                                     <TextBlock Foreground="{DynamicResource SystemAccentColor}"
-                                                               Text="Загрузка модели" />
+                                                               Text="{echoes:Translate {x:Static translations:Strings+loading.model_changing}}" />
                                                 </StackPanel>
                                             </Grid>
                                         </views:SettingsCard>
@@ -3201,10 +3218,10 @@
                                                     Foreground="{DynamicResource SystemBaseHighColor}">
                                                     <PathIcon.RenderTransform>
                                                         <ScaleTransform ScaleY="-1" />
-                                                    </PathIcon.RenderTransform>    
+                                                    </PathIcon.RenderTransform>
                                                 </PathIcon>
                                             </views:SettingsCard.Icon>
-                                            <HyperlinkButton 
+                                            <HyperlinkButton
                                                 NavigateUri="https://github.com/altesco/WaifuAI/"
                                                 Padding="0"
                                                 Margin="0"
@@ -3235,7 +3252,7 @@
                                                     <TextBlock Foreground="#7583ff">
                                                         <Run Text="altesco/" /><Run FontWeight="DemiBold" Text="WaifuAI" />
                                                     </TextBlock>
-                                                </HyperlinkButton.Content>    
+                                                </HyperlinkButton.Content>
                                             </HyperlinkButton>
 
                                         </views:SettingsCard>
@@ -3248,15 +3265,15 @@
                     </ScrollViewer>
 
                     <Button
-Grid.Row="0"
-Grid.RowSpan="2"
-Grid.Column="0"
-Grid.ColumnSpan="2"
-Margin="6"
-HorizontalAlignment="Right"
-VerticalAlignment="Top"
-Classes="icon-button"
-Command="{Binding SettingsCommand}">
+                        Grid.Row="0"
+                        Grid.RowSpan="2"
+                        Grid.Column="0"
+                        Grid.ColumnSpan="2"
+                        Margin="6"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Top"
+                        Classes="icon-button"
+                        Command="{Binding SettingsCommand}">
                         <LucideIcon Kind="X" Size="18" />
                     </Button>
 
@@ -3265,98 +3282,98 @@ Command="{Binding SettingsCommand}">
 
             <!--  Prompt Editor  -->
             <Border
-MaxWidth="800"
-MaxHeight="500"
-Margin="52"
-Padding="16,12,16,12"
-Background="{DynamicResource SystemChromeLowColor}"
-BorderThickness="1"
-CornerRadius="8"
-IsVisible="{Binding IsPromptEditorOpen}">
+                MaxWidth="800"
+                MaxHeight="500"
+                Margin="52"
+                Padding="16,12,16,12"
+                Background="{DynamicResource SystemChromeLowColor}"
+                BorderThickness="1"
+                CornerRadius="8"
+                IsVisible="{Binding IsPromptEditorOpen}">
                 <Grid RowDefinitions="Auto,*,Auto">
                     <TextBlock
-HorizontalAlignment="Left"
-VerticalAlignment="Center"
-FontSize="22"
-FontWeight="DemiBold"
-Text="{echoes:Translate {x:Static translations:Strings+dialogs.edit_prompt}}" />
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        FontSize="22"
+                        FontWeight="DemiBold"
+                        Text="{echoes:Translate {x:Static translations:Strings+dialogs.edit_prompt}}" />
                     <TextBox
-Grid.Row="1"
-Height="NaN"
-Margin="0,12"
-Padding="12"
-VerticalAlignment="Stretch"
-VerticalContentAlignment="Top"
-x:DataType="vm:SettingsVM"
-AcceptsReturn="True"
-AcceptsTab="True"
-DataContext="{x:Static vm:SettingsVM.Instance}"
-Text="{Binding SelectedArchetype.Prompt, Mode=TwoWay}"
-TextWrapping="Wrap" />
+                        Grid.Row="1"
+                        Height="NaN"
+                        Margin="0,12"
+                        Padding="12"
+                        VerticalAlignment="Stretch"
+                        VerticalContentAlignment="Top"
+                        x:DataType="vm:SettingsVM"
+                        AcceptsReturn="True"
+                        AcceptsTab="True"
+                        DataContext="{x:Static vm:SettingsVM.Instance}"
+                        Text="{Binding SelectedArchetype.Prompt, Mode=TwoWay}"
+                        TextWrapping="Wrap" />
                     <StackPanel
-Grid.Row="2"
-HorizontalAlignment="Right"
-Orientation="Horizontal"
-Spacing="6">
+                        Grid.Row="2"
+                        HorizontalAlignment="Right"
+                        Orientation="Horizontal"
+                        Spacing="6">
                         <Button
-Classes="word-button"
-Command="{Binding SavePromptCommand}"
-Content="{echoes:Translate {x:Static translations:Strings+dialogs.save}}" />
+                            Classes="word-button"
+                            Command="{Binding SavePromptCommand}"
+                            Content="{echoes:Translate {x:Static translations:Strings+dialogs.save}}" />
                         <Button
-Classes="word-button"
-Command="{Binding PromptEditorCommand}"
-Content="{echoes:Translate {x:Static translations:Strings+dialogs.cancel}}" />
+                            Classes="word-button"
+                            Command="{Binding PromptEditorCommand}"
+                            Content="{echoes:Translate {x:Static translations:Strings+dialogs.cancel}}" />
                     </StackPanel>
                     <Button
-Grid.Row="0"
-Grid.RowSpan="2"
-HorizontalAlignment="Right"
-VerticalAlignment="Top"
-Classes="icon-button"
-Command="{Binding PromptEditorCommand}">
+                        Grid.Row="0"
+                        Grid.RowSpan="2"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Top"
+                        Classes="icon-button"
+                        Command="{Binding PromptEditorCommand}">
                         <LucideIcon Kind="X" Size="18" />
                     </Button>
                 </Grid>
             </Border>
             <!--  Deleting Message Dialog  -->
             <Border
-MaxWidth="500"
-MaxHeight="180"
-Margin="52"
-Padding="16,12,16,12"
-Background="{DynamicResource SystemChromeLowColor}"
-BorderThickness="1"
-CornerRadius="8"
-IsVisible="{Binding IsDeletingMessageDialogOpen}">
+                MaxWidth="500"
+                MaxHeight="180"
+                Margin="52"
+                Padding="16,12,16,12"
+                Background="{DynamicResource SystemChromeLowColor}"
+                BorderThickness="1"
+                CornerRadius="8"
+                IsVisible="{Binding IsDeletingMessageDialogOpen}">
                 <Grid RowDefinitions="Auto,*,Auto">
                     <TextBlock
-HorizontalAlignment="Left"
-VerticalAlignment="Center"
-FontSize="22"
-FontWeight="DemiBold"
-Text="{echoes:Translate {x:Static translations:Strings+dialogs.deleting}}" />
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        FontSize="22"
+                        FontWeight="DemiBold"
+                        Text="{echoes:Translate {x:Static translations:Strings+dialogs.deleting}}" />
                     <TextBlock
-Grid.Row="1"
-Padding="0,12"
-HorizontalAlignment="Left"
-VerticalAlignment="Top"
-FontSize="16"
-Text="{Binding DeletingDialogMessage}"
-TextWrapping="Wrap" />
+                        Grid.Row="1"
+                        Padding="0,12"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        FontSize="16"
+                        Text="{Binding DeletingDialogMessage}"
+                        TextWrapping="Wrap" />
                     <StackPanel
-Grid.Row="2"
-Margin="4"
-HorizontalAlignment="Right"
-Orientation="Horizontal"
-Spacing="6">
+                        Grid.Row="2"
+                        Margin="4"
+                        HorizontalAlignment="Right"
+                        Orientation="Horizontal"
+                        Spacing="6">
                         <Button
-Background="{DynamicResource ErrorLowColor}"
-BorderBrush="{DynamicResource SystemErrorTextColor}"
-Classes="word-button"
-Command="{Binding DeleteMessageCommand}"
-FontWeight="DemiBold"
-Content="{echoes:Translate {x:Static translations:Strings+dialogs.delete}}"
-Foreground="{DynamicResource SystemErrorTextColor}">
+                            Background="{DynamicResource ErrorLowColor}"
+                            BorderBrush="{DynamicResource SystemErrorTextColor}"
+                            Classes="word-button"
+                            Command="{Binding DeleteMessageCommand}"
+                            FontWeight="DemiBold"
+                            Content="{echoes:Translate {x:Static translations:Strings+dialogs.delete}}"
+                            Foreground="{DynamicResource SystemErrorTextColor}">
                             <Button.Styles>
                                 <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
                                     <Setter Property="Foreground" Value="{DynamicResource SystemErrorTextColor}" />
@@ -3371,60 +3388,60 @@ Foreground="{DynamicResource SystemErrorTextColor}">
                             </Button.Styles>
                         </Button>
                         <Button
-Classes="word-button"
-Command="{Binding DeletingMessageDialogCommand}"
-Content="{echoes:Translate {x:Static translations:Strings+dialogs.cancel}}" />
+                            Classes="word-button"
+                            Command="{Binding DeletingMessageDialogCommand}"
+                            Content="{echoes:Translate {x:Static translations:Strings+dialogs.cancel}}" />
                     </StackPanel>
                     <Button
-Grid.Row="0"
-Grid.RowSpan="2"
-HorizontalAlignment="Right"
-VerticalAlignment="Top"
-Classes="icon-button"
-Command="{Binding DeletingMessageDialogCommand}">
+                        Grid.Row="0"
+                        Grid.RowSpan="2"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Top"
+                        Classes="icon-button"
+                        Command="{Binding DeletingMessageDialogCommand}">
                         <LucideIcon Kind="X" Size="18" />
                     </Button>
                 </Grid>
             </Border>
             <!--  Deleting KnowledgeRecord Dialog  -->
             <Border
-MaxWidth="500"
-MaxHeight="180"
-Margin="52"
-Padding="16,12,16,12"
-Background="{DynamicResource SystemChromeLowColor}"
-BorderThickness="1"
-CornerRadius="8"
-IsVisible="{Binding IsDeletingRecordDialogOpen}">
+                MaxWidth="500"
+                MaxHeight="180"
+                Margin="52"
+                Padding="16,12,16,12"
+                Background="{DynamicResource SystemChromeLowColor}"
+                BorderThickness="1"
+                CornerRadius="8"
+                IsVisible="{Binding IsDeletingRecordDialogOpen}">
                 <Grid RowDefinitions="Auto,*,Auto">
                     <TextBlock
-HorizontalAlignment="Left"
-VerticalAlignment="Center"
-FontSize="22"
-FontWeight="DemiBold"
-Text="{echoes:Translate {x:Static translations:Strings+dialogs.deleting}}" />
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        FontSize="22"
+                        FontWeight="DemiBold"
+                        Text="{echoes:Translate {x:Static translations:Strings+dialogs.deleting}}" />
                     <TextBlock
-Grid.Row="1"
-Padding="0,12"
-HorizontalAlignment="Left"
-VerticalAlignment="Top"
-FontSize="16"
-Text="{echoes:Translate {x:Static translations:Strings+dialogs.deleting_knowledge_record}}"
-TextWrapping="Wrap" />
+                        Grid.Row="1"
+                        Padding="0,12"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        FontSize="16"
+                        Text="{echoes:Translate {x:Static translations:Strings+dialogs.deleting_knowledge_record}}"
+                        TextWrapping="Wrap" />
                     <StackPanel
-Grid.Row="2"
-Margin="4"
-HorizontalAlignment="Right"
-Orientation="Horizontal"
-Spacing="6">
+                        Grid.Row="2"
+                        Margin="4"
+                        HorizontalAlignment="Right"
+                        Orientation="Horizontal"
+                        Spacing="6">
                         <Button
-Background="{DynamicResource ErrorLowColor}"
-BorderBrush="{DynamicResource SystemErrorTextColor}"
-Classes="word-button"
-FontWeight="DemiBold"
-Command="{Binding DeleteKnowledgeRecordCommand}"
-Content="{echoes:Translate {x:Static translations:Strings+dialogs.delete}}"
-Foreground="{DynamicResource SystemErrorTextColor}">
+                            Background="{DynamicResource ErrorLowColor}"
+                            BorderBrush="{DynamicResource SystemErrorTextColor}"
+                            Classes="word-button"
+                            FontWeight="DemiBold"
+                            Command="{Binding DeleteKnowledgeRecordCommand}"
+                            Content="{echoes:Translate {x:Static translations:Strings+dialogs.delete}}"
+                            Foreground="{DynamicResource SystemErrorTextColor}">
                             <Button.Styles>
                                 <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
                                     <Setter Property="Foreground" Value="{DynamicResource SystemErrorTextColor}" />
@@ -3439,17 +3456,17 @@ Foreground="{DynamicResource SystemErrorTextColor}">
                             </Button.Styles>
                         </Button>
                         <Button
-Classes="word-button"
-Command="{Binding DeletingRecordDialogCommand}"
-Content="{echoes:Translate {x:Static translations:Strings+dialogs.cancel}}" />
+                            Classes="word-button"
+                            Command="{Binding DeletingRecordDialogCommand}"
+                            Content="{echoes:Translate {x:Static translations:Strings+dialogs.cancel}}" />
                     </StackPanel>
                     <Button
-Grid.Row="0"
-Grid.RowSpan="2"
-HorizontalAlignment="Right"
-VerticalAlignment="Top"
-Classes="icon-button"
-Command="{Binding DeletingRecordDialogCommand}">
+                        Grid.Row="0"
+                        Grid.RowSpan="2"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Top"
+                        Classes="icon-button"
+                        Command="{Binding DeletingRecordDialogCommand}">
                         <LucideIcon Kind="X" Size="18" />
                     </Button>
                 </Grid>
@@ -3457,17 +3474,17 @@ Command="{Binding DeletingRecordDialogCommand}">
         </Grid>
         <!--  Startup  -->
         <StackPanel
-VerticalAlignment="Center"
-IsVisible="{Binding IsAppInitializing, Source={x:Static vm:SettingsVM.Instance}}"
-Spacing="16">
+            VerticalAlignment="Center"
+            IsVisible="{Binding IsAppInitializing, Source={x:Static vm:SettingsVM.Instance}}"
+            Spacing="16">
             <TextBlock HorizontalAlignment="Center" Text="{Binding InitializingMessage}" />
             <ProgressBar
-Height="8"
-MaxWidth="1000"
-Margin="100,0"
-CornerRadius="3"
-IsIndeterminate="{Binding IsAppInitializing, Source={x:Static vm:SettingsVM.Instance}}"
-IsVisible="{Binding IsAppInitializing, Source={x:Static vm:SettingsVM.Instance}}" />
+                Height="8"
+                MaxWidth="1000"
+                Margin="100,0"
+                CornerRadius="3"
+                IsIndeterminate="{Binding IsAppInitializing, Source={x:Static vm:SettingsVM.Instance}}"
+                IsVisible="{Binding IsAppInitializing, Source={x:Static vm:SettingsVM.Instance}}" />
         </StackPanel>
     </Grid>
 </Window>

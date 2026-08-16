@@ -803,8 +803,8 @@ public partial class MainVM : ObservableValidator
     {
         if (SelectedKnowledgeRecord is null)
             return;
+        
         KnowledgeBase.Remove(SelectedKnowledgeRecord);
-        await DatabaseService.KnowledgeDb.DeleteAsync(SelectedKnowledgeRecord);
         IsDeletingRecordDialogOpen = false;
     }
     
@@ -856,5 +856,55 @@ public partial class MainVM : ObservableValidator
             msg.IsSelected = true;
         }
     }
-    
+
+    [RelayCommand]
+    private async Task RequestTest()
+    {
+        var settings = SettingsVM.Instance;
+
+        var text = settings.SelectedLanguage switch
+        {
+            "ru" =>
+                "Привет! Я рада тебя видеть. Сегодня у меня отличное настроение, так что давай немного поболтаем и проверим, как звучит мой голос.",
+            "fr" =>
+                "Bonjour ! Je suis contente de te voir. Aujourd’hui, je suis de très bonne humeur, alors discutons un peu et voyons comment ma voix sonne.",
+            "es" =>
+                "¡Hola! Me alegra mucho verte. Hoy estoy de muy buen humor, así que vamos a charlar un poco y comprobar cómo suena mi voz.",
+            "de" =>
+                "Hallo! Ich freue mich, dich zu sehen. Heute bin ich besonders gut gelaunt, also lass uns ein bisschen plaudern und meine Stimme testen.",
+            _ =>
+                "Hello! I’m happy to see you. I’m in a really good mood today, so let’s have a little chat and see how my voice sounds."
+        };
+
+        WeakReferenceMessenger.Default.Send(
+            new ExecuteScriptMessage("window.vrmApp.isTestRequested = true")
+        );
+
+        var isTestRequested = false;
+        while (!isTestRequested)
+        {
+            var msg = new EvaluateScriptMessage<bool>("return window.vrmApp.isTestRequested");
+            isTestRequested = await WeakReferenceMessenger.Default.Send(msg);
+            await Task.Delay(100);
+        }
+
+        VoiceService.Say(
+            text,
+            settings.SelectedSource,
+            settings.SelectedVoiceModel,
+            settings.SelectedLanguage,
+            settings.SelectedSpeaker,
+            settings.Volume,
+            settings.Pitch,
+            settings.Bass,
+            settings.Treble,
+            isStream: false);
+
+        while (isTestRequested)
+        {
+            var msg = new EvaluateScriptMessage<bool>("return window.vrmApp.isTestRequested");
+            isTestRequested = await WeakReferenceMessenger.Default.Send(msg);
+            await Task.Delay(100);
+        }
+    }
 }

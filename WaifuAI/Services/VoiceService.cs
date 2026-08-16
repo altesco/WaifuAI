@@ -62,7 +62,7 @@ public static class VoiceService
             string scriptPath = Path.Combine(baseDir, "say.py");
             string pythonExe = OperatingSystem.IsWindows()
                 ? Path.Combine(baseDir, "python_runtime", "python.exe")
-                : Path.Combine(baseDir, "say", "say");//Path.Combine(baseDir, "venv", "bin", "python");
+                : Path.Combine(baseDir, "say", "say");
             ProcessStartInfo info = new ProcessStartInfo
             {
                 FileName = pythonExe,
@@ -165,7 +165,8 @@ public static class VoiceService
         bool isStream)
     {
         var parsedResult = MessageParser.ParseTextForEmotions(text);
-        parsedResult.CleanText = parsedResult.CleanText.ToPhoneticCyrillic();
+        if (language == "ru")
+            parsedResult.CleanText = parsedResult.CleanText.ToPhoneticCyrillic();
         var dialogueData = new
         {
             cleanText = parsedResult.CleanText,

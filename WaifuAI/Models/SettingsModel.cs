@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 
 namespace WaifuAI.Models;
 
@@ -15,7 +16,7 @@ public class SettingsModel
     // AI Parameters
     public double Temperature { get; set; } = 0.7;
     public ResponseLength ResponseLength { get; set; } = ResponseLength.Medium;
-    public int MaxTokens { get; set; } = 1000;
+    public int MaxTokens { get; set; } = 10000;
     public int ContextLength { get; set; } = 120000;
 
     // General Settings
@@ -23,7 +24,7 @@ public class SettingsModel
     public string AccentColor { get; set; } = "#4287f5";
     public string Font { get; set; } = string.Empty;
     public string MonospaceFont { get; set; } = string.Empty;
-    public string AppLanguage { get; set; } = string.Empty;
+    public string AppLanguage { get; set; } = CultureInfo.CurrentCulture.TwoLetterISOLanguageName.ToLower();
     public string Language { get; set; } = string.Empty;
 
     // Sound Settings
@@ -42,7 +43,7 @@ public class SettingsModel
     public CameraVariant Camera { get; set; } = CameraVariant.Medium;
 
     // Personality Settings
-    public string WaifuName { get; set; } = "Waifu";
+    public string? WaifuName { get; set; }
     public DateOnly Birthday { get; set; } = new(2000, 01, 01);
     public string SelectedArchetype { get; set; } = string.Empty;
 

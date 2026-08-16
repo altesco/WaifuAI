@@ -400,6 +400,8 @@ function pcmToAudioBuffer(ctx, bytes, sampleRate = 48000) {
   return buffer;
 }
 
+window.vrmApp.isTestRequested = false;
+
 window.say = async (
   data, pitch, port, service, model, language, speaker, volume, bass, treble,
   isStream = false
@@ -440,55 +442,115 @@ window.say = async (
       if (processableLength === 0) continue;
 
       const processableBytes = chunk.slice(0, processableLength);
-      const audioBuffer = pcmToAudioBuffer(audioContext, processableBytes, 48000);
+      const audioBuffer = pcmToAudioBuffer(
+        audioContext,
+        processableBytes,
+        48000
+      );
 
       const sourceNode = audioContext.createBufferSource();
       sourceNode.buffer = audioBuffer;
       sourceNode.playbackRate.value = pitch;
 
+      // Громкость
       const gainNode = audioContext.createGain();
       gainNode.gain.value = volume;
 
+      // Бас
+      const bassFilter = audioContext.createBiquadFilter();
+      bassFilter.type = "lowshelf";
+      bassFilter.frequency.value = 200;
+      bassFilter.gain.value = bass;
+
+      // Высокие частоты
+      const trebleFilter = audioContext.createBiquadFilter();
+      trebleFilter.type = "highshelf";
+      trebleFilter.frequency.value = 3000;
+      trebleFilter.gain.value = treble;
+
+      // Цепочка:
+      // source → lipSync → bass → treble → volume → output
       sourceNode.connect(lipSync.analyser);
-      sourceNode.connect(gainNode);
+      sourceNode.connect(bassFilter);
+      bassFilter.connect(trebleFilter);
+      trebleFilter.connect(gainNode);
       gainNode.connect(audioContext.destination);
 
-      const startTime = Math.max(audioContext.currentTime, nextStartTime);
+      const startTime = Math.max(
+        audioContext.currentTime,
+        nextStartTime
+      );
+
       sourceNode.start(startTime);
       activeSources.push(sourceNode);
 
       if (!emotionsTriggered) {
         emotionsTriggered = true;
-        setEmotions(data, estimatedDuration, startTime, pitch);
+        setEmotions(
+          data,
+          estimatedDuration,
+          startTime,
+          pitch
+        );
       }
 
       const chunkDuration = audioBuffer.duration / pitch;
       nextStartTime = startTime + chunkDuration;
     }
   }
-  // 3. Генерация целиком "всё за раз" (isStream = false)
+
+  // 3. Генерация целиком "всё за раз"
   else {
     const url = `http://127.0.0.1:${port}/${service}?text=${encodeURIComponent(data.cleanText)}&model_path=${encodeURIComponent(model)}&language=${language}&speaker=${speaker}`;
     const response = await fetch(url);
-    const audioBuffer = await audioContext.decodeAudioData(await response.arrayBuffer());
+
+    const audioBuffer = await audioContext.decodeAudioData(
+      await response.arrayBuffer()
+    );
 
     const sourceNode = audioContext.createBufferSource();
     sourceNode.buffer = audioBuffer;
     sourceNode.playbackRate.value = pitch;
 
+    // Громкость
     const gainNode = audioContext.createGain();
     gainNode.gain.value = volume;
 
+    // Бас
+    const bassFilter = audioContext.createBiquadFilter();
+    bassFilter.type = "lowshelf";
+    bassFilter.frequency.value = 200;
+    bassFilter.gain.value = bass;
+
+    // Высокие частоты
+    const trebleFilter = audioContext.createBiquadFilter();
+    trebleFilter.type = "highshelf";
+    trebleFilter.frequency.value = 3000;
+    trebleFilter.gain.value = treble;
+
+    // Цепочка:
+    // source → lipSync → bass → treble → volume → output
     sourceNode.connect(lipSync.analyser);
-    sourceNode.connect(gainNode);
+    sourceNode.connect(bassFilter);
+    bassFilter.connect(trebleFilter);
+    trebleFilter.connect(gainNode);
     gainNode.connect(audioContext.destination);
 
     const startTime = audioContext.currentTime;
+
     sourceNode.start(startTime);
     activeSources.push(sourceNode);
 
-    // В монолитном режиме передаем ТОЧНУЮ реальную длину полученного аудиофайла
-    setEmotions(data, audioBuffer.duration, startTime, pitch);
+    setEmotions(
+      data,
+      audioBuffer.duration,
+      startTime,
+      pitch
+    );
+
+    sourceNode.onended = () => {
+      window.vrmApp.isTestRequested = false;
+    };
   }
 };
 

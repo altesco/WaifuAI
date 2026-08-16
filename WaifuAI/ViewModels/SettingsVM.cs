@@ -106,7 +106,7 @@ public partial class SettingsVM : ObservableValidator
         Camera = SettingsModel.Camera;
 
         // Personality
-        WaifuName = SettingsModel.WaifuName;
+        WaifuName = SettingsModel.WaifuName ?? GetRandomName(SelectedLanguage);
         Birthday = SettingsModel.Birthday.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
         SelectedArchetype = 
             Archetypes.Find(x => x.Name == SettingsModel.SelectedArchetype) ?? 
@@ -341,7 +341,8 @@ public partial class SettingsVM : ObservableValidator
     [
         "ru", "en", "de", "es", "fr"
     ];
-    [ObservableProperty] private string _selectedAppLanguage = "ru";
+
+    [ObservableProperty] private string _selectedAppLanguage;
 
     public ObservableCollection<string> Languages { get; } =
     [
@@ -380,6 +381,8 @@ public partial class SettingsVM : ObservableValidator
         OnPropertyChanged(nameof(EngagementText));
         OnPropertyChanged(nameof(MoodText));
         OnPropertyChanged(nameof(EnergyText));
+
+        OnPropertyChanged(nameof(ModelDescription));
     }
 
     partial void OnSelectedThemeChanged(ThemeVariant? value)
@@ -633,8 +636,31 @@ public partial class SettingsVM : ObservableValidator
     [NotifyPropertyChangedFor(nameof(ModelDescription))]
     private string _model3DFolder = BaseModel3DFolder;
 
+    private string GetShortModelFolder(string path)
+    {
+        var separator = OperatingSystem.IsWindows() ? '\\' : '/';
+
+        if (path.Count(c => c == separator) < 4) 
+            return path;
+
+        var first = path[0] == separator
+            ? path.IndexOf(separator, 1)
+            : path.IndexOf(separator);
+        var second = path.IndexOf(separator, first + 1);
+
+        var last = path[^1] == separator
+            ? path.LastIndexOf(separator, path.Length - 2)
+            : path.LastIndexOf(separator);
+        var prelast = path.LastIndexOf(separator, last - 1);
+
+        return path[..(second + 1)] + "..." + path[prelast..];
+    }
+
     public string ModelDescription =>
-        string.Format(Translations.Strings.settings_popup.appearance_panel.character_description.CurrentValue, Model3DFolder);
+        string.Format(
+            Translations.Strings.settings_popup.appearance_panel.character_description.CurrentValue, 
+            GetShortModelFolder(Model3DFolder)
+        );
 
     public ObservableCollection<string> Models3D { get; } = [];
     [ObservableProperty] private string _selectedModel3D;
@@ -793,6 +819,55 @@ public partial class SettingsVM : ObservableValidator
     #region PersonalitySettings
 
     [ObservableProperty] private string _waifuName;
+
+    private readonly Dictionary<string, string[]> _randomNames = new()
+    {
+        ["ru"] =
+        [
+            "Алина", "Елена", "Виктория", "София", "Анастасия",
+            "Дарья", "Полина", "Кира", "Милана", "Вероника"
+        ],
+
+        ["en"] =
+        [
+            "Alice", "Emily", "Sophie", "Charlotte", "Amelia",
+            "Olivia", "Chloe", "Grace", "Lily", "Emma"
+        ],
+
+        ["de"] =
+        [
+            "Anna", "Lena", "Sophie", "Mia", "Hannah",
+            "Lea", "Laura", "Clara", "Emilia", "Lina"
+        ],
+
+        ["es"] =
+        [
+            "Lucía", "Sofía", "Carmen", "Elena", "María",
+            "Valeria", "Isabella", "Camila", "Alba", "Clara"
+        ],
+
+        ["fr"] =
+        [
+            "Camille", "Chloé", "Élodie", "Amélie", "Juliette",
+            "Clara", "Manon", "Léa", "Océane", "Sophie"
+        ]
+    };
+
+    [RelayCommand]
+    private void SetRandomName() => WaifuName = GetRandomName(SelectedLanguage);
+
+    private string GetRandomName(string lang)
+    {
+        var random = new Random();
+
+        var names = _randomNames[lang].ToList();
+
+        if (!string.IsNullOrEmpty(WaifuName))
+            names.Remove(WaifuName);
+
+        var index = random.Next(names.Count);
+        return _randomNames[lang][index];
+    }
 
     [ObservableProperty]
     [RegularExpression(@"^\d{4}\-\d{2}\-\d{2}$", ErrorMessage = "Формат должен быть ГГГГ-ММ-ДД")]
@@ -1221,7 +1296,6 @@ public partial class SettingsVM : ObservableValidator
 
     [ObservableProperty] private int _randomDailyNoise;
 
-    //[ObservableProperty] private bool _isSleeping;
     public bool IsSleeping => DateTime.UtcNow < WakeUpTime;
 
     public void NotifySleepStatus() => OnPropertyChanged(nameof(IsSleeping));
