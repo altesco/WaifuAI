@@ -1,12 +1,25 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
+
+    <OutputType Condition="!$(RuntimeIdentifier.StartsWith('linux'))">WinExe</OutputType>
+    <OutputType Condition="$(RuntimeIdentifier.StartsWith('linux'))">Exe</OutputType>
+
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <RootNamespace>WaifuAI</RootNamespace>
+
+    <PublishSingleFile>true</PublishSingleFile>
+
+    <!-- ОТКЛЮЧАЕТ оптимизацию рефлексии, сохраняя совместимость с JsonSerializer -->
+    <PublishAot>false</PublishAot>
+    <TrimMode>partial</TrimMode>
+    <IlcTrimMetadata>false</IlcTrimMetadata>
+    <EnableTrimAnalyzer>false</EnableTrimAnalyzer>
+
   </PropertyGroup>
 
   <ItemGroup>
@@ -21,7 +34,6 @@
     </Content>
   </ItemGroup>
 
-
   <ItemGroup>
     <None Remove="say.py" />
   </ItemGroup>
@@ -31,6 +43,15 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="prompt.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="../LICENSE">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="../README.md">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="../THIRD_PARTY_NOTICES.md">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
@@ -77,4 +98,20 @@
       </Content>
     </ItemGroup>
   </Target>
+
+    <!-- Этот таргет перехватывает публикацию и принудительно оставляет файлы браузера снаружи -->
+  <Target Name="FixCefBrowserProcessAfterPublish" AfterTargets="Publish">
+    <Message Importance="high" Text="[Fix] Extracting CefGlueBrowserProcess to keep it external..." />
+    
+    <!-- Находим саму DLL, которую .NET пытается спрятать -->
+    <ItemGroup>
+      <CefFilesToKeepOutside Include="$(TargetDir)CefGlueBrowserProcess\**\*" />
+    </ItemGroup>
+
+    <!-- Копируем файлы напрямую в готовую папку публикации -->
+    <Copy SourceFiles="@(CefFilesToKeepOutside)" 
+          DestinationFiles="$(PublishDir)CefGlueBrowserProcess\%(RecursiveDir)%(Filename)%(Extension)" 
+          SkipUnchangedFiles="true" />
+  </Target>
+
 </Project>

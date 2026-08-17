@@ -3185,20 +3185,57 @@
                                     Text="{echoes:Translate {x:Static translations:Strings+settings_popup.about}}" />
                                 <Border Theme="{DynamicResource SettingsGroup}">
                                     <StackPanel>
+                                        <StackPanel.Resources>
+                                            <Thickness x:Key="ButtonPadding">0</Thickness>
+                                            <Thickness x:Key="HyperlinkButtonPadding">0</Thickness>
+                                        </StackPanel.Resources>
+                                        <StackPanel.Styles>
+                                            <Style Selector="HyperlinkButton /template/ ContentPresenter">
+                                                <Setter Property="Padding" Value="0" />
+                                                <Setter Property="MinHeight" Value="0" />
+                                                <Setter Property="MinWidth" Value="0" />
+                                            </Style>
+                                            <Style
+                                                Selector="HyperlinkButton:pointerover /template/ ContentPresenter">
+                                                <Setter Property="Background" Value="Transparent" />
+                                                <Setter Property="Padding" Value="0" />
+                                            </Style>
+                                            <Style
+                                                Selector="HyperlinkButton:pressed /template/ ContentPresenter">
+                                                <Setter Property="Background" Value="Transparent" />
+                                                <Setter Property="Padding" Value="0" />
+                                            </Style>
+                                        </StackPanel.Styles>
 
                                         <views:SettingsCard
                                             Header="{echoes:Translate {x:Static translations:Strings+settings_popup+about_panel.version}}"
                                             Icon="{LucideIconContent CodeXml,
                                                                      Size=20}">
                                             <TextBlock
-                                                Text="0.1.0-beta"
+                                                Text="0.1.0"
                                                 TextTrimming="CharacterEllipsis" />
                                         </views:SettingsCard>
 
                                         <Separator />
 
                                         <views:SettingsCard
-                                            Header="{echoes:Translate {x:Static translations:Strings+settings_popup+about_panel.repo}}">
+                                            Header="{echoes:Translate {x:Static translations:Strings+settings_popup+about_panel.repo}}"
+                                            Icon="{LucideIconContent BookMarked, Size=20}">
+                                            <HyperlinkButton
+                                                NavigateUri="https://github.com/altesco/WaifuAI/"
+                                                Padding="0"
+                                                Margin="0"
+                                                MinWidth="0"
+                                                MinHeight="0"
+                                                Foreground="#7583ff"
+                                                Content="WaifuAI"/>
+                                        </views:SettingsCard>
+
+                                        <Separator />
+
+                                        <views:SettingsCard
+                                            Header="{echoes:Translate {x:Static translations:Strings+settings_popup+about_panel.dev}}">
+
                                             <views:SettingsCard.Icon>
                                                 <PathIcon
                                                     Data="M970 2301 c-305 -68 -555 -237 -727 -493 -301 -451 -241 -1056 143
@@ -3221,39 +3258,15 @@
                                                     </PathIcon.RenderTransform>
                                                 </PathIcon>
                                             </views:SettingsCard.Icon>
+
                                             <HyperlinkButton
-                                                NavigateUri="https://github.com/altesco/WaifuAI/"
+                                                NavigateUri="https://github.com/altesco"
                                                 Padding="0"
                                                 Margin="0"
                                                 MinWidth="0"
-                                                MinHeight="0">
-                                                <HyperlinkButton.Resources>
-                                                    <Thickness x:Key="ButtonPadding">0</Thickness>
-                                                    <Thickness x:Key="HyperlinkButtonPadding">0</Thickness>
-                                                </HyperlinkButton.Resources>
-                                                <HyperlinkButton.Styles>
-                                                    <Style Selector="HyperlinkButton /template/ ContentPresenter">
-                                                        <Setter Property="Padding" Value="0" />
-                                                        <Setter Property="MinHeight" Value="0" />
-                                                        <Setter Property="MinWidth" Value="0" />
-                                                    </Style>
-                                                    <Style
-                                                        Selector="HyperlinkButton:pointerover /template/ ContentPresenter">
-                                                        <Setter Property="Background" Value="Transparent" />
-                                                        <Setter Property="Padding" Value="0" />
-                                                    </Style>
-                                                    <Style
-                                                        Selector="HyperlinkButton:pressed /template/ ContentPresenter">
-                                                        <Setter Property="Background" Value="Transparent" />
-                                                        <Setter Property="Padding" Value="0" />
-                                                    </Style>
-                                                </HyperlinkButton.Styles>
-                                                <HyperlinkButton.Content>
-                                                    <TextBlock Foreground="#7583ff">
-                                                        <Run Text="altesco/" /><Run FontWeight="DemiBold" Text="WaifuAI" />
-                                                    </TextBlock>
-                                                </HyperlinkButton.Content>
-                                            </HyperlinkButton>
+                                                MinHeight="0"
+                                                Foreground="#7583ff"
+                                                Content="altesco" />
 
                                         </views:SettingsCard>
 

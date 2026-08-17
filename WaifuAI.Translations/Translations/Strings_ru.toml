@@ -149,6 +149,11 @@ close = "Близко"
 medium = "Средне"
 far = "Далеко"
 
+[settings_popup.about_panel]
+version = "Версия"
+repo = "Репозиторий"
+dev = "Разработчик"
+
 [loading]
 settings_load = "Загрузка данных..."
 start_web_server = " Запуск веб-сервера..."

@@ -149,6 +149,11 @@ close = "Nah"
 medium = "Mittel"
 far = "Weit"
 
+[settings_popup.about_panel]
+version = "Version"
+repo = "Repository"
+dev = "Entwickler"
+
 [loading]
 settings_load = "Daten werden geladen..."
 start_web_server = "Webserver wird gestartet..."
@@ -157,3 +162,6 @@ create_vector_generator = "Vektorgenerator wird erstellt..."
 get_encoding = "Sprachmodule werden vorbereitet..."
 db_load = "Wissensdatenbank wird geladen..."
 chat_load = "Chatverlauf wird geladen..."
+model_changing = "Modell wird geladen..."
+load_model = "Modell herunterladen"
+test = "Stimmtest"

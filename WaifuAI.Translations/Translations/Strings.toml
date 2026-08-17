@@ -157,6 +157,7 @@ far = "Far"
 [settings_popup.about_panel]
 version = "Version"
 repo = "Repository"
+dev = "Developer"
 
 [loading]
 settings_load = "Loading data..."

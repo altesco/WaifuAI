@@ -149,6 +149,11 @@ close = "Proche"
 medium = "Moyenne"
 far = "Éloignée"
 
+[settings_popup.about_panel]
+version = "Version"
+repo = "Dépôt"
+dev = "Développeur"
+
 [loading]
 settings_load = "Chargement des données..."
 start_web_server = "Démarrage du serveur web..."
@@ -157,3 +162,6 @@ create_vector_generator = "Initialisation du générateur de vecteurs..."
 get_encoding = "Préparation des modules linguistiques..."
 db_load = "Chargement de la base de connaissances..."
 chat_load = "Chargement de l'historique du chat..."
+model_changing = "Chargement du modèle..."
+load_model = "Télécharger le modèle"
+test = "Test vocal"
