@@ -19,7 +19,6 @@ public partial class MessageVM : ObservableObject
         QuoteStart = messageModel.QuoteStart;
         QuoteEnd = messageModel.QuoteEnd;
         IsReplied = messageModel.IsReplied;
-        TokensText = string.Format(Strings.sidepanel.chat_panel.tokens.CurrentValue, messageModel.Tokens);
     }
 
     public Message MessageModel { get; set; }
@@ -63,8 +62,6 @@ public partial class MessageVM : ObservableObject
     }
 
     public DateTime LocalTime => MessageModel.Time.ToLocalTime();
-
-    public string TokensText { get; set; }
 
     protected override void OnPropertyChanged(PropertyChangedEventArgs e)
     {

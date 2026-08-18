@@ -320,6 +320,14 @@
                 </Setter>
             </Style>
 
+            <Style Selector="Grid.blurred">
+                <Setter Property="Effect">
+                    <Setter.Value>
+                        <BlurEffect Radius="30" />
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
         </Grid.Styles>
 
 
@@ -333,15 +341,6 @@
                     <Binding Path="IsDeletingRecordDialogOpen" />
                 </MultiBinding>
             </Classes.blurred>
-            <Grid.Styles>
-                <Style Selector="Grid.blurred">
-                    <Setter Property="Effect">
-                        <Setter.Value>
-                            <BlurEffect Radius="10" />
-                        </Setter.Value>
-                    </Setter>
-                </Style>
-            </Grid.Styles>
             <Border
                 Background="{DynamicResource SystemChromeHighColor}"
                 BorderThickness="0,0,0,1"
@@ -720,6 +719,7 @@
                                 x:Name="ChatButton"
                                 IsChecked="True"
                                 IsCheckedChanged="LeftToggleButton_OnIsCheckedChanged"
+                                IsHitTestVisible="{Binding !IsSidePanelAnimating}"
                                 ToolTip.HorizontalOffset="4"
                                 ToolTip.Placement="Right"
                                 ToolTip.Tip="{echoes:Translate {x:Static translations:Strings+sidepanel.chat}}"
@@ -729,6 +729,7 @@
                             <ToggleButton
                                 x:Name="MemoryButton"
                                 IsCheckedChanged="LeftToggleButton_OnIsCheckedChanged"
+                                IsHitTestVisible="{Binding !IsSidePanelAnimating}"
                                 ToolTip.HorizontalOffset="4"
                                 ToolTip.Placement="Right"
                                 ToolTip.Tip="{echoes:Translate {x:Static translations:Strings+sidepanel.knowledge_base}}"
@@ -738,6 +739,7 @@
                             <ToggleButton
                                 x:Name="PersonalityButton"
                                 IsCheckedChanged="LeftToggleButton_OnIsCheckedChanged"
+                                IsHitTestVisible="{Binding !IsSidePanelAnimating}"
                                 ToolTip.HorizontalOffset="4"
                                 ToolTip.Placement="Right"
                                 ToolTip.Tip="{echoes:Translate {x:Static translations:Strings+sidepanel.personality}}"
@@ -754,6 +756,7 @@
                             <ToggleButton
                                 x:Name="ParametersButton"
                                 IsCheckedChanged="LeftToggleButton_OnIsCheckedChanged"
+                                IsHitTestVisible="{Binding !IsSidePanelAnimating}"
                                 ToolTip.HorizontalOffset="4"
                                 ToolTip.Placement="Right"
                                 ToolTip.Tip="{echoes:Translate {x:Static translations:Strings+sidepanel.ai_parameters}}"
@@ -763,6 +766,7 @@
                             <ToggleButton
                                 x:Name="ModelButton"
                                 IsCheckedChanged="LeftToggleButton_OnIsCheckedChanged"
+                                IsHitTestVisible="{Binding !IsSidePanelAnimating}"
                                 ToolTip.HorizontalOffset="4"
                                 ToolTip.Placement="Right"
                                 ToolTip.Tip="{echoes:Translate {x:Static translations:Strings+sidepanel.model_source}}"
@@ -784,16 +788,25 @@
                 </Border>
 
 
-                <!--  LeftPanel  -->
+                <!--  SidePanel  -->
                 <Border
+                    x:Name="SidePanel"
                     Grid.Column="1"
                     Background="{DynamicResource SystemChromeMediumColor}"
-                    BorderThickness="0,0,1,0">
+                    BorderThickness="0,0,1,0"
+                    SizeChanged="SidePanel_OnSizeChanged">
+                    <Border.Transitions>
+                        <Transitions>
+                            <DoubleTransition Property="Width" Duration="0:0:0.2" Easing="CubicEaseInOut" />
+                        </Transitions>
+                    </Border.Transitions>
+
                     <Panel>
 
                         <!--  Chat  -->
-                        <views:SidePanel Header="{echoes:Translate {x:Static translations:Strings+sidepanel.chat}}"
-                                         IsVisible="{Binding #ChatButton.IsChecked}">
+                        <views:SidePanel 
+                            Header="{echoes:Translate {x:Static translations:Strings+sidepanel.chat}}"
+                            IsVisible="{Binding ActiveTab, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:SideTab.Chat}}">
                             <Grid RowDefinitions="*,Auto">
                                 <ScrollViewer x:Name="ChatScrollViewer">
                                     <ScrollViewer.Styles>
@@ -1332,8 +1345,10 @@
                                                                         <TextBlock
                                                                             Grid.Column="1"
                                                                             FontSize="12"
-                                                                            Foreground="{DynamicResource SystemBaseMediumColor}"
-                                                                            Text="{Binding TokensText}" />
+                                                                            Foreground="{DynamicResource SystemBaseMediumColor}">
+                                                                            <Run Text="{echoes:Translate {x:Static translations:Strings+sidepanel+chat_panel.tokens}}"/>
+                                                                            <Run Text="{Binding MessageModel.Tokens}"/>
+                                                                        </TextBlock>
                                                                         <Separator
                                                                             Grid.Column="2"
                                                                             Width="1"
@@ -1777,8 +1792,10 @@
                                                     Padding="0"
                                                     VerticalAlignment="Center"
                                                     FontSize="12"
-                                                    Foreground="{DynamicResource SystemBaseMediumColor}"
-                                                    Text="{Binding TokensText}" />
+                                                    Foreground="{DynamicResource SystemBaseMediumColor}">
+                                                    <Run Text="{echoes:Translate {x:Static translations:Strings+sidepanel+chat_panel.tokens}}" />
+                                                    <Run Text="{Binding Tokens}" />    
+                                                </TextBlock>
                                             </StackPanel>
                                         </Border>
                                     </Grid>
@@ -1789,7 +1806,7 @@
                         <!--  Knowledge Base  -->
                         <views:SidePanel
                             Header="{echoes:Translate {x:Static translations:Strings+sidepanel.knowledge_base}}"
-                            IsVisible="{Binding #MemoryButton.IsChecked}">
+                            IsVisible="{Binding ActiveTab, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:SideTab.Memory}}">
                             <DataGrid
                                 VerticalAlignment="Top"
                                 AutoGenerateColumns="False"
@@ -1955,7 +1972,7 @@
                         <!--  Personality  -->
                         <views:SidePanel
                             Header="{echoes:Translate {x:Static translations:Strings+sidepanel.personality}}"
-                            IsVisible="{Binding #PersonalityButton.IsChecked}">
+                            IsVisible="{Binding ActiveTab, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:SideTab.Personality}}">
                             <ScrollViewer>
                                 <StackPanel
                                     MaxWidth="720"
@@ -2107,7 +2124,7 @@
                         <!--  Model Parameters  -->
                         <views:SidePanel
                             Header="{echoes:Translate {x:Static translations:Strings+sidepanel.ai_parameters}}"
-                            IsVisible="{Binding #ParametersButton.IsChecked}">
+                            IsVisible="{Binding ActiveTab, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:SideTab.Parameters}}">
                             <ScrollViewer>
                                 <StackPanel
                                     MaxWidth="720"
@@ -2228,7 +2245,7 @@
                         <!--  Model Source  -->
                         <views:SidePanel
                             Header="{echoes:Translate {x:Static translations:Strings+sidepanel.model_source}}"
-                            IsVisible="{Binding #ModelButton.IsChecked}">
+                            IsVisible="{Binding ActiveTab, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:SideTab.Model}}">
                             <ScrollViewer>
                                 <StackPanel
                                     MaxWidth="720"
@@ -2313,9 +2330,13 @@
                 <GridSplitter
                     Grid.Column="1"
                     Width="4"
+                    MinWidth="0"
                     HorizontalAlignment="Right"
                     Background="Transparent"
-                    DragCompleted="LeftThumb_OnDragCompleted">
+                    DragCompleted="LeftThumb_OnDragCompleted"
+                    DragStarted="LeftThumb_OnDragStarted"
+                    DragDelta="LeftThumb_OnDragDelta">
+
                     <GridSplitter.IsVisible>
                         <MultiBinding Converter="{x:Static BoolConverters.Or}">
                             <Binding ElementName="ChatButton" Path="IsChecked" />
@@ -2325,14 +2346,49 @@
                             <Binding ElementName="ModelButton" Path="IsChecked" />
                         </MultiBinding>
                     </GridSplitter.IsVisible>
+
                 </GridSplitter>
+
+
+                <Grid
+                    Grid.Column="2"
+                    ClipToBounds="True"
+                    Classes.blurred="{Binding IsWebViewResizing}"
+                    IsVisible="{Binding !#MyWebView.IsVisible}">
+
+                    <Image
+                        x:Name="WebViewSnapshot"
+                        Margin="-10000,0,-10000,0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Stretch"
+                        Stretch="Uniform"/>
+
+                    <Grid
+                        Opacity="0.7"
+                        Background="{DynamicResource SystemChromeLowColor}" />
+
+                </Grid>
 
                 <StackPanel
                     Grid.Column="2"
-                    HorizontalAlignment="Center"
+                    Spacing="3"
+                    IsVisible="{Binding !#MyWebView.IsVisible}"
                     VerticalAlignment="Center"
-                    IsVisible="{Binding Source={x:Static vm:SettingsVM.Instance}, Path=IsModel3DLoading}"
-                    Spacing="4">
+                    HorizontalAlignment="Center">
+                    <LucideIcon
+                        Kind="Scaling"
+                        Size="56"
+                        StrokeWidth="1.1" />
+                    <TextBlock
+                        Text="{echoes:Translate {x:Static translations:Strings.resizing}}"
+                        FontSize="16"
+                        Margin="8,0,0,0" />
+                </StackPanel>
+
+                <Grid
+                    Grid.Column="2"
+                    Background="{DynamicResource SystemChromeLowColor}"
+                    IsVisible="{Binding Source={x:Static vm:SettingsVM.Instance}, Path=IsModel3DLoading}">
                     <Arc
                         Width="36"
                         Height="36"
@@ -2352,24 +2408,20 @@
                             <RotateTransform />
                         </Arc.RenderTransform>
                     </Arc>
-                </StackPanel>
+                </Grid>
 
-                <Image x:Name="WebViewSnapshot" Grid.Column="2">
-                    <Image.IsVisible>
-                        <MultiBinding Converter="{x:Static BoolConverters.Or}">
-                            <Binding Path="IsSettingsOpen" />
-                            <Binding Path="IsPromptEditorOpen" />
-                            <Binding Path="IsDeletingMessageDialogOpen" />
-                            <Binding Path="IsDeletingRecordDialogOpen" />
-                        </MultiBinding>
-                    </Image.IsVisible>
-                </Image>
                 <wv:WebView
                     x:Name="MyWebView"
                     Grid.Column="2"
                     Address="{Binding WebAddress}"
                     DisableBuiltinContextMenus="True"
+                    Classes.windows-margin="{Binding IsWindows}"
                     JavascriptContextCreated="MyWebView_JavascriptContextCreated">
+                    <wv:WebView.Styles>
+                        <Style Selector="wv|WebView.windows-margin">
+                            <Setter Property="Margin" Value="0,0,1,1" />
+                        </Style>
+                    </wv:WebView.Styles>
                     <wv:WebView.IsVisible>
                         <MultiBinding Converter="{x:Static BoolConverters.And}">
                             <Binding Path="!IsModel3DLoading" Source="{x:Static vm:SettingsVM.Instance}" />
@@ -2381,56 +2433,6 @@
                     </wv:WebView.IsVisible>
                 </wv:WebView>
 
-
-                <!--  RightPanel  -->
-                <!-- <Border
-                    Grid.Column="3"
-                    x:DataType="vm:SettingsVM"
-                    Background="{DynamicResource SystemChromeMediumColor}"
-                    BorderThickness="1,0,0,0"
-                    DataContext="{x:Static vm:SettingsVM.Instance}">
-                    <Border.Styles>
-                        <Style Selector="TextBox">
-                            <Setter Property="CornerRadius" Value="5" />
-                            <Setter Property="FontFamily"
-                                    Value="{Binding SelectedMonoFontFamily, Source={x:Static vm:SettingsVM.Instance}}" />
-                        </Style>
-                        <Style Selector="StackPanel[Tag=False]">
-                            <Setter Property="IsEnabled" Value="False" />
-                        </Style>
-                    </Border.Styles>
-                    <Panel>
-
-
-
-                    </Panel>
-                </Border>-->
-
-
-                <!-- <GridSplitter
-                    Grid.Column="3"
-                    Width="4"
-                    HorizontalAlignment="Left"
-                    Background="Transparent"
-                    DragCompleted="RightThumb_OnDragCompleted">
-                    <GridSplitter.IsVisible>
-                        <MultiBinding Converter="{x:Static BoolConverters.Or}">
-                            <Binding ElementName="ModelButton" Path="IsChecked" />
-                            <Binding ElementName="ParametersButton" Path="IsChecked" />
-                        </MultiBinding>
-                    </GridSplitter.IsVisible>
-                </GridSplitter>-->
-                <!-- <Border
-                    Grid.Column="4"
-                    Background="{DynamicResource SystemChromeMediumColor}"
-                    BorderThickness="1,0,0,0">
-                    <StackPanel
-                        Margin="5"
-                        HorizontalAlignment="Center"
-                        Spacing="4">
-
-                    </StackPanel>
-                </Border>-->
             </Grid>
         </Grid>
 
@@ -3228,7 +3230,7 @@
                                                 MinWidth="0"
                                                 MinHeight="0"
                                                 Foreground="#7583ff"
-                                                Content="WaifuAI"/>
+                                                Content="WaifuAI" />
                                         </views:SettingsCard>
 
                                         <Separator />

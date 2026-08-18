@@ -1,5 +1,6 @@
 settings = "Настройки"
 error = "Ошибка"
+resizing = "Масштабирование..."
 
 [sidepanel]
 chat = "Чат"
@@ -10,7 +11,7 @@ model_source = "Источник модели"
 
 [sidepanel.chat_panel]
 write_a_message = "Сообщение..."
-tokens = "Токены: {0}"
+tokens = "Токены: "
 reply_quote = "Ответ на цитату"
 reply = "Ответ на сообщение"
 

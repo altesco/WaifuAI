@@ -13,15 +13,63 @@ using WaifuAI.Services;
 using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.Messaging;
 using System.IO;
+using System.Reactive.Linq;
+using Avalonia;
+using Avalonia.Animation;
+using Avalonia.Animation.Easings;
+using WaifuAI.Models;
 
 namespace WaifuAI.Views
 {
     public partial class MainWindow : Window
     {
+        private bool _isWebViewVisibleTemp;
+
+        private bool _isSplitDragging;
+        
         public MainWindow()
         {
             InitializeComponent();
+
+            MyWebView.GetObservable(BoundsProperty)
+                .Skip(2)
+                .Do(_ =>
+                {
+                    if (SettingsVM.Instance.IsAppInitializing)
+                        return;
+
+                    // начало ресайза
+                    (DataContext as MainVM)?.IsWebViewResizing = true;
+
+                    WeakReferenceMessenger.Default.Send(new SnapshotMessage(true));
+
+                    if (MyWebView.IsVisible)
+                    {
+                        _isWebViewVisibleTemp = MyWebView.IsVisible;
+                        MyWebView.IsVisible = false;
+                    }
+                })
+                .Throttle(TimeSpan.FromMilliseconds(200))
+                .Subscribe(_ =>
+                {
+                    Dispatcher.UIThread.Post(() =>
+                    {
+                        if (SettingsVM.Instance.IsAppInitializing || _isSplitDragging)
+                            return;
+
+                        // конец ресайза
+                        (DataContext as MainVM)?.IsWebViewResizing = false;
+
+                        if (_isWebViewVisibleTemp)
+                        {
+                            MyWebView.IsVisible = true;
+                        }
+                    });
+                    
+                });
+
             _lastLeftBarWidth = MainGrid.ColumnDefinitions[1].Width;
+            SidePanel.Width = MainGrid.ColumnDefinitions[1].Width.Value;
             ChatButton.IsChecked = true;
 
             WeakReferenceMessenger.Default.Register<ExecuteScriptMessage>(this, (_, m) =>
@@ -61,19 +109,22 @@ namespace WaifuAI.Views
 
             WeakReferenceMessenger.Default.Register<MainWindow, SnapshotMessage>(this, (_, m) =>
             {
+                if (MyWebView.Bounds.Width == 0 ||
+                    MyWebView.Bounds.Height == 0 ||
+                    !m.Value)
+                    return;
+                
+                if (SettingsVM.IsBlurImageCacheValid)
+                    return;
+                
                 Task.Run(async () =>
                 {
                     try
                     {
-                        if (MyWebView.Bounds.Width == 0 ||
-                            MyWebView.Bounds.Height == 0 ||
-                            !m.Value)
-                            return;
-
                         // 1. Делаем скриншот
                         MyWebView.ExecuteScript("window.vrmApp.takePrintscreen()");
 
-                        string jsCode = @"return window.vrmApp.printscreen";
+                        string jsCode = "return window.vrmApp.printscreen";
                         string base64Data = string.Empty;
                         int attempts = 0;
 
@@ -84,8 +135,9 @@ namespace WaifuAI.Views
                             attempts++;
                         }
 
-                        if (string.IsNullOrEmpty(base64Data)) return;
-
+                        if (string.IsNullOrEmpty(base64Data)) 
+                            return;
+                  
                         // 2. Очищаем память в JS сразу после получения
                         MyWebView.ExecuteScript("window.vrmApp.printscreen = ''");
 
@@ -102,11 +154,16 @@ namespace WaifuAI.Views
                             var oldBitmap = WebViewSnapshot.Source as IDisposable;
                             WebViewSnapshot.Source = newBitmap;
                             oldBitmap?.Dispose();
+
+                            if (DataContext is MainVM { IsSpeaking: false })
+                            {
+                                SettingsVM.IsBlurImageCacheValid = true;
+                            }
                         });
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"Snapshot failed: {ex.Message}");
+                        Console.WriteLine($"Snapshot failed: {ex.Message}, {ex.StackTrace}");
                     }
                 });
             });
@@ -189,6 +246,33 @@ namespace WaifuAI.Views
         private void LeftThumb_OnDragCompleted(object? sender, VectorEventArgs e)
         {
             _lastLeftBarWidth = MainGrid.ColumnDefinitions[1].Width;
+
+            _isSplitDragging = false;
+
+            Dispatcher.UIThread.Post(() =>
+            {
+                if (SettingsVM.Instance.IsAppInitializing)
+                    return;
+
+                // конец ресайза
+                (DataContext as MainVM)?.IsWebViewResizing = false;
+
+                if (_isWebViewVisibleTemp)
+                {
+                    MyWebView.IsVisible = true;
+                }
+            });
+        }
+
+        private void LeftThumb_OnDragDelta(object? sender, VectorEventArgs e)
+        {
+            SidePanel.Transitions?.Clear();
+            SidePanel.Width = MainGrid.ColumnDefinitions[1].Width.Value;
+        }
+
+        private void LeftThumb_OnDragStarted(object? sender, VectorEventArgs e)
+        {
+            _isSplitDragging = true;
         }
 
         private void ChatOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -222,27 +306,80 @@ namespace WaifuAI.Views
             Environment.Exit(0);
         }
 
-        private void LeftToggleButton_OnIsCheckedChanged(object? sender, RoutedEventArgs e)
+        private async void LeftToggleButton_OnIsCheckedChanged(object? sender, RoutedEventArgs e)
         {
-            if (sender is not ToggleButton btn || btn.Parent is not Panel panel)
+            if (sender is not ToggleButton btn || DataContext is not MainVM vm || vm.IsSidePanelAnimating)
                 return;
+
+            vm.IsSidePanelAnimating = true;
+
+            var dur = 200;
+
+            SidePanel.Transitions =
+            [
+                new DoubleTransition
+                {
+                    Property = WidthProperty,
+                    Duration = TimeSpan.FromMilliseconds(dur),
+                    Easing = new CubicEaseInOut()
+                }
+            ];
+
             switch (btn.IsChecked)
             {
                 case true:
+                    SidePanel.Width = _lastLeftBarWidth.Value;
+
+                    ChangeActiveTab(btn);
+
                     ChatButton.IsChecked = btn == ChatButton;
                     MemoryButton.IsChecked = btn == MemoryButton;
                     PersonalityButton.IsChecked = btn == PersonalityButton;
                     ParametersButton.IsChecked = btn == ParametersButton;
                     ModelButton.IsChecked = btn == ModelButton;
 
+                    await Task.Delay(dur);
+
                     MainGrid.ColumnDefinitions[1].MinWidth = 400;
-                    MainGrid.ColumnDefinitions[1].Width = _lastLeftBarWidth;
+
+                    vm.SidePanelOpened = true;
                     break;
+
                 case false:
                     MainGrid.ColumnDefinitions[1].MinWidth = 0;
-                    MainGrid.ColumnDefinitions[1].Width = new GridLength(0, GridUnitType.Pixel);
+
+                    SidePanel.Width = 0;
+
+                    await Task.Delay(dur);
+
+                    vm.SidePanelOpened = false;
+
+                    ChangeActiveTab(null);
                     break;
             }
+
+            vm.IsSidePanelAnimating = false;
+        }
+
+        private void SidePanel_OnSizeChanged(object? sender, SizeChangedEventArgs e)
+        {
+            if (DataContext is not MainVM { IsSidePanelAnimating: true })
+                return;
+
+            MainGrid.ColumnDefinitions[1].Width = new GridLength(e.NewSize.Width, GridUnitType.Pixel);
+        }
+
+        private void ChangeActiveTab(ToggleButton? btn)
+        {
+            if (DataContext is not MainVM vm)
+                return;
+
+            if (btn == ChatButton) vm.ActiveTab = SideTab.Chat;
+            else if (btn == MemoryButton) vm.ActiveTab = SideTab.Memory;
+            else if (btn == PersonalityButton) vm.ActiveTab = SideTab.Personality;
+            else if (btn == ModelButton) vm.ActiveTab = SideTab.Model;
+            else if (btn == ParametersButton) vm.ActiveTab = SideTab.Parameters;
+            else vm.ActiveTab = null;
         }
 
         private void PART_SelectableTextBlock_PointerPressed(object? sender, PointerPressedEventArgs e)

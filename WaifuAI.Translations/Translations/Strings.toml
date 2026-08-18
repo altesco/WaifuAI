@@ -5,6 +5,7 @@ generated_namespace = "WaifuAI.Translations"
 [translations]
 settings = "Settings"
 error = "Error"
+resizing = "Resizing..."
 
 [sidepanel]
 chat = "Chat"
@@ -15,7 +16,7 @@ model_source = "Model Source"
 
 [sidepanel.chat_panel]
 write_a_message = "Type a message..."
-tokens = "Tokens: {0}"
+tokens = "Tokens: "
 reply_quote = "Replying to quote"
 reply = "Replying to message"
 

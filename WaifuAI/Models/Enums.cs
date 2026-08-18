@@ -34,6 +34,7 @@ public enum MoodType
 #endregion
 
 
+
 #region AnswerLength
 
 public enum ResponseLength
@@ -48,6 +49,7 @@ public enum ResponseLength
 #endregion
 
 
+
 #region Model3D
 
 public enum CameraVariant
@@ -59,9 +61,24 @@ public enum CameraVariant
 
 #endregion
 
+
+
+#region UI
+
 public enum ThemeVariant
 {
     Dark,
     Light,
     System
 }
+
+public enum SideTab
+{
+    Chat,
+    Memory,
+    Personality,
+    Parameters,
+    Model
+}
+
+#endregion

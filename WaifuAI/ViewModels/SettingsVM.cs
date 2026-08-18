@@ -46,6 +46,8 @@ public partial class SettingsVM : ObservableValidator
 
     public static readonly string HistoryPath = Path.Combine(AppDirectory, "history.db");
 
+    public static bool IsBlurImageCacheValid { get; set; }
+
     private SettingsModel SettingsModel { get; set; }
 
     [ObservableProperty] private bool _isSettingsLoading;
@@ -373,9 +375,7 @@ public partial class SettingsVM : ObservableValidator
         TranslationProvider.SetCulture(CultureInfo.GetCultureInfo(value));
 
         foreach (var archetype in Archetypes)
-        {
             archetype.RefreshLocalization();
-        }
         
         OnPropertyChanged(nameof(AffectionText));
         OnPropertyChanged(nameof(EngagementText));
@@ -738,7 +738,11 @@ public partial class SettingsVM : ObservableValidator
 
             await Task.Delay(30);
 
-            WeakReferenceMessenger.Default.Send(new SnapshotMessage(true));
+            if (!IsAppInitializing)
+            {
+                IsBlurImageCacheValid = false;
+                WeakReferenceMessenger.Default.Send(new SnapshotMessage(true));
+            }
         });
     }
 
@@ -772,28 +776,40 @@ public partial class SettingsVM : ObservableValidator
                 var message = new EvaluateScriptMessage<int>("return window.vrmApp.isModelLoaded");
                 int status = await WeakReferenceMessenger.Default.Send(message);
 
+                Console.WriteLine($"Статус от JS: {status}");
+
                 if (status == 0)
                     continue;
-                
+
                 IsModel3DLoading = false;
 
-                if (Model3DFolder == BaseModel3DFolder)
-                    continue;
-
-                // remove old or new temp
-                var files = Directory.GetFiles(BaseModel3DFolder, "temp_*.vrm");
-                if (files.Length <= 0)
-                    continue;
-
-                if (status == 1)
+                if (!IsAppInitializing)
                 {
-                    foreach (var file in files)
-                        if (Path.GetFileName(file) != newFileName)
-                            File.Delete(file);
+                    await Task.Delay(1300);
+
+                    Console.WriteLine("Отправляю запрос на скриншот...");
+                    IsBlurImageCacheValid = false;
+                    WeakReferenceMessenger.Default.Send(new SnapshotMessage(true));
                 }
-                else if (status == -1)
-                    foreach (var file in files)
-                        File.Delete(file);
+
+                if (Model3DFolder != BaseModel3DFolder)
+                {
+                    var files = Directory.GetFiles(BaseModel3DFolder, "temp_*.vrm");
+                    if (files.Length > 0)
+                    {
+                        if (status == 1)
+                        {
+                            foreach (var file in files)
+                                if (Path.GetFileName(file) != newFileName)
+                                    File.Delete(file);
+                        }
+                        else if (status == -1)
+                        {
+                            foreach (var file in files)
+                                File.Delete(file);
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {

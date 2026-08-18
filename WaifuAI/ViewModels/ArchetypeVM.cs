@@ -9,7 +9,7 @@ public partial class ArchetypeVM : ObservableObject
 {
     public string Name { get; set; } = string.Empty;
 
-    public TranslationUnit DescriptionTranslation { get; init; }
+    public TranslationUnit? DescriptionTranslation { get; init; }
 
     public string Description => DescriptionTranslation?.CurrentValue ?? string.Empty;
     

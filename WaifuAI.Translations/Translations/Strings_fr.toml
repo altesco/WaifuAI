@@ -1,5 +1,6 @@
 settings = "Paramètres"
 error = "Erreur"
+resizing = "Redimensionnement..."
 
 [sidepanel]
 chat = "Chat"
@@ -10,7 +11,7 @@ model_source = "Source du modèle"
 
 [sidepanel.chat_panel]
 write_a_message = "Écrire un message..."
-tokens = "Tokens : {0}"
+tokens = "Tokens : "
 reply_quote = "Réponse à la citation"
 reply = "Réponse au message"
 

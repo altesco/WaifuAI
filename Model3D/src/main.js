@@ -401,23 +401,52 @@ function pcmToAudioBuffer(ctx, bytes, sampleRate = 48000) {
 }
 
 window.vrmApp.isTestRequested = false;
+window.vrmApp.isSpeaking = false;
+
+let currentSpeechId = 0;
+let activeNodesCount = 0;
 
 window.say = async (
   data, pitch, port, service, model, language, speaker, volume, bass, treble,
   isStream = false
 ) => {
+  const speechId = ++currentSpeechId;
+  activeNodesCount = 0;
+
   // 1. Останавливаем предыдущую речь, если она ещё идёт
   activeSources.forEach(source => {
     try { source.stop(); } catch (e) { }
   });
   activeSources = [];
 
+  window.vrmApp.isSpeaking = true;
+
+  const setupSourceNode = (sourceNode) => {
+    activeNodesCount++;
+    activeSources.push(sourceNode);
+
+    sourceNode.onended = () => {
+      // Проверяем, что нода принадлежит именно текущей речи (а не оборванной старой)
+      if (speechId === currentSpeechId) {
+        activeNodesCount--;
+        // Когда проиграли ВСЕ чанки потока или единственный файл
+        if (activeNodesCount <= 0) {
+          window.vrmApp.isSpeaking = false;
+          window.vrmApp.isTestRequested = false; // Возвращаем на место твой сброс флага теста
+        }
+      }
+    };
+  };
+
   // 2. Потоковая генерация (isStream = true)
   if (isStream) {
     const url = `http://127.0.0.1:${port}/silero_tts_stream?text=${encodeURIComponent(data.cleanText)}&model_path=${encodeURIComponent(model)}&language=${language}&speaker=${speaker}&sample_rate=48000`;
     const response = await fetch(url);
 
-    if (!response.body) return;
+    if (!response.body) {
+      window.vrmApp.isSpeaking = false;
+      return;
+    }
 
     const reader = response.body.getReader();
     let nextStartTime = audioContext.currentTime;
@@ -482,7 +511,8 @@ window.say = async (
       );
 
       sourceNode.start(startTime);
-      activeSources.push(sourceNode);
+
+      setupSourceNode(sourceNode);
 
       if (!emotionsTriggered) {
         emotionsTriggered = true;
@@ -541,16 +571,14 @@ window.say = async (
     sourceNode.start(startTime);
     activeSources.push(sourceNode);
 
+    setupSourceNode(sourceNode);
+
     setEmotions(
       data,
       audioBuffer.duration,
       startTime,
       pitch
     );
-
-    sourceNode.onended = () => {
-      window.vrmApp.isTestRequested = false;
-    };
   }
 };
 
@@ -657,19 +685,48 @@ window.vrmApp.printscreen = "";
 window.vrmApp.takePrintscreen = () => {
   try {
     const canvas = document.querySelector('canvas');
-    if (!canvas) return "null";
+    if (!canvas || typeof camera === 'undefined' || typeof renderer === 'undefined' || typeof scene === 'undefined') {
+      window.vrmApp.printscreen = "";
+      return;
+    }
 
+    // Сохраняем старые параметры (используем прямые переменные из скрипта)
+    const oldAspect = camera.aspect;
+    const oldWidth = renderer.domElement.width;
+    const oldHeight = renderer.domElement.height;
+
+    // Делаем скриншот шире, чтобы модель не резало по бокам
+    const expandedWidth = Math.round(canvas.width * 1.5);
+    const targetHeight = canvas.height;
+
+    // Меняем aspect камеры под новые широкие пропорции
+    camera.aspect = expandedWidth / targetHeight;
+    camera.updateProjectionMatrix();
+
+    // Меняем размер рендера в памяти (false - не трогаем CSS стили на экране)
+    renderer.setSize(expandedWidth, targetHeight, false);
+    renderer.render(scene, camera);
+
+    // Делаем временный холст для сжатия
     const tempCanvas = document.createElement('canvas');
     const scale = 0.5;
-    tempCanvas.width = canvas.width * scale;
-    tempCanvas.height = canvas.height * scale;
+    tempCanvas.width = expandedWidth * scale;
+    tempCanvas.height = targetHeight * scale;
 
     const ctx = tempCanvas.getContext('2d');
-    ctx.drawImage(canvas, 0, 0, tempCanvas.width, tempCanvas.height);
+    ctx.drawImage(renderer.domElement, 0, 0, tempCanvas.width, tempCanvas.height);
 
     window.vrmApp.printscreen = tempCanvas.toDataURL('image/jpeg', 0.8);
+
+    // ВОЗВРАЩАЕМ ВСЁ НА МЕСТО
+    camera.aspect = oldAspect;
+    camera.updateProjectionMatrix();
+    renderer.setSize(oldWidth, oldHeight, false);
+    renderer.render(scene, camera);
+
   } catch (e) {
-    window.vrmApp.printscreen = e.toString();
+    console.error("Printscreen error:", e);
+    window.vrmApp.printscreen = "";
   }
 };
 
@@ -677,7 +734,7 @@ window.vrmApp.takePrintscreen = () => {
 
 
 
-// --- НАСТРОЙКИ КАМЕРЫ (Крути как душе угодно!) ---
+// --- НАСТРОЙКИ КАМЕРЫ ---
 const CAMERA_CONFIG = {
   portrait: {
     targetYOffset: -0.03,  // Куда смотрит точка взгляда (плюс = выше, минус = ниже уровня головы)

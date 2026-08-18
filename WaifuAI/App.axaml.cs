@@ -48,10 +48,13 @@ namespace WaifuAI
                 {
                     if (SettingsVM.Instance.IsSettingsLoading)
                         return;
+                    
                     Model3DService.SetBackground();
+                    
                     Dispatcher.UIThread.InvokeAsync(async () =>
                     {
                         await Task.Delay(10);
+                        SettingsVM.IsBlurImageCacheValid = false;
                         WeakReferenceMessenger.Default.Send(new SnapshotMessage(true));
                     });
                 };

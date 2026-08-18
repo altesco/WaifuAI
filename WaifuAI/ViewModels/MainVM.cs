@@ -123,10 +123,7 @@ public partial class MainVM : ObservableValidator
     private string _question = string.Empty;
 
     [ObservableProperty] 
-    [NotifyPropertyChangedFor(nameof(TokensText))]
     private int? _tokens;
-
-    public string TokensText => string.Format(Strings.sidepanel.chat_panel.tokens.CurrentValue, Tokens);
 
     [ObservableProperty] private MessageVM? _selectedMessage;
 
@@ -158,7 +155,24 @@ public partial class MainVM : ObservableValidator
     private CancellationTokenSource? _cts;
     [ObservableProperty] private bool _isGeneratingResponse;
 
+    [ObservableProperty] private bool _isWebViewResizing;
+
+    [ObservableProperty] private bool _sidePanelOpened;
+    [ObservableProperty] private SideTab? _activeTab = SideTab.Chat;
+    [ObservableProperty] private bool _isSidePanelAnimating;
+
     private DispatcherTimer? _sleepTimer;
+
+    public bool IsSpeaking
+    {
+        get;
+        set
+        {
+            field = value;
+            if (value)
+                SettingsVM.IsBlurImageCacheValid = false;
+        }
+    }
 
     [ObservableProperty] 
     [NotifyPropertyChangedFor(nameof(RemainingSleepTimeMask))]
@@ -482,6 +496,9 @@ public partial class MainVM : ObservableValidator
     private async Task ProcessReceivedMessage(MessageVM msg)
     {
         var messageText = msg.MessageModel.Content;
+
+        _ = RunSpeakingListener();
+
         VoiceService.Say(
             messageText,
             SettingsVM.Instance.SelectedSource,
@@ -799,7 +816,7 @@ public partial class MainVM : ObservableValidator
     }
 
     [RelayCommand]
-    private async Task DeleteKnowledgeRecord()
+    private void DeleteKnowledgeRecord()
     {
         if (SelectedKnowledgeRecord is null)
             return;
@@ -898,7 +915,7 @@ public partial class MainVM : ObservableValidator
             settings.Pitch,
             settings.Bass,
             settings.Treble,
-            isStream: false);
+            settings.IsStream);
 
         while (isTestRequested)
         {
@@ -907,4 +924,27 @@ public partial class MainVM : ObservableValidator
             await Task.Delay(100);
         }
     }
+
+    private async Task RunSpeakingListener()
+    {
+        while (!IsSpeaking)
+        {
+            var msg = new EvaluateScriptMessage<bool>("return window.vrmApp.isSpeaking");
+            IsSpeaking = await WeakReferenceMessenger.Default.Send(msg);
+            await Task.Delay(100);
+        }
+
+        var isSpeaking = true;
+
+        while (isSpeaking)
+        {
+            var msg = new EvaluateScriptMessage<bool>("return window.vrmApp.isSpeaking");
+            isSpeaking = await WeakReferenceMessenger.Default.Send(msg);
+            await Task.Delay(100);
+        }
+
+        await Task.Delay(4000);
+        IsSpeaking = false;
+    }
+
 }
