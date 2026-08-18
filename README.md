@@ -4,37 +4,18 @@
     <img src="docs/images/waifu-ai-logo.png" width="500"/>
 </p>
 
-**WaifuAI** is your personal 3D desktop companion app. The project is designed to simulate communicating with a real girl via AI as detailed as possible, even with weak local models.
-
-## 🚀 Quickstart
-
-### Installation
-
-1. Download the archive for your operating system from the [Releases](https://github.com/altesco/WaifuAI/releases) section.
-2. Extract the archive to a convenient location.
-3. On **Windows**, run `WaifuAI.exe`; on **Linux**, run `WaifuAI`.
-
-### Post-installation
-
-1. Initially, 4 character models are available, which can be changed in `Settings` &#8594; `Appearance` &#8594; `Character Model`. You can also download models, for example, from [here](https://hub.vroid.com/en/search/%23BOOTH).
-2. Select and download a voice model in `Settings` &#8594; `Audio` &#8594; `Engine`. You can change the voice model language in `Settings` &#8594; `General` &#8594; `AI Language`.
-3. In the sidepanel under `Model Source`, select the AI provider:
-
-    * To run a **local** model, enter the `Port` and `IP Address` (for example, for **LM Studio**, the defaults are `1234` and `127.0.0.1` respectively).
-    * To run cloud models, you need to insert your `API Key`, the provider's endpoint into `API URL`, and the model name into `Model`. WaifuAI uses an OpenAI-compatible API.
+**WaifuAI** is your personal 3D desktop companion app. The project is designed to simulate communicating with a real girl via AI as detailed as possible, even with weak local LLMs.
 
 ## ✨ Main Features
 
 ### 👤 Character Model
 
-<table align="center">
-  <tr>
-    <td><img src="docs/images/1.png" width="200"/></td>
-    <td><img src="docs/images/2.png" width="200"/></td>
-    <td><img src="docs/images/3.png" width="200"/></td>
-    <td><img src="docs/images/4.png" width="200"/></td>
-  </tr>
-</table>
+<p align="center">
+  <img src="docs/images/1.png" width="180"/>&emsp;
+  <img src="docs/images/2.png" width="180"/>&emsp;
+  <img src="docs/images/3.png" width="180"/>&emsp;
+  <img src="docs/images/4.png" width="180"/>&emsp;
+</p>
 
 WaifuAI features the integration of 3D models in the `.vrm` format. For a quick start, 4 base models created by [白い白米](https://hub.vroid.com/en/users/24352731) are already built into the app. A huge selection of free (and paid) models is available on [VRoid Hub](https://hub.vroid.com/en/search/%23BOOTH) or [BOOTH](https://booth.pm/en).
 
@@ -98,6 +79,23 @@ WaifuAI implements a **Knowledge Base** — she remembers facts about herself th
 
 The assistant is sensitive to **time**. She sees when each message was sent and can understand how long you haven't talked to her, how long you've known each other, what time of day it is, and what day it is today. Depending on her **archetype**, she reacts differently to time intervals.
 
+## 🚀 Quickstart
+
+### 📥 Installation
+
+1. Download the archive for your operating system from the [Releases](https://github.com/altesco/WaifuAI/releases) section.
+2. Extract the archive to a convenient location.
+3. On **Windows**, run `WaifuAI.exe`; on **Linux**, run `WaifuAI`.
+
+### ⚙️ Post-installation
+
+1. Initially, 4 character models are available, which can be changed in `Settings` &#8594; `Appearance` &#8594; `Character Model`. You can also download models, for example, from [here](https://hub.vroid.com/en/search/%23BOOTH).
+2. Select and download a voice model in `Settings` &#8594; `Audio` &#8594; `Engine`. You can change the voice model language in `Settings` &#8594; `General` &#8594; `AI Language`.
+3. In the sidepanel under `Model Source`, select the AI provider:
+
+    * To run a **local** model, enter the `Port` and `IP Address` (for example, for **LM Studio**, the defaults are `1234` and `127.0.0.1` respectively).
+    * To run cloud models, you need to insert your `API Key`, the provider's endpoint into `API URL`, and the model name into `Model`. WaifuAI uses an OpenAI-compatible API.
+
 ## 🛠 Technical Details
 
 ### 📦 No Dependencies
@@ -108,7 +106,7 @@ WaifuAI **does not require** any separate dependencies to run, only an externall
 
 WaifuAI is developed using the AvaloniaUI framework in C# and is cross-platform, supporting Windows 10/11 and Linux-based distributions.
 
-**3D Rendering:** Implemented via Three.js inside a WebView; VRM model integration is handled using [three-vrm](https://github.com/pixiv/three-vrm).
+**3D Rendering** implemented via Three.js inside a WebView. VRM model integration is handled using [three-vrm](https://github.com/pixiv/three-vrm).
 
 All settings and dialogue history are stored strictly locally in an SQLite database, so when using local LLMs, your conversations with the AI remain **completely private**.
 
