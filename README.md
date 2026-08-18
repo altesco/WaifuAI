@@ -1,7 +1,9 @@
 # 💙 WaifuAI
 
 <p align="center">
-    <img src="docs/images/waifu-ai-logo.png" width="500"/>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/waifu-ai-logo-dark.png" width="500">
+  <source media="(prefers-color-scheme: light)" srcset="docs/images/waifu-ai-logo-light.png" width="500">
+  <img alt="logo" src="docs/images/waifu-ai-logo-dark.png" width="500">
 </p>
 
 **WaifuAI** is your personal 3D desktop companion app. The project is designed to simulate communicating with a real girl via AI as detailed as possible, even with weak local LLMs.
